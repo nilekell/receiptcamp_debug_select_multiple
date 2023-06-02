@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/presentation/screens/home.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DatabaseRepository.instance.init();
   runApp(const MyApp());
 }
 
