@@ -5,4 +5,8 @@ part 'receipt_upload_state.dart';
 
 class ReceiptUploadCubit extends Cubit<ReceiptUploadState> {
   ReceiptUploadCubit() : super(ReceiptUploadInitial());
+
+  Future<void> uploadReceipt(String filePath) async {
+    
+  }
 }
