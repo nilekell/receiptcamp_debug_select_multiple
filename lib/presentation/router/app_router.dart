@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:receiptcamp/presentation/screens/file_explorer.dart';
 import 'package:receiptcamp/presentation/screens/home.dart';
-import 'package:receiptcamp/presentation/screens/login.dart';
-import 'package:receiptcamp/presentation/screens/register.dart';
 
 class AppRouter {
   Route onGenerateRoute(RouteSettings settings) {
@@ -10,14 +8,6 @@ class AppRouter {
       case '/':
         return MaterialPageRoute(
           builder: (_) => const Home(),
-        );
-      case '/register':
-        return MaterialPageRoute(
-          builder: (_) => Register()
-        );
-      case '/login':
-        return MaterialPageRoute(
-          builder: (_) => const Login()
         );
       case '/explorer':
         return MaterialPageRoute(
