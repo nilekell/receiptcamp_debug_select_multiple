@@ -8,3 +8,9 @@ abstract class UploadState extends Equatable {
 }
 
 class UploadInitial extends UploadState {}
+
+class UploadLoading extends UploadState {}
+
+class UploadSuccess extends UploadState {}
+
+class UploadFailed extends UploadState {}
