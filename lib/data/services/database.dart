@@ -46,7 +46,7 @@ class DatabaseService {
             dateCreated INTEGER NOT NULL,
             lastModified INTEGER NOT NULL,
             storageSize INTEGER NOT NULL,
-            parentId TEXT NOT NULL
+            parentId TEXT NOT NULL,
             FOREIGN KEY (parentId) REFERENCES folders(id)       
           )
         ''');
