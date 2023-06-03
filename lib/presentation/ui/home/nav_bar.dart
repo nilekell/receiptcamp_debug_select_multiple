@@ -2,16 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
 
 class NavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<UploadBloc, UploadState>(
-      listener: (context, state) {
-        // TODO: implement listener
-      },
+      listener: (context, state) {},
       builder: (context, state) {
         return BottomAppBar(
             color: Colors.blue,
@@ -27,9 +24,7 @@ class NavBar extends StatelessWidget {
                     icon: const Icon(Icons.upload_file),
                     color: Colors.white,
                     onPressed: () async {
-
                         context.read<UploadBloc>().add(UploadTapEvent());
-
                     }),
                 IconButton(
                   onPressed: () {},

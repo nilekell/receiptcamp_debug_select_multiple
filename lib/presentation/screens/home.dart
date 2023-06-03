@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
 import 'package:receiptcamp/presentation/ui/home/app_bar.dart';
 import 'package:receiptcamp/presentation/ui/home/drawer.dart';
@@ -19,6 +18,17 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return BlocConsumer<UploadBloc, UploadState>(
       listener: (context, state) {
+        if (state is UploadSuccess) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(
+                content: Text('Receipt added successfully'),
+                duration: Duration(milliseconds: 900)));
+        } else if (state is UploadFailed) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(
+                content: Text('Receipt failed to be saved'),
+                duration: Duration(milliseconds: 900)));
+        }
       },
       builder: (context, state) {
         return Scaffold(
