@@ -47,5 +47,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This permission is required to take photos of receipts</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This permission is required to access photos of receipts from the camera roll</string>
 </dict>
 </plist>

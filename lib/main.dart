@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receiptcamp/data/repositories/database_repository.dart';
+import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
 import 'package:receiptcamp/presentation/screens/home.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DatabaseRepository.instance.init();
+  runApp(BlocProvider<UploadBloc>(
+      create: (BuildContext context) => UploadBloc()..add(UploadInitialEvent()),
+      child: const MyApp(),
+    ));
 }
 
 class MyApp extends StatelessWidget {
@@ -10,12 +18,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ReceiptCamp',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return RepositoryProvider.value(
+      value: (context) => DatabaseRepository.instance,
+      child: MaterialApp(
+        title: 'ReceiptCamp',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const Home(),
       ),
-      home: const Home(),
     );
   }
 }
