@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:receiptcamp/presentation/widgets/home/app_bar.dart';
-import 'package:receiptcamp/presentation/widgets/home/drawer.dart';
-import 'package:receiptcamp/presentation/widgets/home/nav_bar.dart';
+import 'package:receiptcamp/presentation/ui/home/app_bar.dart';
+import 'package:receiptcamp/presentation/ui/home/drawer.dart';
+import 'package:receiptcamp/presentation/ui/home/nav_bar.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
