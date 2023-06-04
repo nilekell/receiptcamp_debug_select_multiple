@@ -2,9 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receiptcamp/logic/blocs/explorer/explorer_bloc.dart';
+import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
 
 class NavBar extends StatelessWidget {
+  const NavBar({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<UploadBloc, UploadState>(
@@ -17,7 +21,9 @@ class NavBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.read<ExplorerBloc>().add(ExplorerNavigateToHomeEvent(context: context));
+                    },
                     icon: const Icon(Icons.home),
                     color: Colors.white),
                 IconButton(
@@ -27,7 +33,9 @@ class NavBar extends StatelessWidget {
                         context.read<UploadBloc>().add(UploadTapEvent());
                     }),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    context.read<HomeBloc>().add(HomeNavigateToFileExplorerEvent(context: context));
+                  },
                   icon: const Icon(Icons.folder),
                   color: Colors.white,
                 )
