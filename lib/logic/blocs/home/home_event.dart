@@ -9,6 +9,8 @@ abstract class HomeEvent extends Equatable {
 
 class HomeInitialEvent extends HomeEvent {}
 
+class HomeLoadReceiptsEvent extends HomeEvent {}
+
 class HomeNavigateToHomeEvent extends HomeEvent {
   const HomeNavigateToHomeEvent({required this.context});
   final BuildContext context;
@@ -17,13 +19,7 @@ class HomeNavigateToHomeEvent extends HomeEvent {
   List<Object> get props => [context];
 }
 
-class HomeNavigateToFileExplorerEvent extends HomeEvent {
-  const HomeNavigateToFileExplorerEvent({required this.context});
-  final BuildContext context;
-
-  @override
-  List<Object> get props => [context];
-}
+class HomeNavigateToFileExplorerEvent extends HomeEvent {}
 
 // The following events are placeholders for future features
 
