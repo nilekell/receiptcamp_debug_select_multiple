@@ -11,6 +11,12 @@ class HomeInitialState extends HomeState {}
 
 class HomeLoadingState extends HomeState {}
 
+class HomeLoadedReceiptsState extends HomeState {
+  final List<Receipt> receipts;
+
+  const HomeLoadedReceiptsState(this.receipts);
+}
+
 class HomeSuccessState extends HomeState {}
 
 class HomeErrorState extends HomeState {}
