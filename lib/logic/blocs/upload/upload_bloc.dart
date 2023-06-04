@@ -14,15 +14,12 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     on<CameraTapEvent>(cameraTapEvent);
   }
 
-    FutureOr<void> uploadInitialEvent(event, Emitter<UploadState> emit) {
-      print('uploadInitialEvent');
-  }
+  FutureOr<void> uploadInitialEvent(event, Emitter<UploadState> emit) {}
 
   FutureOr<void> uploadTapEvent(UploadTapEvent event, Emitter<UploadState> emit) async {
     final ImagePicker imagePicker = ImagePicker();
     final XFile? receiptImage = await imagePicker.pickImage(source: ImageSource.gallery);
     if (receiptImage == null) {
-      emit(UploadFailed());
       return;
     } else {
       try {
@@ -40,7 +37,6 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     final ImagePicker imagePicker = ImagePicker();
     final XFile? receiptPicture = await imagePicker.pickImage(source: ImageSource.camera);
     if (receiptPicture == null) {
-      emit(UploadFailed());
       return;
     } else {
       try {
@@ -53,6 +49,4 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
       }
     }
   }
-
-
 }
