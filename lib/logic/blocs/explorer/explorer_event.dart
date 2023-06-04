@@ -9,14 +9,9 @@ abstract class ExplorerEvent extends Equatable {
 
 class ExplorerInitialEvent extends ExplorerEvent {}
 
-class ExplorerNavigateToHomeEvent extends ExplorerEvent {
-  const ExplorerNavigateToHomeEvent({required this.context});
+class ExplorerFetchReceiptsEvent extends ExplorerEvent {}
 
-  final BuildContext context;
-
-  @override
-  List<Object> get props => [context];
-}
+class ExplorerNavigateToHomeEvent extends ExplorerEvent {}
 
 // The following events are placeholders for future features
 
