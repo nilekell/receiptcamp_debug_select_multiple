@@ -11,6 +11,13 @@ class ExplorerInitialState extends ExplorerState {}
 
 class ExplorerLoadingState extends ExplorerState {}
 
+class ExplorerLoadedState extends ExplorerState {
+  const ExplorerLoadedState(this.receipts);
+
+  final List<Receipt> receipts;
+}
+
+
 class ExplorerSuccessState extends ExplorerState {}
 
 class ExplorerErrorState extends ExplorerState {}
