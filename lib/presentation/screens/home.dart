@@ -34,7 +34,9 @@ class _HomeState extends State<Home> {
               },
             builder: (context, state) {
               // consider using switch statements instead to declaratively build on state changes
-              if (state is HomeLoadingState) {
+              if (state is HomeInitialState) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is HomeLoadingState) {
                 return const Center(child: CircularProgressIndicator());
               } else if (state is HomeLoadedReceiptsState) {
                   return RefreshIndicator(
