@@ -30,9 +30,9 @@ class _HomeState extends State<Home> {
       },
       builder: (context, state) {
         if (state is HomeInitialState) {
-          return const Center(child: CircularProgressIndicator());
+          return const Scaffold(body: CircularProgressIndicator());
         } else if (state is HomeLoadingState) {
-          return const Center(child: CircularProgressIndicator());
+          return const Scaffold(body: CircularProgressIndicator());
         } else if (state is HomeLoadedReceiptsState) {
           return Scaffold(
             drawer: const NavDrawer(),
