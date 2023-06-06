@@ -21,7 +21,7 @@ class _FileExplorerState extends State<FileExplorer> {
     return MultiBlocProvider(
         providers: [
           BlocProvider<UploadBloc>(
-            create: (context) => UploadBloc(),
+            create: (context) => UploadBloc()..add(UploadInitialEvent()),
           ),
           BlocProvider<ExplorerBloc>(
             create: (context) => ExplorerBloc()..add(ExplorerFetchReceiptsEvent()),
