@@ -17,7 +17,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    context.read<HomeBloc>().add(HomeLoadReceiptsEvent());
+    context.read<HomeBloc>().add(HomeInitialEvent());
   }
 
   @override
@@ -26,44 +26,36 @@ class _HomeState extends State<Home> {
       drawer: const NavDrawer(),
       appBar: const HomeAppBar(),
       bottomNavigationBar: const NavBar(),
-      body: MultiBlocListener(
-          listeners: [
-            BlocListener<HomeBloc, HomeState>(
+      body: BlocConsumer<HomeBloc, HomeState>(
               listener: (context, state) {
-                if (state is HomeLoadingState) {
-                  print('HomeLoadingState');
-                } else if (state is HomeLoadedReceiptsState) {
-                  print('HomeSuccessState');
-                } else if (state is HomeErrorState) {
-                  print('HomeFailureState');
-                } else if (state is HomeNavigateToFileExplorerState) {
+                 if (state is HomeNavigateToFileExplorerState) {
                   Navigator.of(context).pushNamed('/explorer');
                 }
               },
-            ),
-          ],
-          child: BlocBuilder<HomeBloc, HomeState>(builder: (context, state) {
-            if (state is HomeLoadingState) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is HomeLoadedReceiptsState) {
-              return RefreshIndicator(
-                onRefresh: () async {
-                  context.read<HomeBloc>().add(HomeLoadReceiptsEvent());
-                },
-                child: ListView.builder(
-                  itemCount: state.receipts.length,
-                  itemBuilder: (context, index) {
-                    // replace this with your own logic
-                    return ListTile(
-                      title: Text(state.receipts[index].name),
-                    );
-                  },
-                ),
-              );
-            } else {
-              return const Center(child: Text('Failed to show Home Screen'));
-            }
-          })),
-    );
+            builder: (context, state) {
+              // consider using switch statements instead to declaratively build on state changes
+              if (state is HomeLoadingState) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is HomeLoadedReceiptsState) {
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<HomeBloc>().add(HomeLoadReceiptsEvent());
+                    },
+                    child: ListView.builder(
+                      itemCount: state.receipts.length,
+                      itemBuilder: (context, index) {
+                        // replace this with your own logic
+                        return ListTile(
+                          title: Text(state.receipts[index].name),
+                        );
+                      },
+                    ),
+                  );
+              } else {
+                // this runs when state is HomeErrorState
+                return const Scaffold(body: Center(child: Text('Failed to show Home Screen')));
+              }
+          }));
+    
   }
 }
