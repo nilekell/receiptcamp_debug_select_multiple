@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
-import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
 import 'package:receiptcamp/presentation/ui/home/app_bar.dart';
 import 'package:receiptcamp/presentation/ui/home/drawer.dart';
 import 'package:receiptcamp/presentation/ui/home/nav_bar.dart';
@@ -15,63 +14,50 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  
+  @override
+  void initState() {
+    super.initState();
+    context.read<HomeBloc>().add(HomeInitialEvent());
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-        listeners: [
-          BlocListener<HomeBloc, HomeState>(
-            listener: (context, state) {
-              if (state is HomeLoadingState) {
-                print('HomeLoadingState');
-              } else if (state is HomeSuccessState) {
-                print('HomeSuccessState');
-              } else if (state is HomeErrorState) {
-                print('HomeFailureState');
-              } else if (state is HomeNavigateToFileExplorerState) {
-                Navigator.of(context).pushNamed('/explorer');
-              }
-            },
-          ),
-          BlocListener<UploadBloc, UploadState>(
-            listener: (context, state) {
-              if (state is UploadSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Receipt added successfully'),
-                    duration: Duration(milliseconds: 900)));
-              } else if (state is UploadFailed) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Receipt failed to be saved'),
-                    duration: Duration(milliseconds: 900)));
-              }
-            },
-          ),
-        ],
-        child: BlocBuilder<HomeBloc, HomeState>(builder: (context, HomeState) {
-          return BlocBuilder<UploadBloc, UploadState>(
-              builder: (context, UploadState) {
-            switch (UploadState.runtimeType) {
-              case HomeLoadingState:
-                return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()));
-              case HomeErrorState:
-                return const Scaffold(
-                    body: Center(child: Text('Failed to show Home Screen')));
-              default:
-                return Scaffold(
-                    drawer: const NavDrawer(),
-                    appBar: const HomeAppBar(),
-                    body: const Placeholder(),
-                    floatingActionButtonLocation:
-                        FloatingActionButtonLocation.endFloat,
-                    floatingActionButton: FloatingActionButton(
-                      onPressed: () {},
-                      backgroundColor: Colors.blue,
-                      child: const Icon(Icons.camera_alt),
+    return Scaffold(
+      drawer: const NavDrawer(),
+      appBar: const HomeAppBar(),
+      bottomNavigationBar: const NavBar(),
+      body: BlocConsumer<HomeBloc, HomeState>(
+              listener: (context, state) {
+                 if (state is HomeNavigateToFileExplorerState) {
+                  Navigator.of(context).pushNamed('/explorer');
+                }
+              },
+            builder: (context, state) {
+              // consider using switch statements instead to declaratively build on state changes
+              if (state is HomeInitialState) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is HomeLoadingState) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is HomeLoadedReceiptsState) {
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<HomeBloc>().add(HomeLoadReceiptsEvent());
+                    },
+                    child: ListView.builder(
+                      itemCount: state.receipts.length,
+                      itemBuilder: (context, index) {
+                        // replace this with your own logic
+                        return ListTile(
+                          title: Text(state.receipts[index].name),
+                        );
+                      },
                     ),
-                    bottomNavigationBar: const NavBar());
-            }
-          });
-        }));
+                  );
+              } else {
+                // this runs when state is HomeErrorState
+                return const Scaffold(body: Center(child: Text('Failed to show Home Screen')));
+              }
+          }));
+    
   }
 }
