@@ -17,6 +17,12 @@ class FileExplorer extends StatefulWidget {
 
 class _FileExplorerState extends State<FileExplorer> {
   @override
+  void initState() {
+    super.initState();
+    context.read<ExplorerBloc>().add(ExplorerInitialEvent());
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
         providers: [
@@ -46,14 +52,17 @@ class _FileExplorerState extends State<FileExplorer> {
               BlocListener<ExplorerBloc, ExplorerState>(
                 listener: (context, state) {
                   if (state is ExplorerNavigateToHomeState) {
-                    Navigator.of(context).pushNamed('/');
+                    Navigator.of(context).pop();
                   }
                 },
               ),
             ],
             child: BlocBuilder<ExplorerBloc, ExplorerState>(
               builder: (context, state) {
-                if (state is ExplorerLoadingState) {
+                if (state is ExplorerInitialState) {
+                  return const Scaffold(body: CircularProgressIndicator());
+                }
+                else if (state is ExplorerLoadingState) {
                   return const Scaffold(body: CircularProgressIndicator());
                 }
                 else if (state is ExplorerLoadedState) {

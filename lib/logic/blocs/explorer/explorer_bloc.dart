@@ -13,7 +13,10 @@ class ExplorerBloc extends Bloc<ExplorerEvent, ExplorerState> {
     on<ExplorerFetchReceiptsEvent>(fetchReceiptsEvent);
   }
 
-  FutureOr<void> explorerInitialEvent(ExplorerInitialEvent event, Emitter<ExplorerState> emit) {}
+  FutureOr<void> explorerInitialEvent(ExplorerInitialEvent event, Emitter<ExplorerState> emit) {
+    emit(ExplorerInitialState());
+    add(ExplorerFetchReceiptsEvent());
+  }
 
   // Define fetchReceiptsEvent
 Future<FutureOr<void>> fetchReceiptsEvent(ExplorerFetchReceiptsEvent event, Emitter<ExplorerState> emit) async {
