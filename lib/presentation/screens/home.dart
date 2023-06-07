@@ -24,40 +24,39 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return BlocConsumer<HomeBloc, HomeState>(
       listener: (context, state) {
-        if (state is HomeNavigateToFileExplorerState) {
-          Navigator.of(context).pushNamed('/explorer');
+        switch (state) {
+          case HomeNavigateToFileExplorerState():
+            Navigator.of(context).pushNamed('/explorer');
+          default:
+            print(state.toString());
+            return;
         }
       },
       builder: (context, state) {
-        if (state is HomeInitialState) {
-          return const Scaffold(body: CircularProgressIndicator());
-        } else if (state is HomeLoadingState) {
-          return const Scaffold(body: CircularProgressIndicator());
-        } else if (state is HomeLoadedReceiptsState) {
-          return Scaffold(
-            drawer: const NavDrawer(),
-            appBar: const HomeAppBar(),
-            bottomNavigationBar: const NavBar(),
-            body: RefreshIndicator(
-              onRefresh: () async {
-                context.read<HomeBloc>().add(HomeLoadReceiptsEvent());
-              },
-              child: ListView.builder(
-                itemCount: state.receipts.length,
-                itemBuilder: (context, index) {
-                  // replace this with your own logic
-                  return ListTile(
-                    title: Text(state.receipts[index].name),
-                  );
-                },
-              ),
-            ),
-          );
-        } else {
-          // this runs when state is HomeErrorState
-          return const Scaffold(
-              body: Center(child: Text('Failed to show Home Screen')));
-        }
+        return switch (state) {
+          HomeInitialState() => const CircularProgressIndicator(),
+          HomeLoadingState() => const CircularProgressIndicator(),
+          HomeErrorState() => const Text('Error showing receipts'),
+          HomeLoadedReceiptsState() => Scaffold(
+                  drawer: const NavDrawer(),
+                  appBar: const HomeAppBar(),
+                  bottomNavigationBar: const NavBar(),
+                  body: RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<HomeBloc>().add(HomeLoadReceiptsEvent());
+                    },
+                    child: ListView.builder(
+                      itemCount: state.receipts.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(state.receipts[index].name),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+          _ => Container()
+        };
       },
     );
   }
