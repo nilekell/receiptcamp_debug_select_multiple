@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 part of 'upload_bloc.dart';
 
-abstract class UploadEvent extends Equatable {
+sealed class UploadEvent extends Equatable {
   const UploadEvent();
 
   // props declared when we want State to be compared against the values
@@ -10,8 +10,8 @@ abstract class UploadEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class UploadInitialEvent extends UploadEvent {}
+final class UploadInitialEvent extends UploadEvent {}
 
-class UploadTapEvent extends UploadEvent {}
+final class UploadTapEvent extends UploadEvent {}
 
-class CameraTapEvent extends UploadEvent {}
+final class CameraTapEvent extends UploadEvent {}
