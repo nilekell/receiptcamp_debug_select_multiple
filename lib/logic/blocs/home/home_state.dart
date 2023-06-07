@@ -7,7 +7,7 @@ sealed class HomeState extends Equatable {
   List<Object> get props => [];
 }
 
- final class HomeInitialState extends HomeState {}
+final class HomeInitialState extends HomeState {}
 
 final class HomeLoadingState extends HomeState {}
 
