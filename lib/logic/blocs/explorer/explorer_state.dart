@@ -18,7 +18,7 @@ final class ExplorerLoadedState extends ExplorerState {
 }
 
 
-final class ExplorerSuccessState extends ExplorerState {}
+// final class ExplorerSuccessState extends ExplorerState {}
 
 final class ExplorerErrorState extends ExplorerState {}
 
