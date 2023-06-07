@@ -17,14 +17,14 @@ final class HomeLoadedReceiptsState extends HomeState {
   const HomeLoadedReceiptsState(this.receipts);
 }
 
-final class HomeSuccessState extends HomeState {}
+// final class HomeSuccessState extends HomeState {}
 
 final class HomeErrorState extends HomeState {}
 
-class HomeNavigateToFileExplorerState extends HomeState {}
+final class HomeNavigateToFileExplorerState extends HomeState {}
 
 // The following states are placeholders for future features
 
-final class HomeNavigateToSearchState extends HomeState {}
+// final class HomeNavigateToSearchState extends HomeState {}
 
-final class HomeNavigateToSettingsState extends HomeState {}
+// final class HomeNavigateToSettingsState extends HomeState {}
