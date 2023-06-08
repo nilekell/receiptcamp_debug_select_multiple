@@ -9,22 +9,22 @@ sealed class HomeState extends Equatable {
 
 final class HomeInitialState extends HomeState {}
 
+final class HomeActionState extends HomeState {}
+
 final class HomeLoadingState extends HomeState {}
 
-final class HomeLoadedReceiptsState extends HomeState {
+final class HomeLoadedSuccessState extends HomeState {
   final List<Receipt> receipts;
 
-  const HomeLoadedReceiptsState(this.receipts);
+  const HomeLoadedSuccessState(this.receipts);
 }
-
-// final class HomeSuccessState extends HomeState {}
 
 final class HomeErrorState extends HomeState {}
 
-final class HomeNavigateToFileExplorerState extends HomeState {}
+final class HomeNavigateToFileExplorerState extends HomeActionState {}
 
 // The following states are placeholders for future features
 
-// final class HomeNavigateToSearchState extends HomeState {}
+// final class HomeNavigateToSearchState extends HomeActionState {}
 
-// final class HomeNavigateToSettingsState extends HomeState {}
+// final class HomeNavigateToSettingsState extends HomeActionState {}
