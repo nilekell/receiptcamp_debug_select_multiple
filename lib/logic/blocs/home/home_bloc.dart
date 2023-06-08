@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/models/receipt.dart';
 
@@ -34,7 +33,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(HomeLoadingState());
     try {
       final receipts = await databaseRepository.getRecentReceipts();
-      emit(HomeLoadedReceiptsState(receipts));
+      if (receipts.isNotEmpty) {
+      emit(HomeLoadedSuccessState(receipts));
+    } else {
+      emit(HomeEmptyReceiptsState());
+    }
     } catch (_) {
       emit(HomeErrorState());
     }

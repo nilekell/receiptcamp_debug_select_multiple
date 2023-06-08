@@ -1,25 +1,26 @@
 part of 'explorer_bloc.dart';
 
-abstract class ExplorerState extends Equatable {
+sealed class ExplorerState extends Equatable {
   const ExplorerState();
   
   @override
   List<Object> get props => [];
 }
 
-class ExplorerInitialState extends ExplorerState {}
+final class ExplorerInitialState extends ExplorerState {}
 
-class ExplorerLoadingState extends ExplorerState {}
+final class ExplorerActionState extends ExplorerState {}
 
-class ExplorerLoadedState extends ExplorerState {
-  const ExplorerLoadedState(this.receipts);
+final class ExplorerLoadingState extends ExplorerState {}
+
+final class ExplorerEmptyReceiptsState extends ExplorerState {}
+
+final class ExplorerLoadedSuccessState extends ExplorerState {
+  const ExplorerLoadedSuccessState(this.receipts);
 
   final List<Receipt> receipts;
 }
 
+final class ExplorerErrorState extends ExplorerState {}
 
-class ExplorerSuccessState extends ExplorerState {}
-
-class ExplorerErrorState extends ExplorerState {}
-
-class ExplorerNavigateToHomeState extends ExplorerState {}
+final class ExplorerNavigateToHomeState extends ExplorerActionState {}

@@ -7,10 +7,13 @@ import 'package:receiptcamp/bloc_observer.dart';
 import 'package:receiptcamp/presentation/router/app_router.dart';
 import 'package:receiptcamp/presentation/screens/home.dart';
 
+// import 'package:flutter/scheduler.dart' show timeDilation;
+
 void main() async {
   Bloc.observer = AppBlocObserver();
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseRepository.instance.init();
+  // timeDilation = 8;
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider<HomeBloc>(
