@@ -1,30 +1,32 @@
 part of 'home_bloc.dart';
 
-abstract class HomeState extends Equatable {
+sealed class HomeState extends Equatable {
   const HomeState();
   
   @override
   List<Object> get props => [];
 }
 
-class HomeInitialState extends HomeState {}
+final class HomeInitialState extends HomeState {}
 
-class HomeLoadingState extends HomeState {}
+final class HomeActionState extends HomeState {}
 
-class HomeLoadedReceiptsState extends HomeState {
+final class HomeLoadingState extends HomeState {}
+
+final class HomeEmptyReceiptsState extends HomeState {}
+
+final class HomeLoadedSuccessState extends HomeState {
   final List<Receipt> receipts;
 
-  const HomeLoadedReceiptsState(this.receipts);
+  const HomeLoadedSuccessState(this.receipts);
 }
 
-class HomeSuccessState extends HomeState {}
+final class HomeErrorState extends HomeState {}
 
-class HomeErrorState extends HomeState {}
-
-class HomeNavigateToFileExplorerState extends HomeState {}
+final class HomeNavigateToFileExplorerState extends HomeActionState {}
 
 // The following states are placeholders for future features
 
-class HomeNavigateToSearchState extends HomeState {}
+// final class HomeNavigateToSearchState extends HomeActionState {}
 
-class HomeNavigateToSettingsState extends HomeState {}
+// final class HomeNavigateToSettingsState extends HomeActionState {}

@@ -30,74 +30,95 @@ class _FileExplorerState extends State<FileExplorer> {
             create: (context) => UploadBloc()..add(UploadInitialEvent()),
           ),
           BlocProvider<ExplorerBloc>(
-            create: (context) => ExplorerBloc()..add(ExplorerFetchReceiptsEvent()),
+            create: (context) =>
+                ExplorerBloc()..add(ExplorerFetchReceiptsEvent()),
           ),
         ],
         child: MultiBlocListener(
             listeners: [
               BlocListener<UploadBloc, UploadState>(
                 listener: (context, state) {
-                  if (state is UploadSuccess) {
-                    context.read<ExplorerBloc>().add(ExplorerFetchReceiptsEvent());
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('Receipt added successfully'),
-                        duration: Duration(milliseconds: 900)));
-                  } else if (state is UploadFailed) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('Receipt failed to be saved'),
-                        duration: Duration(milliseconds: 900)));
+                  switch (state) {
+                    case UploadSuccess():
+                      context
+                          .read<ExplorerBloc>()
+                          .add(ExplorerFetchReceiptsEvent());
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Receipt added successfully'),
+                          duration: Duration(milliseconds: 900)));
+                    case UploadFailed():
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Receipt failed to be saved'),
+                          duration: Duration(milliseconds: 900)));
+                    default:
+                      print('Explorer Screen: ${state.toString()}');
+                      return;
                   }
                 },
               ),
               BlocListener<ExplorerBloc, ExplorerState>(
+                listenWhen: (previous, current) =>
+                    current is ExplorerActionState,
                 listener: (context, state) {
-                  if (state is ExplorerNavigateToHomeState) {
-                    Navigator.of(context).pop();
+                  switch (state) {
+                    case ExplorerNavigateToHomeState():
+                      Navigator.of(context).pushNamed('/');
+                    default:
+                      print('Explorer Screen: ${state.toString()}');
+                      return;
                   }
                 },
               ),
             ],
             child: BlocBuilder<ExplorerBloc, ExplorerState>(
-              builder: (context, state) {
-                if (state is ExplorerInitialState) {
-                  return const Scaffold(body: CircularProgressIndicator());
-                }
-                else if (state is ExplorerLoadingState) {
-                  return const Scaffold(body: CircularProgressIndicator());
-                }
-                else if (state is ExplorerLoadedState) {
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                  context.read<ExplorerBloc>().add(ExplorerFetchReceiptsEvent());
-                },
-                    child: Scaffold(
-                        drawer: const NavDrawer(),
-                        appBar: const HomeAppBar(),
-                        bottomNavigationBar: const NavBar(),
-                        body: ListView.builder(
-                          itemCount: state.receipts.length,
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              title: Text(state.receipts[index].name),
-                            );
-                          },
-                        ),
-                        floatingActionButtonLocation:
-                            FloatingActionButtonLocation.endFloat,
-                        floatingActionButton: FloatingActionButton(
-                          onPressed: () => showUploadOptions(context),
-                          backgroundColor: Colors.blue,
-                          child: const Icon(Icons.add),
-                        )),
-                  );
-                } else if (state is ExplorerErrorState) {
-                  return const Scaffold(body: Text('Explorer Error'));
-                } else if (state is ExplorerLoadingState) {
-                  return const Scaffold(body: CircularProgressIndicator());
-                } else {
-                  return const Scaffold(body: Text('Explorer Initial State'));
-                }
-              },
-            )));
+                buildWhen: (previous, current) =>
+                    current is! ExplorerActionState,
+                builder: (context, state) {
+                  return Scaffold(
+                      drawer: const NavDrawer(),
+                      appBar: const HomeAppBar(),
+                      bottomNavigationBar: const NavBar(),
+                      floatingActionButtonLocation:
+                          FloatingActionButtonLocation.endFloat,
+                      floatingActionButton: FloatingActionButton(
+                        onPressed: () => showUploadOptions(context),
+                        backgroundColor: Colors.blue,
+                        child: const Icon(Icons.add),
+                      ),
+                      body: BlocBuilder<ExplorerBloc, ExplorerState>(
+                        builder: (context, state) {
+                          switch (state) {
+                            case ExplorerInitialState():
+                              return const CircularProgressIndicator();
+                            case ExplorerLoadingState():
+                              return const CircularProgressIndicator();
+                            case ExplorerEmptyReceiptsState():
+                              return RefreshIndicator(
+                                onRefresh: () async {
+                                  context
+                                      .read<ExplorerBloc>()
+                                      .add(ExplorerFetchReceiptsEvent());
+                                },
+                                child: const Center(
+                                    child: Text('No receipts to show')),
+                              );
+                            case ExplorerLoadedSuccessState():
+                              return RefreshIndicator(onRefresh: () async {
+                                context
+                                    .read<ExplorerBloc>()
+                                    .add(ExplorerFetchReceiptsEvent());
+                              }, child: ListView.builder(
+                                  itemBuilder: (context, index) {
+                                return ListTile(
+                                  title: Text(state.receipts[index].name),
+                                );
+                              }));
+                            default:
+                              print('Explorer Screen: ${state.toString()}');
+                              return Container();
+                          }
+                        },
+                      ));
+                })));
   }
 }
