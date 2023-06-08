@@ -13,6 +13,8 @@ final class HomeActionState extends HomeState {}
 
 final class HomeLoadingState extends HomeState {}
 
+final class HomeEmptyReceiptsState extends HomeState {}
+
 final class HomeLoadedSuccessState extends HomeState {
   final List<Receipt> receipts;
 

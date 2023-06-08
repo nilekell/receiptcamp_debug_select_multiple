@@ -13,6 +13,8 @@ final class ExplorerActionState extends ExplorerState {}
 
 final class ExplorerLoadingState extends ExplorerState {}
 
+final class ExplorerEmptyReceiptsState extends ExplorerState {}
+
 final class ExplorerLoadedSuccessState extends ExplorerState {
   const ExplorerLoadedSuccessState(this.receipts);
 
