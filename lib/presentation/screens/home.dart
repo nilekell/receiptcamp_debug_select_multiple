@@ -30,7 +30,7 @@ class _HomeState extends State<Home> {
           case HomeNavigateToFileExplorerState():
             Navigator.of(context).pushNamed('/explorer');
           default:
-            print(state.toString());
+            print('Home Screen: ${state.toString()}');
             return;
         }
       },
@@ -66,7 +66,8 @@ class _HomeState extends State<Home> {
                                 title: Text(state.receipts[index].name));
                           }));
                 default:
-                  return const Text('Unknown State');
+                  print('Home Screen: ${state.toString()}');
+                  return Container();
               }
             }));
       },

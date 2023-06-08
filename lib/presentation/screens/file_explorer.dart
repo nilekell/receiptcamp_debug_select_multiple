@@ -51,7 +51,7 @@ class _FileExplorerState extends State<FileExplorer> {
                           content: Text('Receipt failed to be saved'),
                           duration: Duration(milliseconds: 900)));
                     default:
-                      print(state.toString());
+                      print('Explorer Screen: ${state.toString()}');
                       return;
                   }
                 },
@@ -62,9 +62,9 @@ class _FileExplorerState extends State<FileExplorer> {
                 listener: (context, state) {
                   switch (state) {
                     case ExplorerNavigateToHomeState():
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pushNamed('/');
                     default:
-                      print(state.toString());
+                      print('Explorer Screen: ${state.toString()}');
                       return;
                   }
                 },
@@ -114,7 +114,8 @@ class _FileExplorerState extends State<FileExplorer> {
                                 );
                               }));
                             default:
-                              return const Text('Unknown State');
+                              print('Explorer Screen: ${state.toString()}');
+                              return Container();
                           }
                         },
                       ));
