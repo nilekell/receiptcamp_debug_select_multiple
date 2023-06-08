@@ -10,7 +10,7 @@ class ExplorerBloc extends Bloc<ExplorerEvent, ExplorerState> {
   ExplorerBloc() : super(ExplorerInitialState()) {
     on<ExplorerInitialEvent>(explorerInitialEvent);
     on<ExplorerNavigateToHomeEvent>(explorerNavigateToHomeEvent);
-    on<ExplorerFetchReceiptsEvent>(fetchReceiptsEvent);
+    on<ExplorerFetchReceiptsEvent>(explorerFetchReceiptsEvent);
   }
 
   FutureOr<void> explorerInitialEvent(ExplorerInitialEvent event, Emitter<ExplorerState> emit) {
@@ -19,7 +19,7 @@ class ExplorerBloc extends Bloc<ExplorerEvent, ExplorerState> {
   }
 
   // Define fetchReceiptsEvent
-Future<FutureOr<void>> fetchReceiptsEvent(ExplorerFetchReceiptsEvent event, Emitter<ExplorerState> emit) async {
+Future<FutureOr<void>> explorerFetchReceiptsEvent(ExplorerFetchReceiptsEvent event, Emitter<ExplorerState> emit) async {
   emit(ExplorerLoadingState());
   try {
     final List<Receipt> receipts = await DatabaseRepository.instance.getReceipts();
