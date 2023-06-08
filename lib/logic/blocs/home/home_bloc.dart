@@ -33,7 +33,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(HomeLoadingState());
     try {
       final receipts = await databaseRepository.getRecentReceipts();
+      if (receipts.isNotEmpty) {
       emit(HomeLoadedSuccessState(receipts));
+    } else {
+      emit(HomeEmptyReceiptsState());
+    }
     } catch (_) {
       emit(HomeErrorState());
     }

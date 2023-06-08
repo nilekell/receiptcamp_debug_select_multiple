@@ -23,7 +23,12 @@ Future<FutureOr<void>> fetchReceiptsEvent(ExplorerFetchReceiptsEvent event, Emit
   emit(ExplorerLoadingState());
   try {
     final List<Receipt> receipts = await DatabaseRepository.instance.getReceipts();
-    emit(ExplorerLoadedSuccessState(receipts));
+    if (receipts.isNotEmpty) {
+      emit(ExplorerLoadedSuccessState(receipts));
+    } else {
+      emit(ExplorerEmptyReceiptsState());
+    }
+    
   } catch (error) {
     emit(ExplorerErrorState());
   }
