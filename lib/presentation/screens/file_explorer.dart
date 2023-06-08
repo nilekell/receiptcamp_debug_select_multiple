@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/explorer/explorer_bloc.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
+import 'package:receiptcamp/presentation/ui/bottom-sheet/upload_sheet.dart';
 import 'package:receiptcamp/presentation/ui/home/app_bar.dart';
 import 'package:receiptcamp/presentation/ui/home/drawer.dart';
 import 'package:receiptcamp/presentation/ui/home/nav_bar.dart';
@@ -77,6 +78,13 @@ class _FileExplorerState extends State<FileExplorer> {
                       drawer: const NavDrawer(),
                       appBar: const HomeAppBar(),
                       bottomNavigationBar: const NavBar(),
+                      floatingActionButtonLocation:
+                          FloatingActionButtonLocation.endFloat,
+                      floatingActionButton: FloatingActionButton(
+                        onPressed: () => showUploadOptions(context),
+                        backgroundColor: Colors.blue,
+                        child: const Icon(Icons.add),
+                      ),
                       body: BlocBuilder<ExplorerBloc, ExplorerState>(
                         builder: (context, state) {
                           switch (state) {
@@ -91,7 +99,8 @@ class _FileExplorerState extends State<FileExplorer> {
                                       .read<ExplorerBloc>()
                                       .add(ExplorerFetchReceiptsEvent());
                                 },
-                                child: const Center(child: Text('No receipts to show')),
+                                child: const Center(
+                                    child: Text('No receipts to show')),
                               );
                             case ExplorerLoadedSuccessState():
                               return RefreshIndicator(onRefresh: () async {
