@@ -23,6 +23,8 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<HomeBloc, HomeState>(
+      listenWhen: (previous, current) => current is HomeActionState,
+      buildWhen: (previous, current) => current is! HomeActionState,
       listener: (context, state) {
         switch (state) {
           case HomeNavigateToFileExplorerState():
@@ -45,7 +47,14 @@ class _HomeState extends State<Home> {
                   return const CircularProgressIndicator();
                 case HomeErrorState():
                   return const Text('Error showing receipts');
-                case HomeLoadedReceiptsState():
+                case HomeEmptyReceiptsState():
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<HomeBloc>().add(HomeLoadReceiptsEvent());
+                    },
+                    child:const Center(child: Text('No receipts to show')),
+                  );
+                case HomeLoadedSuccessState():
                   return RefreshIndicator(
                       onRefresh: () async {
                         context.read<HomeBloc>().add(HomeLoadReceiptsEvent());
