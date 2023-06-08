@@ -33,30 +33,33 @@ class _HomeState extends State<Home> {
         }
       },
       builder: (context, state) {
-        return switch (state) {
-          HomeInitialState() => const CircularProgressIndicator(),
-          HomeLoadingState() => const CircularProgressIndicator(),
-          HomeErrorState() => const Text('Error showing receipts'),
-          HomeLoadedReceiptsState() => Scaffold(
-                  drawer: const NavDrawer(),
-                  appBar: const HomeAppBar(),
-                  bottomNavigationBar: const NavBar(),
-                  body: RefreshIndicator(
-                    onRefresh: () async {
-                      context.read<HomeBloc>().add(HomeLoadReceiptsEvent());
-                    },
-                    child: ListView.builder(
-                      itemCount: state.receipts.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(state.receipts[index].name),
-                        );
+        return Scaffold(
+            drawer: const NavDrawer(),
+            appBar: const HomeAppBar(),
+            bottomNavigationBar: const NavBar(),
+            body: BlocBuilder<HomeBloc, HomeState>(builder: (context, state) {
+              switch (state) {
+                case HomeInitialState():
+                  return const CircularProgressIndicator();
+                case HomeLoadingState():
+                  return const CircularProgressIndicator();
+                case HomeErrorState():
+                  return const Text('Error showing receipts');
+                case HomeLoadedReceiptsState():
+                  return RefreshIndicator(
+                      onRefresh: () async {
+                        context.read<HomeBloc>().add(HomeLoadReceiptsEvent());
                       },
-                    ),
-                  ),
-                ),
-          _ => Container()
-        };
+                      child: ListView.builder(
+                          itemCount: state.receipts.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                                title: Text(state.receipts[index].name));
+                          }));
+                default:
+                  return const Text('Unknown State');
+              }
+            }));
       },
     );
   }
