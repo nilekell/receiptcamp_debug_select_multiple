@@ -4,6 +4,7 @@ import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
 import 'package:receiptcamp/presentation/screens/file_explorer.dart';
 import 'package:receiptcamp/presentation/screens/home.dart';
 import 'package:receiptcamp/presentation/ui/home/app_bar.dart';
+import 'package:receiptcamp/presentation/ui/home/drawer.dart';
 
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
@@ -12,9 +13,10 @@ class LandingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<LandingCubit, int>(
       builder: (context, state) => Scaffold(
+        drawer: const NavDrawer(),
         appBar: const HomeAppBar(),
         body: _getChildBasedOnTab(state),
-        bottomNavigationBar: _bottomNavigationBar(state,context),
+        bottomNavigationBar: _bottomNavigationBar(state, context),
       ),
     );
   }
@@ -24,7 +26,7 @@ class LandingScreen extends StatelessWidget {
       case 0:
         return const Home();
       case 1:
-        return const FileExplorer(); 
+        return const FileExplorer();
       default:
         return const Scaffold(
           body: Center(
@@ -34,19 +36,21 @@ class LandingScreen extends StatelessWidget {
     }
   }
 
-  Widget _bottomNavigationBar(int state,
-      BuildContext context) {
+  Widget _bottomNavigationBar(int state, BuildContext context) {
     return BottomNavigationBar(
+      backgroundColor: Colors.blue,
       showSelectedLabels: false,
       showUnselectedLabels: false,
-      selectedItemColor: Theme.of(context).secondaryHeaderColor,
+      selectedItemColor: Colors.black,
       items: const [
         BottomNavigationBarItem(
+            backgroundColor: Colors.blue,
             icon: Icon(Icons.home),
             label: 'Home'),
         BottomNavigationBarItem(
-            icon: Icon(Icons.explore),
-            label: 'Explore'),
+            backgroundColor: Colors.blue,
+            icon: Icon(Icons.folder),
+            label: 'Receipts'),
       ],
       currentIndex: state,
       onTap: (value) => context.read<LandingCubit>().updateIndex(value),
