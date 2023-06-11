@@ -11,10 +11,8 @@ final class ExplorerInitialEvent extends ExplorerEvent {}
 
 final class ExplorerFetchReceiptsEvent extends ExplorerEvent {}
 
-final class ExplorerNavigateToHomeEvent extends ExplorerEvent {}
-
 // The following events are placeholders for future features
 
-final class ExplorerNavigateToSearchEvent extends ExplorerEvent {}
+// final class ExplorerNavigateToSearchEvent extends ExplorerEvent {}
 
-final class ExplorerNavigateToSettingsEvent extends ExplorerEvent {}
+//final class ExplorerNavigateToSettingsEvent extends ExplorerEvent {}
