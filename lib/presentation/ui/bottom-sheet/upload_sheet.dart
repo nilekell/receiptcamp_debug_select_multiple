@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
 
-void showUploadOptions(BuildContext context) {
+void showUploadOptions(BuildContext context, UploadBloc uploadBloc) {
   showModalBottomSheet(
           context: context,
           builder: (context) => Column(
@@ -12,7 +11,7 @@ void showUploadOptions(BuildContext context) {
                     leading: const Icon(Icons.photo_library),
                     title: const Text('Choose from gallery'),
                     onTap: () {
-                      context.read<UploadBloc>().add(UploadTapEvent());
+                      uploadBloc.add(UploadTapEvent());
                       Navigator.of(context).pop();
                     },
                   ),
@@ -20,7 +19,7 @@ void showUploadOptions(BuildContext context) {
                     leading: const Icon(Icons.camera),
                     title: const Text('Take a photo'),
                     onTap: () {
-                      context.read<UploadBloc>().add(CameraTapEvent());
+                      uploadBloc.add(CameraTapEvent());
                       Navigator.of(context).pop();
                     },
                   ),
