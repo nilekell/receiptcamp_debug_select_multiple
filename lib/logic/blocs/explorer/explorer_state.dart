@@ -22,5 +22,3 @@ final class ExplorerLoadedSuccessState extends ExplorerState {
 }
 
 final class ExplorerErrorState extends ExplorerState {}
-
-final class ExplorerNavigateToHomeState extends ExplorerActionState {}

@@ -4,9 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/explorer/explorer_bloc.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
 import 'package:receiptcamp/presentation/ui/bottom-sheet/upload_sheet.dart';
-import 'package:receiptcamp/presentation/ui/home/app_bar.dart';
-import 'package:receiptcamp/presentation/ui/home/drawer.dart';
-import 'package:receiptcamp/presentation/ui/home/nav_bar.dart';
 
 class FileExplorer extends StatefulWidget {
   const FileExplorer({Key? key}) : super(key: key);
@@ -34,91 +31,91 @@ class _FileExplorerState extends State<FileExplorer> {
                 ExplorerBloc()..add(ExplorerFetchReceiptsEvent()),
           ),
         ],
-        child: MultiBlocListener(
-            listeners: [
-              BlocListener<UploadBloc, UploadState>(
-                listener: (context, state) {
-                  switch (state) {
-                    case UploadSuccess():
-                      context
-                          .read<ExplorerBloc>()
-                          .add(ExplorerFetchReceiptsEvent());
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Receipt added successfully'),
-                          duration: Duration(milliseconds: 900)));
-                    case UploadFailed():
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Receipt failed to be saved'),
-                          duration: Duration(milliseconds: 900)));
-                    default:
-                      print('Explorer Screen: ${state.toString()}');
-                      return;
-                  }
-                },
-              ),
-              BlocListener<ExplorerBloc, ExplorerState>(
-                listenWhen: (previous, current) =>
-                    current is ExplorerActionState,
-                listener: (context, state) {
-                  switch (state) {
-                    case ExplorerNavigateToHomeState():
-                      Navigator.of(context).pushNamed('/');
-                    default:
-                      print('Explorer Screen: ${state.toString()}');
-                      return;
-                  }
-                },
-              ),
-            ],
-            child: BlocBuilder<ExplorerBloc, ExplorerState>(
-                buildWhen: (previous, current) =>
-                    current is! ExplorerActionState,
-                builder: (context, state) {
-                  return Scaffold(
-                      drawer: const NavDrawer(),
-                      appBar: const HomeAppBar(),
-                      bottomNavigationBar: const NavBar(),
-                      floatingActionButtonLocation:
-                          FloatingActionButtonLocation.endFloat,
-                      floatingActionButton: FloatingActionButton(
-                        onPressed: () => showUploadOptions(context),
-                        backgroundColor: Colors.blue,
-                        child: const Icon(Icons.add),
-                      ),
-                      body: BlocBuilder<ExplorerBloc, ExplorerState>(
-                        builder: (context, state) {
-                          switch (state) {
-                            case ExplorerInitialState():
-                              return const CircularProgressIndicator();
-                            case ExplorerLoadingState():
-                              return const CircularProgressIndicator();
-                            case ExplorerEmptyReceiptsState():
-                              return RefreshIndicator(
-                                onRefresh: () async {
-                                  context
-                                      .read<ExplorerBloc>()
-                                      .add(ExplorerFetchReceiptsEvent());
-                                },
-                                child: const Center(
-                                    child: Text('No receipts to show')),
-                              );
-                            case ExplorerLoadedSuccessState():
-                              return RefreshIndicator(onRefresh: () async {
+        child: BlocConsumer<UploadBloc, UploadState>(
+          listener: (context, state) {
+            switch (state) {
+              case UploadSuccess():
+                context.read<ExplorerBloc>().add(ExplorerFetchReceiptsEvent());
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Receipt added successfully'),
+                    duration: Duration(milliseconds: 900)));
+              case UploadFailed():
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Receipt failed to be saved'),
+                    duration: Duration(milliseconds: 900)));
+              default:
+                print('Explorer Screen: ${state.toString()}');
+                return;
+            }
+          },
+          builder: (context, state) {
+            return BlocBuilder<ExplorerBloc, ExplorerState>(
+              builder: (context, state) {
+                switch (state) {
+                  case ExplorerInitialState():
+                    return const CircularProgressIndicator();
+                  case ExplorerLoadingState():
+                    return const CircularProgressIndicator();
+                  case ExplorerEmptyReceiptsState():
+                    return Stack(
+                      children: [
+                        Align(
+                          alignment: Alignment.topCenter,
+                          child: RefreshIndicator(
+                              onRefresh: () async {
                                 context
                                     .read<ExplorerBloc>()
                                     .add(ExplorerFetchReceiptsEvent());
-                              }, child: ListView.builder(
-                                  itemBuilder: (context, index) {
-                                return ListTile(
-                                  title: Text(state.receipts[index].name),
-                                );
-                              }));
-                            default:
-                              print('Explorer Screen: ${state.toString()}');
-                              return Container();
-                          }
-                        },
-                      ));
-                })));
+                              },
+                              child: const Center(
+                                  child: Text('No receipts to show'))),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: FloatingActionButton.large(
+                                onPressed: () {
+                                  showUploadOptions(context, context.read<UploadBloc>());
+                                }, child: const Icon(Icons.add)),
+                          ),
+                        ),
+                      ],
+                    );
+                  case ExplorerLoadedSuccessState():
+                    return Stack(
+                      children: [
+                        Align(
+                            alignment: Alignment.topCenter,
+                            child: RefreshIndicator(onRefresh: () async {
+                              context
+                                  .read<ExplorerBloc>()
+                                  .add(ExplorerFetchReceiptsEvent());
+                            }, child:
+                                ListView.builder(itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text(state.receipts[index].name),
+                              );
+                            }))),
+                         Align(
+                          alignment: Alignment.bottomRight,
+                          child: Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: FloatingActionButton.large(
+                                onPressed: () {
+                                  context.read<UploadBloc>().add(UploadTapEvent());
+                                }, child: const Icon(Icons.add)),
+                          ),
+                        ),
+                      ],
+                    );
+                  default:
+                    print('Explorer Screen: ${state.toString()}');
+                    return Container();
+                }
+              },
+            );
+          },
+        ));
   }
 }
