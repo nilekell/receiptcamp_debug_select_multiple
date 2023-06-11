@@ -4,8 +4,9 @@ import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/logic/blocs/explorer/explorer_bloc.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/bloc_observer.dart';
+import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
 import 'package:receiptcamp/presentation/router/app_router.dart';
-import 'package:receiptcamp/presentation/screens/home.dart';
+import 'package:receiptcamp/presentation/screens/landing_screen.dart';
 
 // import 'package:flutter/scheduler.dart' show timeDilation;
 
@@ -16,6 +17,8 @@ void main() async {
   // timeDilation = 8;
   runApp(MultiBlocProvider(
     providers: [
+      BlocProvider<LandingCubit>(
+        create: (BuildContext context) => LandingCubit()),
       BlocProvider<HomeBloc>(
         create: (BuildContext context) => HomeBloc(databaseRepository: DatabaseRepository.instance)..add(HomeInitialEvent()),
       ),
@@ -39,7 +42,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
         ),
         onGenerateRoute: AppRouter().onGenerateRoute,
-        home: const Home(),
+        home: const LandingScreen(),
       ),
     );
   }
