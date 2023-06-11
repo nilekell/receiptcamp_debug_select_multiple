@@ -14,18 +14,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc({required this.databaseRepository}) : super(HomeInitialState()) {
     on<HomeLoadReceiptsEvent>(onHomeLoadReceipts);
     on<HomeInitialEvent>(onHomeInitialEvent);
-    on<HomeNavigateToFileExplorerEvent>(onHomeNavigateToFileExplorerEvent);
   }
 
   FutureOr<void> onHomeInitialEvent(
       HomeInitialEvent event, Emitter<HomeState> emit) {
     emit(HomeLoadingState());
     add(HomeLoadReceiptsEvent());
-  }
-
-  FutureOr<void> onHomeNavigateToFileExplorerEvent(
-      HomeNavigateToFileExplorerEvent event, Emitter<HomeState> emit) {
-    emit(HomeNavigateToFileExplorerState());
   }
 
   FutureOr<void> onHomeLoadReceipts(
