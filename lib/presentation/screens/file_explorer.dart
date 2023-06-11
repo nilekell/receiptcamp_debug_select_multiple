@@ -3,10 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/explorer/explorer_bloc.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
-import 'package:receiptcamp/presentation/ui/bottom-sheet/upload_sheet.dart';
-import 'package:receiptcamp/presentation/ui/home/app_bar.dart';
-import 'package:receiptcamp/presentation/ui/home/drawer.dart';
-import 'package:receiptcamp/presentation/ui/home/nav_bar.dart';
 
 class FileExplorer extends StatefulWidget {
   const FileExplorer({Key? key}) : super(key: key);
@@ -71,54 +67,36 @@ class _FileExplorerState extends State<FileExplorer> {
               ),
             ],
             child: BlocBuilder<ExplorerBloc, ExplorerState>(
-                buildWhen: (previous, current) =>
-                    current is! ExplorerActionState,
-                builder: (context, state) {
-                  return Scaffold(
-                      drawer: const NavDrawer(),
-                      appBar: const HomeAppBar(),
-                      bottomNavigationBar: const NavBar(),
-                      floatingActionButtonLocation:
-                          FloatingActionButtonLocation.endFloat,
-                      floatingActionButton: FloatingActionButton(
-                        onPressed: () => showUploadOptions(context),
-                        backgroundColor: Colors.blue,
-                        child: const Icon(Icons.add),
-                      ),
-                      body: BlocBuilder<ExplorerBloc, ExplorerState>(
-                        builder: (context, state) {
-                          switch (state) {
-                            case ExplorerInitialState():
-                              return const CircularProgressIndicator();
-                            case ExplorerLoadingState():
-                              return const CircularProgressIndicator();
-                            case ExplorerEmptyReceiptsState():
-                              return RefreshIndicator(
-                                onRefresh: () async {
-                                  context
-                                      .read<ExplorerBloc>()
-                                      .add(ExplorerFetchReceiptsEvent());
-                                },
-                                child: const Center(
-                                    child: Text('No receipts to show')),
-                              );
-                            case ExplorerLoadedSuccessState():
-                              return RefreshIndicator(onRefresh: () async {
-                                context
-                                    .read<ExplorerBloc>()
-                                    .add(ExplorerFetchReceiptsEvent());
-                              }, child: ListView.builder(
-                                  itemBuilder: (context, index) {
-                                return ListTile(
-                                  title: Text(state.receipts[index].name),
-                                );
-                              }));
-                            default:
-                              print('Explorer Screen: ${state.toString()}');
-                              return Container();
-                          }
-                        },
-                      ));
-                })));
+              builder: (context, state) {
+                switch (state) {
+                  case ExplorerInitialState():
+                    return const CircularProgressIndicator();
+                  case ExplorerLoadingState():
+                    return const CircularProgressIndicator();
+                  case ExplorerEmptyReceiptsState():
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        context
+                            .read<ExplorerBloc>()
+                            .add(ExplorerFetchReceiptsEvent());
+                      },
+                      child: const Center(child: Text('No receipts to show')),
+                    );
+                  case ExplorerLoadedSuccessState():
+                    return RefreshIndicator(onRefresh: () async {
+                      context
+                          .read<ExplorerBloc>()
+                          .add(ExplorerFetchReceiptsEvent());
+                    }, child: ListView.builder(itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(state.receipts[index].name),
+                      );
+                    }));
+                  default:
+                    print('Explorer Screen: ${state.toString()}');
+                    return Container();
+                }
+              },
+            )));
   }
 }
