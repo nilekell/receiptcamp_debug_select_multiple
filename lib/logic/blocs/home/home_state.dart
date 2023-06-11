@@ -23,8 +23,6 @@ final class HomeLoadedSuccessState extends HomeState {
 
 final class HomeErrorState extends HomeState {}
 
-final class HomeNavigateToFileExplorerState extends HomeActionState {}
-
 // The following states are placeholders for future features
 
 // final class HomeNavigateToSearchState extends HomeActionState {}
