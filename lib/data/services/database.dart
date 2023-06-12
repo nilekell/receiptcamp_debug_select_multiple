@@ -37,6 +37,22 @@ class DatabaseService {
       version: 1,
       // Create receipt table
       onCreate: (db, version) async {
+         // Add Folder table creation
+        await db.execute('''
+          CREATE TABLE folders (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            parentId TEXT NOT NULL,
+            FOREIGN KEY (parentId) REFERENCES folders(id)
+          )
+        ''');
+
+        // creating an initial folder for all receipts to first be added to when they are created
+        await db.execute('''
+          INSERT INTO folders (id, name, parentId)
+          VALUES('a1','all','null')
+        ''');
+
         // create receipts table
         await db.execute('''
           CREATE TABLE receipts (
@@ -59,22 +75,6 @@ class DatabaseService {
               tag TEXT NOT NULL, 
               FOREIGN KEY (receiptId) REFERENCES receipts(id)
           )
-      ''');
-
-      // Add Folder table creation
-      await db.execute('''
-        CREATE TABLE folders (
-          id TEXT PRIMARY KEY,
-          name TEXT NOT NULL,
-          parentId TEXT NOT NULL,
-          FOREIGN KEY (parentId) REFERENCES receipts(id)
-        )
-      ''');
-
-      // creating an initial folder for all receipts to first be added to when they are created
-      await db.execute('''
-        INSERT INTO folders (id,name,parentId)
-        VALUES('a1','all','null')
       ''');
       },
     );
