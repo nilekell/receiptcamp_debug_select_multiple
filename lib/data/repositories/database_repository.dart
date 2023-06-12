@@ -28,6 +28,10 @@ class DatabaseRepository {
     return await _databaseService.insertFolder(folder);
   }
 
+  Future<void> renameFolder(String folderId, String newName) async {
+    return await _databaseService.renameFolder(folderId, newName);
+  }
+
   Future<List<Folder>> getFolders() async {
     return await _databaseService.getFolders();
   }
