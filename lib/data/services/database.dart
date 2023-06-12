@@ -237,7 +237,7 @@ class DatabaseService {
     final db = await database;
     // Query the database for the 8 most recently created receipts
     final List<Map<String, dynamic>> maps = await db
-        .rawQuery('SELECT * FROM receipts ORDER BY dateCreated DESC LIMIT 8');
+        .rawQuery('SELECT * FROM receipts ORDER BY lastModified DESC LIMIT 8');
     // Convert the List<Map<String, dynamic>> to a List<Receipt>
     List<Receipt> receipts = List.generate(maps.length, (i) {
       return Receipt(
