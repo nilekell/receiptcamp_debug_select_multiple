@@ -58,6 +58,10 @@ class DatabaseRepository {
     return await _databaseService.getReceiptByName(name);
   }
 
+  Future<void> renameReceipt(String id, String newName) async {
+    return await _databaseService.renameReceipt(id, newName);
+  }
+
   Future<List<Receipt>> getRecentReceipts() async {
     return await _databaseService.getRecentReceipts();
   }
@@ -79,11 +83,6 @@ class DatabaseRepository {
   Future<List<Tag>> getTagsByReceiptID(String receiptId) async {
     return await _databaseService.getTagsByReceiptID(receiptId);
   }
-
-  Future<int> deleteTagsForAReceipt(String receiptId) async {
-    return await _databaseService.deleteTagsForAReceipt(receiptId);
-  }
-
   // Delete all data
 
   Future<void> deleteAll() async {
