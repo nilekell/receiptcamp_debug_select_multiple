@@ -20,6 +20,10 @@ class DatabaseRepository {
 
   // Folder methods
 
+  Future<List<Object>> getFolderContents(String folderId) async {
+    return await _databaseService.getFolderContents(folderId);
+  }
+
   Future<void> insertFolder(Folder folder) async {
     return await _databaseService.insertFolder(folder);
   }

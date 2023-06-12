@@ -19,7 +19,7 @@ class DatabaseService {
     if (_database != null) {
       // print('acessing database...');
       return _database!;
-    } 
+    }
     _database = await _initDatabase();
     return _database!;
   }
@@ -37,7 +37,7 @@ class DatabaseService {
       version: 1,
       // Create receipt table
       onCreate: (db, version) async {
-         // Add Folder table creation
+        // Add Folder table creation
         await db.execute('''
           CREATE TABLE folders (
             id TEXT PRIMARY KEY,
@@ -78,11 +78,53 @@ class DatabaseService {
       ''');
       },
     );
-
-    
   }
 
   // Add Folder operations
+
+  // Method to get folder contents (this includes receipts and folders)
+  Future<List<Object>> getFolderContents(String folderId) async {
+    final db = await database;
+
+    // Fetch all folders in the folder
+    final List<Map<String, dynamic>> folders = await db.rawQuery('''
+      SELECT *
+      FROM folders
+      WHERE parentId = ?
+    ''', [folderId]);
+
+    final foldersList = List<Folder>.generate(folders.length, (i) {
+      return Folder(
+        id: folders[i]['id'],
+        name: folders[i]['name'],
+        parentId: folders[i]['parentId'],
+      );
+    });
+
+    // Fetch all receipts in the folder
+    final List<Map<String, dynamic>> receipts = await db.rawQuery('''
+      SELECT *
+      FROM receipts
+      WHERE parentId = ?
+    ''', [folderId]);
+
+    final receiptsList = List<Receipt>.generate(receipts.length, (i) {
+      return Receipt(
+          id: receipts[i]['id'],
+          name: receipts[i]['name'],
+          localPath: receipts[i]['localPath'],
+          dateCreated: receipts[i]['dateCreated'],
+          lastModified: receipts[i]['lastModified'],
+          storageSize: receipts[i]['storageSize'],
+          parentId: receipts[i]['parentId']);
+    });
+
+    return [...foldersList, ...receiptsList]; // combining two lists and return
+  }
+
+  // Method to name folder
+
+  // Method to delete folder
 
   // Method to insert a Folder object into the database.
   Future<void> insertFolder(Folder folder) async {
@@ -124,16 +166,15 @@ class DatabaseService {
       SELECT COUNT (*)
       FROM folders
       WHERE id=? or name=? 
-      ''',
-      [id, name]);
+      ''', [id, name]);
 
     int? numSameFolders = Sqflite.firstIntValue(countResult);
 
-      if (numSameFolders != 0) {
-        return true;
-      } else {
-        return false;
-      }
+    if (numSameFolders != 0) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   // Add Receipt operations
@@ -177,11 +218,10 @@ class DatabaseService {
           id: maps[i]['id'],
           name: maps[i]['name'],
           localPath: maps[i]['localPath'],
-          dateCreated: maps[i]['dateCreated'], 
-          lastModified: maps[i]['lastModified'], 
+          dateCreated: maps[i]['dateCreated'],
+          lastModified: maps[i]['lastModified'],
           storageSize: maps[i]['storageSize'],
-          parentId: maps[i]['parentId']
-);
+          parentId: maps[i]['parentId']);
     });
   }
 
@@ -193,14 +233,13 @@ class DatabaseService {
     print('All receipts in database:');
     maps.forEach((receiptMap) {
       final receipt = Receipt(
-        id: receiptMap['id'],
-        name: receiptMap['name'],
-        localPath: receiptMap['localPath'],
-        dateCreated: receiptMap['dateCreated'], 
-        lastModified: receiptMap['lastModified'], 
-        storageSize: receiptMap['storageSize'],
-        parentId: receiptMap['parentId']
-      );
+          id: receiptMap['id'],
+          name: receiptMap['name'],
+          localPath: receiptMap['localPath'],
+          dateCreated: receiptMap['dateCreated'],
+          lastModified: receiptMap['lastModified'],
+          storageSize: receiptMap['storageSize'],
+          parentId: receiptMap['parentId']);
 
       print('id: ${receipt.id.toString()}');
       print('name: ${receipt.name.toString()}');
@@ -218,7 +257,7 @@ class DatabaseService {
     final db = await database;
     List<Map<String, dynamic>> maps = await db.query('receipts',
         // retrieving the following columns from the database
-        columns: ['id', 'userID', 'name', 'localPath','dateCreated'],
+        columns: ['id', 'userID', 'name', 'localPath', 'dateCreated'],
         // '?'s are replaced with the items in the [whereArgs] field
         where: 'name = ?',
         // [name] is the argument of the function
@@ -228,8 +267,8 @@ class DatabaseService {
           id: maps[i]['id'],
           name: maps[i]['name'],
           localPath: maps[i]['localPath'],
-          dateCreated: maps[i]['dateCreated'], 
-          lastModified: maps[i]['lastModified'], 
+          dateCreated: maps[i]['dateCreated'],
+          lastModified: maps[i]['lastModified'],
           storageSize: maps[i]['storageSize'],
           parentId: maps[i]['parentId']);
     });
@@ -257,8 +296,8 @@ class DatabaseService {
           id: maps[i]['id'],
           name: maps[i]['name'],
           localPath: maps[i]['localPath'],
-          dateCreated: maps[i]['dateCreated'], 
-          lastModified: maps[i]['lastModified'], 
+          dateCreated: maps[i]['dateCreated'],
+          lastModified: maps[i]['lastModified'],
           storageSize: maps[i]['storageSize'],
           parentId: maps[i]['parentId']);
     });
@@ -269,9 +308,9 @@ class DatabaseService {
   Future<void> deleteAll() async {
     final db = await database;
     // delete() returns number (int) of rows deleted
-    // deleting all rows in the receipts table NOT SPECIFIC TO USER 
+    // deleting all rows in the receipts table NOT SPECIFIC TO USER
     print(await db.delete('receipts'));
-    // deleting ALL tags in database NOT SPECIFIC TO USER 
+    // deleting ALL tags in database NOT SPECIFIC TO USER
     print(await db.delete('tags'));
     // deleting all folders in database NOT SPECIFIC TO USER
     print(await db.delete('folders'));
@@ -290,20 +329,17 @@ class DatabaseService {
   Future<List<Tag>> getTagsByReceiptID(String receiptId) async {
     final db = await database;
     // retrieving a list of maps where each map represents a Tag object
-    final List<Map<String, dynamic>> tagMaps = await db
-        .rawQuery('''
+    final List<Map<String, dynamic>> tagMaps = await db.rawQuery('''
                   SELECT *
                   FROM tags 
                   WHERE receiptId=?
-                  ''',
-        [receiptId]);
+                  ''', [receiptId]);
     // returning a list of Tag objects
     return List.generate(tagMaps.length, (i) {
       return Tag(
-        id: tagMaps[i]['id'],
-        receiptId: tagMaps[i]['receiptId'],
-        tag: tagMaps[i]['tag']
-      );
+          id: tagMaps[i]['id'],
+          receiptId: tagMaps[i]['receiptId'],
+          tag: tagMaps[i]['tag']);
     });
   }
 
@@ -330,19 +366,17 @@ class DatabaseService {
         GROUP BY receipts.id
         ORDER BY dateCreated DESC
         LIMIT 8
-        ''',
-        [tag]);
+        ''', [tag]);
 
-    final receiptList =  List.generate(maps.length, (i) {
+    final receiptList = List.generate(maps.length, (i) {
       return Receipt(
           id: maps[i]['id'],
           name: maps[i]['name'],
           localPath: maps[i]['localPath'],
-          dateCreated: maps[i]['dateCreated'], 
-          lastModified: maps[i]['lastModified'], 
+          dateCreated: maps[i]['dateCreated'],
+          lastModified: maps[i]['lastModified'],
           storageSize: maps[i]['storageSize'],
-          parentId: maps[i]['parentId']
-);
+          parentId: maps[i]['parentId']);
     });
 
     print(receiptList.length);
@@ -363,21 +397,19 @@ class DatabaseService {
         WHERE tags.tag LIKE '%' || ? || '%'
         GROUP BY receipts.id
         ORDER BY dateCreated DESC
-        ''',
-        [tag]);
+        ''', [tag]);
 
     final receiptList = List.generate(maps.length, (i) {
       return Receipt(
           id: maps[i]['id'],
           name: maps[i]['name'],
           localPath: maps[i]['localPath'],
-          dateCreated: maps[i]['dateCreated'], 
-          lastModified: maps[i]['lastModified'], 
+          dateCreated: maps[i]['dateCreated'],
+          lastModified: maps[i]['lastModified'],
           storageSize: maps[i]['storageSize'],
-          parentId: maps[i]['parentId']
-);
+          parentId: maps[i]['parentId']);
     });
-    
+
     print('num of receipts: ${receiptList.length}');
     return receiptList;
   }
