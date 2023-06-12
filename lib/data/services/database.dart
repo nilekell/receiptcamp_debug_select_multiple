@@ -37,6 +37,22 @@ class DatabaseService {
       version: 1,
       // Create receipt table
       onCreate: (db, version) async {
+         // Add Folder table creation
+        await db.execute('''
+          CREATE TABLE folders (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            parentId TEXT NOT NULL,
+            FOREIGN KEY (parentId) REFERENCES folders(id)
+          )
+        ''');
+
+        // creating an initial folder for all receipts to first be added to when they are created
+        await db.execute('''
+          INSERT INTO folders (id, name, parentId)
+          VALUES('a1','all','null')
+        ''');
+
         // create receipts table
         await db.execute('''
           CREATE TABLE receipts (
@@ -59,22 +75,6 @@ class DatabaseService {
               tag TEXT NOT NULL, 
               FOREIGN KEY (receiptId) REFERENCES receipts(id)
           )
-      ''');
-
-      // Add Folder table creation
-      await db.execute('''
-        CREATE TABLE folders (
-          id TEXT PRIMARY KEY,
-          name TEXT NOT NULL,
-          parentId TEXT NOT NULL,
-          FOREIGN KEY (parentId) REFERENCES receipts(id)
-        )
-      ''');
-
-      // creating an initial folder for all receipts to first be added to when they are created
-      await db.execute('''
-        INSERT INTO folders (id,name,parentId)
-        VALUES('a1','all','null')
       ''');
       },
     );
@@ -158,6 +158,9 @@ class DatabaseService {
   // Method to delete a Receipt object from the database based on its id.
   Future<int> deleteReceipt(String id) async {
     final db = await database;
+    // deleting all tags associated to a receipt
+    await deleteTagsForAReceipt(id);
+    // deleting receipt record in receipts table
     return await db.delete(
       'receipts',
       where: 'id = ?',
@@ -232,12 +235,22 @@ class DatabaseService {
     });
   }
 
+  // Method to rename receipt
+  Future<void> renameReceipt(String id, String newName) async {
+    final db = await database;
+    await db.rawUpdate('''
+      UPDATE receipts
+      SET name = ?
+      WHERE id = ?
+    ''', [newName, id]);
+  }
+
   // Method to get recently created receipts from database
   Future<List<Receipt>> getRecentReceipts() async {
     final db = await database;
     // Query the database for the 8 most recently created receipts
     final List<Map<String, dynamic>> maps = await db
-        .rawQuery('SELECT * FROM receipts ORDER BY dateCreated DESC LIMIT 8');
+        .rawQuery('SELECT * FROM receipts ORDER BY lastModified DESC LIMIT 8');
     // Convert the List<Map<String, dynamic>> to a List<Receipt>
     List<Receipt> receipts = List.generate(maps.length, (i) {
       return Receipt(
