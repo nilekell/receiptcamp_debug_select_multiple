@@ -36,8 +36,8 @@ class DatabaseRepository {
     return await _databaseService.getFolders();
   }
 
-  Future<int> deleteFolder(String id) async {
-    return await _databaseService.deleteFolder(id);
+  Future<void> deleteFolder(String folderId) async {
+    return await _databaseService.deleteFolder(folderId);
   }
 
   Future<bool> folderExists(String id, String name) async {

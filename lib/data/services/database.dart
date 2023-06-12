@@ -159,13 +159,35 @@ class DatabaseService {
   }
 
   // Method to delete a Folder object from the database based on its id.
-  Future<int> deleteFolder(String id) async {
+  Future<void> deleteFolder(String id) async {
     final db = await database;
-    return await db.delete(
-      'folders',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    // Check if folder contains any subfolders
+    final List<Map<String, dynamic>> subfolders = await db.rawQuery('''
+    SELECT *
+    FROM folders
+    WHERE parentId = ?
+  ''', [id]);
+
+    // Check if folder contains any receipts
+    final List<Map<String, dynamic>> receipts = await db.rawQuery('''
+    SELECT *
+    FROM receipts
+    WHERE parentId = ?
+  ''', [id]);
+
+    // If the folder is not empty, recursively delete its contents
+    if (subfolders.isNotEmpty || receipts.isNotEmpty) {
+      for (var folder in subfolders) {
+        await deleteFolder(folder['id']);
+      }
+      for (var receipt in receipts) {
+        await db
+            .rawDelete('DELETE FROM receipts WHERE id = ?', [receipt['id']]);
+      }
+    }
+
+    // Delete the folder itself
+    await db.rawDelete('DELETE FROM folders WHERE id = ?', [id]);
   }
 
   // method to check if folder already exists
