@@ -158,6 +158,9 @@ class DatabaseService {
   // Method to delete a Receipt object from the database based on its id.
   Future<int> deleteReceipt(String id) async {
     final db = await database;
+    // deleting all tags associated to a receipt
+    await deleteTagsForAReceipt(id);
+    // deleting receipt record in receipts table
     return await db.delete(
       'receipts',
       where: 'id = ?',
