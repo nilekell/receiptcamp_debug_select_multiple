@@ -235,6 +235,16 @@ class DatabaseService {
     });
   }
 
+  // Method to rename receipt
+  Future<void> renameReceipt(String id, String newName) async {
+    final db = await database;
+    await db.rawUpdate('''
+      UPDATE receipts
+      SET name = ?
+      WHERE id = ?
+    ''', [newName, id]);
+  }
+
   // Method to get recently created receipts from database
   Future<List<Receipt>> getRecentReceipts() async {
     final db = await database;

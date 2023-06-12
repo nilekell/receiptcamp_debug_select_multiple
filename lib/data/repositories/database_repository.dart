@@ -58,6 +58,10 @@ class DatabaseRepository {
     return await _databaseService.getReceiptByName(name);
   }
 
+  Future<void> renameReceipt(String id, String newName) async {
+    return await _databaseService.renameReceipt(id, newName);
+  }
+
   Future<List<Receipt>> getRecentReceipts() async {
     return await _databaseService.getRecentReceipts();
   }
