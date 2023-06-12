@@ -20,16 +20,24 @@ class DatabaseRepository {
 
   // Folder methods
 
+  Future<List<Object>> getFolderContents(String folderId) async {
+    return await _databaseService.getFolderContents(folderId);
+  }
+
   Future<void> insertFolder(Folder folder) async {
     return await _databaseService.insertFolder(folder);
+  }
+
+  Future<void> renameFolder(String folderId, String newName) async {
+    return await _databaseService.renameFolder(folderId, newName);
   }
 
   Future<List<Folder>> getFolders() async {
     return await _databaseService.getFolders();
   }
 
-  Future<int> deleteFolder(String id) async {
-    return await _databaseService.deleteFolder(id);
+  Future<void> deleteFolder(String folderId) async {
+    return await _databaseService.deleteFolder(folderId);
   }
 
   Future<bool> folderExists(String id, String name) async {
