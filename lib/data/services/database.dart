@@ -122,7 +122,16 @@ class DatabaseService {
     return [...foldersList, ...receiptsList]; // combining two lists and return
   }
 
-  // Method to name folder
+  // Method to rename folder
+
+  Future<void> renameFolder(String folderId, String newName) async {
+    final db = await database;
+    await db.rawUpdate('''
+      UPDATE folders
+      SET name = ?
+      WHERE id = ?
+    ''', [newName, folderId]);
+  }
 
   // Method to delete folder
 
