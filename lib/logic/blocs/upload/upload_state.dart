@@ -11,6 +11,10 @@ final class UploadInitial extends UploadState {}
 
 final class UploadLoading extends UploadState {}
 
-final class UploadSuccess extends UploadState {}
+final class UploadSuccess extends UploadState {
+  const UploadSuccess({required this.object});
+
+  final Object object;
+}
 
 final class UploadFailed extends UploadState {}
