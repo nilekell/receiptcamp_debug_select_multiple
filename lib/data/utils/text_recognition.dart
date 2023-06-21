@@ -4,7 +4,7 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 class TextRecognitionService {
   static List<String> _commonReceiptWords = [];
 
-  Future<List<String>> extractKeywordsFromImage(String imagePath) async {
+  Future<List<String>> extractKeywordsFromPath(String imagePath) async {
     try {
       final scannedTextList = await _scanImageForText(imagePath);
       final receiptKeyWords = await _extractKeywords(scannedTextList);
