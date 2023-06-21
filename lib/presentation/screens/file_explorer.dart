@@ -76,7 +76,7 @@ class _FileExplorerState extends State<FileExplorer> {
                             padding: const EdgeInsets.all(18),
                             child: FloatingActionButton.large(
                                 onPressed: () {
-                                  showUploadOptions(context, context.read<UploadBloc>());
+                                  showUploadOptions(context);
                                 }, child: const Icon(Icons.add)),
                           ),
                         ),
@@ -105,7 +105,7 @@ class _FileExplorerState extends State<FileExplorer> {
                             padding: const EdgeInsets.all(18),
                             child: FloatingActionButton.large(
                                 onPressed: () {
-                                  context.read<UploadBloc>().add(UploadTapEvent());
+                                  showUploadOptions(context);
                                 }, child: const Icon(Icons.add)),
                           ),
                         ),

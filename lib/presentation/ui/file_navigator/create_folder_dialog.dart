@@ -5,7 +5,8 @@ import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
 final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 final TextEditingController _textEditingController = TextEditingController();
 
-Future<void> showFolderDialog(BuildContext context, UploadBloc uploadBloc) async {
+Future<void> showFolderDialog(
+    BuildContext context) async {
   return await showDialog(
       context: context,
       builder: (context) {
@@ -35,14 +36,18 @@ Future<void> showFolderDialog(BuildContext context, UploadBloc uploadBloc) async
               TextButton(
                   child: const Text('Cancel'),
                   onPressed: () {
+                    // popping folder dialog context, then bottom sheet context
+                    Navigator.of(context).pop();
                     Navigator.of(context).pop();
                   }),
               TextButton(
                   child: const Text('Create'),
                   onPressed: () {
-                    print(_textEditingController.value.text);
-                    uploadBloc.add(FolderCreateEvent(name: _textEditingController.value.text));
+                    // popping folder dialog context, then bottom sheet context
                     Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                    UploadBloc().add(FolderCreateEvent(
+                        name: _textEditingController.value.text));
                   }),
             ],
           );
