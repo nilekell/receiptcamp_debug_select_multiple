@@ -92,7 +92,9 @@ class _FileExplorerState extends State<FileExplorer> {
                                   .read<ExplorerBloc>()
                                   .add(ExplorerFetchReceiptsEvent());
                             }, child:
-                                ListView.builder(itemBuilder: (context, index) {
+                                ListView.builder(
+                                  itemCount: state.receipts.length,
+                                  itemBuilder: (context, index) {
                               return ListTile(
                                 title: Text(state.receipts[index].name),
                               );
