@@ -6,8 +6,8 @@ class TextRecognitionService {
 
   Future<List<String>> extractKeywordsFromImage(String imagePath) async {
     try {
-      final scannedTextList = await scanImageForText(imagePath);
-      final receiptKeyWords = await extractKeywords(scannedTextList);
+      final scannedTextList = await _scanImageForText(imagePath);
+      final receiptKeyWords = await _extractKeywords(scannedTextList);
 
       return receiptKeyWords;
     } on Exception catch (e) {
@@ -16,7 +16,7 @@ class TextRecognitionService {
     }
   }
 
-  static Future<List> scanImageForText(String imagePath) async {
+  static Future<List> _scanImageForText(String imagePath) async {
     // Uses Google ML Kit Vision
     try {
       final inputImage = InputImage.fromFilePath(imagePath);
@@ -42,7 +42,7 @@ class TextRecognitionService {
     }
   }
 
-  Future<List<String>> extractKeywords(List scannedOCRText) async {
+  Future<List<String>> _extractKeywords(List scannedOCRText) async {
     try {
       String scannedOCRTextList = scannedOCRText.join(' ');
       // Define the regular expression pattern for word characters.
