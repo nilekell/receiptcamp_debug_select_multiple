@@ -34,14 +34,19 @@ class _FileExplorerState extends State<FileExplorer> {
         child: BlocConsumer<UploadBloc, UploadState>(
           listener: (context, state) {
             switch (state) {
-              case UploadSuccess():
+              case UploadReceiptSuccess():
                 context.read<ExplorerBloc>().add(ExplorerFetchReceiptsEvent());
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Receipt added successfully'),
-                    duration: Duration(milliseconds: 900)));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Receipt ${state.receipt.name} added successfully'),
+                    duration: const Duration(milliseconds: 1300)));
+              case UploadFolderSuccess():
+                context.read<ExplorerBloc>().add(ExplorerFetchReceiptsEvent());
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Folder ${state.folder.name} added successfully'),
+                    duration: const Duration(milliseconds: 1300)));
               case UploadFailed():
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Receipt failed to be saved'),
+                    content: Text('Failed to save file object'),
                     duration: Duration(milliseconds: 900)));
               default:
                 print('Explorer Screen: ${state.toString()}');
@@ -76,7 +81,7 @@ class _FileExplorerState extends State<FileExplorer> {
                             padding: const EdgeInsets.all(18),
                             child: FloatingActionButton.large(
                                 onPressed: () {
-                                  showUploadOptions(context);
+                                  showUploadOptions(context, context.read<UploadBloc>());
                                 }, child: const Icon(Icons.add)),
                           ),
                         ),
@@ -105,7 +110,7 @@ class _FileExplorerState extends State<FileExplorer> {
                             padding: const EdgeInsets.all(18),
                             child: FloatingActionButton.large(
                                 onPressed: () {
-                                  showUploadOptions(context);
+                                  showUploadOptions(context, context.read<UploadBloc>());
                                 }, child: const Icon(Icons.add)),
                           ),
                         ),
