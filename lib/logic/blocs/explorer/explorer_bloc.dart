@@ -26,7 +26,7 @@ class ExplorerBloc extends Bloc<ExplorerEvent, ExplorerState> {
       final List<Receipt> receipts =
           await DatabaseRepository.instance.getReceipts();
       if (receipts.isNotEmpty) {
-        emit(ExplorerLoadedSuccessState(receipts));
+        emit(ExplorerLoadedSuccessState(receipts: receipts));
       } else {
         emit(ExplorerEmptyReceiptsState());
       }

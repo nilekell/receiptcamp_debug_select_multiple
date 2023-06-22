@@ -15,12 +15,18 @@ final class UploadReceiptSuccess extends UploadState {
   const UploadReceiptSuccess({required this.receipt});
 
   final Receipt receipt;
+
+  @override
+  List<Object> get props => [receipt];
 }
 
 final class UploadFolderSuccess extends UploadState {
   const UploadFolderSuccess({required this.folder});
 
   final Folder folder;
+
+  @override
+  List<Object> get props => [folder];
 }
 
 final class UploadFailed extends UploadState {}
