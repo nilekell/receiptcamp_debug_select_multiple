@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/explorer/explorer_bloc.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
+import 'package:receiptcamp/models/folder.dart';
+import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/upload_sheet.dart';
 
 class FileExplorer extends StatefulWidget {
@@ -27,22 +29,23 @@ class _FileExplorerState extends State<FileExplorer> {
             create: (context) => UploadBloc()..add(UploadInitialEvent()),
           ),
           BlocProvider<ExplorerBloc>(
-            create: (context) =>
-                ExplorerBloc()..add(ExplorerFetchReceiptsEvent()),
+            create: (context) => ExplorerBloc()..add(ExplorerFetchFilesEvent()),
           ),
         ],
         child: BlocConsumer<UploadBloc, UploadState>(
           listener: (context, state) {
             switch (state) {
               case UploadReceiptSuccess():
-                context.read<ExplorerBloc>().add(ExplorerFetchReceiptsEvent());
+                context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('Receipt ${state.receipt.name} added successfully'),
+                    content: Text(
+                        'Receipt ${state.receipt.name} added successfully'),
                     duration: const Duration(milliseconds: 1300)));
               case UploadFolderSuccess():
-                context.read<ExplorerBloc>().add(ExplorerFetchReceiptsEvent());
+                context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('Folder ${state.folder.name} added successfully'),
+                    content:
+                        Text('Folder ${state.folder.name} added successfully'),
                     duration: const Duration(milliseconds: 1300)));
               case UploadFailed():
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -70,10 +73,10 @@ class _FileExplorerState extends State<FileExplorer> {
                               onRefresh: () async {
                                 context
                                     .read<ExplorerBloc>()
-                                    .add(ExplorerFetchReceiptsEvent());
+                                    .add(ExplorerFetchFilesEvent());
                               },
                               child: const Center(
-                                  child: Text('No receipts to show'))),
+                                  child: Text('No files/folders to show'))),
                         ),
                         Align(
                           alignment: Alignment.bottomRight,
@@ -81,8 +84,10 @@ class _FileExplorerState extends State<FileExplorer> {
                             padding: const EdgeInsets.all(18),
                             child: FloatingActionButton.large(
                                 onPressed: () {
-                                  showUploadOptions(context, context.read<UploadBloc>());
-                                }, child: const Icon(Icons.add)),
+                                  showUploadOptions(
+                                      context, context.read<UploadBloc>());
+                                },
+                                child: const Icon(Icons.add)),
                           ),
                         ),
                       ],
@@ -92,26 +97,44 @@ class _FileExplorerState extends State<FileExplorer> {
                       children: [
                         Align(
                             alignment: Alignment.topCenter,
-                            child: RefreshIndicator(onRefresh: () async {
-                              context
-                                  .read<ExplorerBloc>()
-                                  .add(ExplorerFetchReceiptsEvent());
-                            }, child:
-                                ListView.builder(
-                                  itemCount: state.receipts.length,
+                            child: RefreshIndicator(
+                                onRefresh: () async {
+                                  context
+                                      .read<ExplorerBloc>()
+                                      .add(ExplorerFetchFilesEvent());
+                                },
+                                child: ListView.builder(
+                                  itemCount: state.files.length,
                                   itemBuilder: (context, index) {
-                              return ListTile(
-                                title: Text(state.receipts[index].name),
-                              );
-                            }))),
-                         Align(
+                                    final file = state.files[index];
+
+                                    if (file is Receipt) {
+                                      return ListTile(
+                                        title: Text(file.name),
+                                        // can return some properties specific to Receipt
+                                      );
+                                    } else if (file is Folder) {
+                                      return ListTile(
+                                        title: Text(file.name),
+                                        // can return some properties specific to Folder
+                                      );
+                                    } else {
+                                      return const ListTile(
+                                        title: Text('Unknown file'),
+                                      );
+                                    }
+                                  },
+                                ))),
+                        Align(
                           alignment: Alignment.bottomRight,
                           child: Padding(
                             padding: const EdgeInsets.all(18),
                             child: FloatingActionButton.large(
                                 onPressed: () {
-                                  showUploadOptions(context, context.read<UploadBloc>());
-                                }, child: const Icon(Icons.add)),
+                                  showUploadOptions(
+                                      context, context.read<UploadBloc>());
+                                },
+                                child: const Icon(Icons.add)),
                           ),
                         ),
                       ],

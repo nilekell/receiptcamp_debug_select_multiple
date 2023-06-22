@@ -70,7 +70,7 @@ class _FolderDialogState extends State<FolderDialog> {
           onPressed: isEnabled
               ? () {
                   context.read<UploadBloc>().add(FolderCreateEvent(
-                      name: textEditingController.value.text, parentId: 'all'));
+                      name: textEditingController.value.text, parentId: 'a1'));
                   // closing folder dialog
                   Navigator.of(context).pop();
                 }
