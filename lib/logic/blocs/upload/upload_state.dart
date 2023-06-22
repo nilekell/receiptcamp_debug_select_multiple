@@ -11,10 +11,16 @@ final class UploadInitial extends UploadState {}
 
 final class UploadLoading extends UploadState {}
 
-final class UploadSuccess extends UploadState {
-  const UploadSuccess({required this.object});
+final class UploadReceiptSuccess extends UploadState {
+  const UploadReceiptSuccess({required this.receipt});
 
-  final Object object;
+  final Receipt receipt;
+}
+
+final class UploadFolderSuccess extends UploadState {
+  const UploadFolderSuccess({required this.folder});
+
+  final Folder folder;
 }
 
 final class UploadFailed extends UploadState {}

@@ -44,7 +44,7 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
       await DatabaseRepository.instance.insertReceipt(receipt);
       print('Image ${receipt.name} saved at ${receipt.localPath}');
 
-      emit(UploadSuccess(object: receipt));
+      emit(UploadReceiptSuccess(receipt: receipt));
     } on PlatformException catch (e) {
       print(e.toString());
     } on Exception catch (e) {
@@ -72,7 +72,7 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
       await DatabaseRepository.instance.insertReceipt(receipt);
       print('Image ${receipt.name} saved at ${receipt.localPath}');
 
-      emit(UploadSuccess(object: receipt));
+      emit(UploadReceiptSuccess(receipt: receipt));
     } on PlatformException catch (e) {
       print(e.toString());
     } on Exception catch (e) {
@@ -94,7 +94,7 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
       // save folder
       DatabaseRepository.instance.insertFolder(folder);
       print('Folder ${folder.name} saved in ${folder.parentId}');
-      emit(UploadSuccess(object: folder));
+      emit(UploadFolderSuccess(folder: folder));
     } on Exception catch (e) {
       print('Error in folderCreateEvent: $e');
       emit(UploadFailed());
