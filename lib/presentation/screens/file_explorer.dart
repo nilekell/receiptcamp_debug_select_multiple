@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/explorer/explorer_bloc.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
-import 'package:receiptcamp/presentation/ui/bottom-sheet/upload_sheet.dart';
+import 'package:receiptcamp/presentation/ui/file_navigator/upload_sheet.dart';
 
 class FileExplorer extends StatefulWidget {
   const FileExplorer({Key? key}) : super(key: key);
