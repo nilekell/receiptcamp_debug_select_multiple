@@ -85,12 +85,11 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
   FutureOr<void> folderCreateEvent(
       FolderCreateEvent event, Emitter<UploadState> emit) async {
     try {
-      // getting folder properties
+      // creating folder id
       final folderId = Utility.generateUid();
-      const parentId = "all";
 
       // create folder object
-      final folder = Folder(id: folderId, name: event.name, parentId: parentId);
+      final folder = Folder(id: folderId, name: event.name, parentId: event.parentId );
 
       // save folder
       DatabaseRepository.instance.insertFolder(folder);
