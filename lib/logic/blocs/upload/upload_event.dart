@@ -17,7 +17,8 @@ final class UploadTapEvent extends UploadEvent {}
 final class CameraTapEvent extends UploadEvent {}
 
 final class FolderCreateEvent extends UploadEvent {
-  const FolderCreateEvent({required this.name});
+  const FolderCreateEvent({required this.name, required this.parentId});
 
-  final String name;  
+  final String name;
+  final String parentId; 
 }
