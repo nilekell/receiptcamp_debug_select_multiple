@@ -64,7 +64,7 @@ class _FileExplorerState extends State<FileExplorer> {
                     return const CircularProgressIndicator();
                   case ExplorerLoadingState():
                     return const CircularProgressIndicator();
-                  case ExplorerEmptyReceiptsState():
+                  case ExplorerEmptyFilesState():
                     return Stack(
                       children: [
                         Align(
