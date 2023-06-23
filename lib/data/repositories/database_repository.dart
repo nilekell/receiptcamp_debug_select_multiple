@@ -84,9 +84,10 @@ class DatabaseRepository {
 
   // Tag methods
 
-  Future<int> insertTag(Tag tag) async {
-    return await _databaseService.insertTag(tag);
+  Future<void> insertTags(List<Tag> tags) async {
+    return await _databaseService.insertTags(tags);
   }
+  
 
   Future<List<Tag>> getTagsByReceiptID(String receiptId) async {
     return await _databaseService.getTagsByReceiptID(receiptId);

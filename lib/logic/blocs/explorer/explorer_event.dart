@@ -9,7 +9,7 @@ sealed class ExplorerEvent extends Equatable {
 
 final class ExplorerInitialEvent extends ExplorerEvent {}
 
-final class ExplorerFetchReceiptsEvent extends ExplorerEvent {}
+final class ExplorerFetchFilesEvent extends ExplorerEvent {}
 
 // The following events are placeholders for future features
 

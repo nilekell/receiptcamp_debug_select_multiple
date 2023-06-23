@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/explorer/explorer_bloc.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
-import 'package:receiptcamp/presentation/ui/bottom-sheet/upload_sheet.dart';
+import 'package:receiptcamp/models/folder.dart';
+import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/ui/file_navigator/upload_sheet.dart';
 
 class FileExplorer extends StatefulWidget {
   const FileExplorer({Key? key}) : super(key: key);
@@ -27,21 +29,27 @@ class _FileExplorerState extends State<FileExplorer> {
             create: (context) => UploadBloc()..add(UploadInitialEvent()),
           ),
           BlocProvider<ExplorerBloc>(
-            create: (context) =>
-                ExplorerBloc()..add(ExplorerFetchReceiptsEvent()),
+            create: (context) => ExplorerBloc()..add(ExplorerFetchFilesEvent()),
           ),
         ],
         child: BlocConsumer<UploadBloc, UploadState>(
           listener: (context, state) {
             switch (state) {
-              case UploadSuccess():
-                context.read<ExplorerBloc>().add(ExplorerFetchReceiptsEvent());
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Receipt added successfully'),
-                    duration: Duration(milliseconds: 900)));
+              case UploadReceiptSuccess():
+                context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(
+                        'Receipt ${state.receipt.name} added successfully'),
+                    duration: const Duration(milliseconds: 1300)));
+              case UploadFolderSuccess():
+                context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content:
+                        Text('Folder ${state.folder.name} added successfully'),
+                    duration: const Duration(milliseconds: 1300)));
               case UploadFailed():
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Receipt failed to be saved'),
+                    content: Text('Failed to save file object'),
                     duration: Duration(milliseconds: 900)));
               default:
                 print('Explorer Screen: ${state.toString()}');
@@ -56,7 +64,7 @@ class _FileExplorerState extends State<FileExplorer> {
                     return const CircularProgressIndicator();
                   case ExplorerLoadingState():
                     return const CircularProgressIndicator();
-                  case ExplorerEmptyReceiptsState():
+                  case ExplorerEmptyFilesState():
                     return Stack(
                       children: [
                         Align(
@@ -65,10 +73,10 @@ class _FileExplorerState extends State<FileExplorer> {
                               onRefresh: () async {
                                 context
                                     .read<ExplorerBloc>()
-                                    .add(ExplorerFetchReceiptsEvent());
+                                    .add(ExplorerFetchFilesEvent());
                               },
                               child: const Center(
-                                  child: Text('No receipts to show'))),
+                                  child: Text('No files/folders to show'))),
                         ),
                         Align(
                           alignment: Alignment.bottomRight,
@@ -76,8 +84,10 @@ class _FileExplorerState extends State<FileExplorer> {
                             padding: const EdgeInsets.all(18),
                             child: FloatingActionButton.large(
                                 onPressed: () {
-                                  showUploadOptions(context, context.read<UploadBloc>());
-                                }, child: const Icon(Icons.add)),
+                                  showUploadOptions(
+                                      context, context.read<UploadBloc>());
+                                },
+                                child: const Icon(Icons.add)),
                           ),
                         ),
                       ],
@@ -87,24 +97,44 @@ class _FileExplorerState extends State<FileExplorer> {
                       children: [
                         Align(
                             alignment: Alignment.topCenter,
-                            child: RefreshIndicator(onRefresh: () async {
-                              context
-                                  .read<ExplorerBloc>()
-                                  .add(ExplorerFetchReceiptsEvent());
-                            }, child:
-                                ListView.builder(itemBuilder: (context, index) {
-                              return ListTile(
-                                title: Text(state.receipts[index].name),
-                              );
-                            }))),
-                         Align(
+                            child: RefreshIndicator(
+                                onRefresh: () async {
+                                  context
+                                      .read<ExplorerBloc>()
+                                      .add(ExplorerFetchFilesEvent());
+                                },
+                                child: ListView.builder(
+                                  itemCount: state.files.length,
+                                  itemBuilder: (context, index) {
+                                    final file = state.files[index];
+
+                                    if (file is Receipt) {
+                                      return ListTile(
+                                        title: Text(file.name),
+                                        // can return some properties specific to Receipt
+                                      );
+                                    } else if (file is Folder) {
+                                      return ListTile(
+                                        title: Text(file.name),
+                                        // can return some properties specific to Folder
+                                      );
+                                    } else {
+                                      return const ListTile(
+                                        title: Text('Unknown file'),
+                                      );
+                                    }
+                                  },
+                                ))),
+                        Align(
                           alignment: Alignment.bottomRight,
                           child: Padding(
                             padding: const EdgeInsets.all(18),
                             child: FloatingActionButton.large(
                                 onPressed: () {
-                                  context.read<UploadBloc>().add(UploadTapEvent());
-                                }, child: const Icon(Icons.add)),
+                                  showUploadOptions(
+                                      context, context.read<UploadBloc>());
+                                },
+                                child: const Icon(Icons.add)),
                           ),
                         ),
                       ],
