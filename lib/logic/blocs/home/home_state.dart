@@ -16,9 +16,12 @@ final class HomeLoadingState extends HomeState {}
 final class HomeEmptyReceiptsState extends HomeState {}
 
 final class HomeLoadedSuccessState extends HomeState {
+  const HomeLoadedSuccessState({required this.receipts});
+
   final List<Receipt> receipts;
 
-  const HomeLoadedSuccessState(this.receipts);
+  @override
+  List<Object> get props => [receipts];
 }
 
 final class HomeErrorState extends HomeState {}

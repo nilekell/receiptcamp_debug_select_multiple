@@ -347,14 +347,21 @@ class DatabaseService {
     print(await db.delete('folders'));
   }
 
-  // method to insert a receipt tag into tags table in the database
-  Future<int> insertTag(Tag tag) async {
-    final db = await database;
-    // returns id of last tag inserted into db by the query
-    return await db.insert('tags', tag.toMap());
-  }
-
   // Add Tag operations
+
+  // method to insert a list of receipt tags into tags table
+  Future<void> insertTags(List<Tag> tags) async {
+    final db = await database;
+
+    // perform multiple operations in a single transaction
+    Batch batch = db.batch();
+
+    for (Tag tag in tags) {
+      batch.insert('tags', tag.toMap());
+    }
+
+    await batch.commit(noResult: true);
+  }
 
   // method to get all tags associated with a receipt based on its id
   Future<List<Tag>> getTagsByReceiptID(String receiptId) async {

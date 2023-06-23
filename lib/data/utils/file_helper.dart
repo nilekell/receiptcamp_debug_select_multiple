@@ -7,16 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 
 class FileService {
-  static Future<File?> compressAndSaveFile(File imageFile, String targetPath) async {
-    try {
-      File? compressedFile = await compressFile(imageFile, targetPath);
-      return saveCompressedFile(compressedFile);
-    } on Exception catch (e) {
-      print('Error in compressAndSaveFile: $e');
-      return null;
-    }
-  }
-
   static Future<File?> compressFile(File imageFile, String targetPath) async {
     try {
       var result = await FlutterImageCompress.compressAndGetFile(
@@ -32,21 +22,6 @@ class FileService {
       }
     } on Exception catch (e) {
       print('Error in compressFile: $e');
-      return null;
-    }
-  }
-
-  static File? saveCompressedFile(File? compressedFile) {
-    try {
-      if (compressedFile == null) {
-        print('Image failed to be compressed');
-        return null;
-      } else {
-        print('Image successfully compressed and stored at ${compressedFile.path}');
-        return compressedFile;
-      }
-    } on Exception catch (e) {
-      print('Error in saveCompressedFile: $e');
       return null;
     }
   }
