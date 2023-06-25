@@ -126,6 +126,7 @@ class DatabaseService {
   Future<void> renameFolder(String folderId, String newName) async {
     final db = await database;
 
+    // folders can have the same name
     if (await folderExists(id: folderId) == false) {
       return;
     } else {
@@ -271,11 +272,16 @@ class DatabaseService {
   // Method to move a folder to another folder
   Future<void> moveFolder(Folder folder, String targetFolderId) async {
     final db = await database;
+
+    if (await folderExists(id: targetFolderId) == false) {
+      return;
+    } else {
     await db.rawUpdate('''
       UPDATE folders
       SET parentId = ?
       WHERE id = ?
     ''', [targetFolderId, folder.id]);
+    }
   }
 
   // Method to get all Receipt objects from the database.
