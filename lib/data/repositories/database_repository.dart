@@ -32,6 +32,10 @@ class DatabaseRepository {
     return await _databaseService.renameFolder(folderId, newName);
   }
 
+  Future<void> moveFolder(Folder folder, String targetFolderId) async {
+    return await _databaseService.moveFolder(folder, targetFolderId);
+  }
+
   Future<List<Folder>> getFolders() async {
     return await _databaseService.getFolders();
   }
@@ -40,8 +44,8 @@ class DatabaseRepository {
     return await _databaseService.deleteFolder(folderId);
   }
 
-  Future<bool> folderExists(String id, String name) async {
-    return await _databaseService.folderExists(id, name);
+  Future<bool> folderExists({String? id, String? name}) async {
+    return await _databaseService.folderExists(id: id, name: name);
   }
 
   // Receipt methods
