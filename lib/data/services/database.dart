@@ -243,6 +243,22 @@ class DatabaseService {
     }
   }
 
+  // Method to get folder name by its id
+  Future<String> getFolderNameById(String folderId) async {
+    final db = await database;
+    final result =  await db.rawQuery('''
+      SELECT name
+      FROM folders
+      WHERE folderId = ?
+    ''', [folderId]);
+
+    if (result.isNotEmpty) {
+    return result.first['name'].toString();
+  } else {
+    throw Exception('Folder with id $folderId not found');
+  } 
+  }
+
   // Add Receipt operations
 
   // Method to insert a Receipt object into the database.

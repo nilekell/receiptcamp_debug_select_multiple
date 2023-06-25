@@ -40,6 +40,10 @@ class DatabaseRepository {
     return await _databaseService.getFolders();
   }
 
+  Future<String> getFolderNameById(String folderId) async {
+    return await _databaseService.getFolderNameById(folderId);
+  }
+
   Future<void> deleteFolder(String folderId) async {
     return await _databaseService.deleteFolder(folderId);
   }
