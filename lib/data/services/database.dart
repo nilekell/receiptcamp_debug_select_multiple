@@ -123,24 +123,33 @@ class DatabaseService {
   }
 
   // Method to rename folder
-
   Future<void> renameFolder(String folderId, String newName) async {
     final db = await database;
-    await db.rawUpdate('''
-      UPDATE folders
-      SET name = ?
-      WHERE id = ?
-    ''', [newName, folderId]);
+
+    if (await folderExists(id: folderId) == false) {
+      return;
+    } else {
+      await db.rawUpdate('''
+        UPDATE folders
+        SET name = ?
+        WHERE id = ?
+        ''', [newName, folderId]);
+    }
   }
 
   // Method to move a receipt to a different folder
   Future<void> moveReceipt(Receipt receipt, String targetFolderId) async {
     final db = await database;
-    await db.rawUpdate('''
+
+    if (await folderExists(id: targetFolderId) == false) {
+      return;
+    } else {
+      await db.rawUpdate('''
       UPDATE receipts
       SET parentId = ?
       WHERE id = ?
     ''', [targetFolderId, receipt.id]);
+    }
   }
 
   // Method to insert a Folder object into the database.
@@ -199,13 +208,23 @@ class DatabaseService {
   }
 
   // method to check if folder already exists
-  Future<bool> folderExists(String id, String name) async {
+  Future<bool> folderExists({String? id, String? name}) async {
     final db = await database;
-    final countResult = await db.rawQuery('''
-      SELECT COUNT (*)
-      FROM folders
-      WHERE id=? or name=? 
-      ''', [id, name]);
+    List<Object?> arguments = [];
+    String query = 'SELECT COUNT (*) FROM folders WHERE ';
+
+    if (id != null) {
+      query += 'id=?';
+      arguments.add(id);
+    }
+
+    if (name != null) {
+      if (id != null) query += ' OR ';
+      query += 'name=?';
+      arguments.add(name);
+    }
+
+    final countResult = await db.rawQuery(query, arguments);
 
     int? numSameFolders = Sqflite.firstIntValue(countResult);
 
@@ -215,6 +234,7 @@ class DatabaseService {
       return false;
     }
   }
+
 
   // Add Receipt operations
 
@@ -249,6 +269,14 @@ class DatabaseService {
   }
 
   // Method to move a folder to another folder
+  Future<void> moveFolder(Folder folder, String targetFolderId) async {
+    final db = await database;
+    await db.rawUpdate('''
+      UPDATE folders
+      SET parentId = ?
+      WHERE id = ?
+    ''', [targetFolderId, folder.id]);
+  }
 
   // Method to get all Receipt objects from the database.
   Future<List<Receipt>> getReceipts() async {
