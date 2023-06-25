@@ -243,21 +243,22 @@ class DatabaseService {
     }
   }
 
-  // Method to get folder name by its id
-  Future<String> getFolderNameById(String folderId) async {
-    final db = await database;
-    final result =  await db.rawQuery('''
-      SELECT name
-      FROM folders
-      WHERE folderId = ?
-    ''', [folderId]);
+  // Method to get folder by its id
+  Future<Folder> getFolderById(String folderId) async {
+  final db = await database;
+  final result = await db.rawQuery('''
+    SELECT *
+    FROM folders
+    WHERE id = ?
+  ''', [folderId]);
 
-    if (result.isNotEmpty) {
-    return result.first['name'].toString();
+  if (result.isNotEmpty) {
+    final folderResult = result.first;
+    return Folder.fromMap(folderResult);
   } else {
     throw Exception('Folder with id $folderId not found');
-  } 
   }
+}
 
   // Add Receipt operations
 
@@ -278,21 +279,22 @@ class DatabaseService {
     );
   }
 
-  // Method to return receipt name by id
-  Future<String> getReceiptNameById(String receiptId) async {
-    final db = await database;
-    final result = await db.rawQuery('''
-      SELECT name
-      FROM receipts
-      WHERE id = ?
-    ''', [receiptId]);
+  // Method to return receipt by id
+  Future<Receipt> getReceiptById(String receiptId) async {
+  final db = await database;
+  final result = await db.rawQuery('''
+    SELECT *
+    FROM receipts
+    WHERE id = ?
+  ''', [receiptId]);
 
-    if (result.isNotEmpty) {
-      return result.first['name'].toString();
-    } else {
-      throw Exception('Receipt with id $receiptId not found');
-    }
+  if (result.isNotEmpty) {
+    final receiptResult = result.first;
+    return Receipt.fromMap(receiptResult);
+  } else {
+    throw Exception('Receipt with id $receiptId not found');
   }
+}
 
   // Method to delete a Receipt object from the database based on its id.
   Future<int> deleteReceipt(String id) async {

@@ -40,8 +40,8 @@ class DatabaseRepository {
     return await _databaseService.getFolders();
   }
 
-  Future<String> getFolderNameById(String folderId) async {
-    return await _databaseService.getFolderNameById(folderId);
+  Future<Folder> getFolderById(String folderId) async {
+    return await _databaseService.getFolderById(folderId);
   }
 
   Future<void> deleteFolder(String folderId) async {
@@ -66,8 +66,8 @@ class DatabaseRepository {
     return await _databaseService.deleteReceipt(id);
   }
 
-  Future<String> getReceiptNameById(String receiptId) async {
-    return await _databaseService.getReceiptNameById(receiptId);
+  Future<Receipt> getReceiptById(String receiptId) async {
+    return await _databaseService.getReceiptById(receiptId);
   }
 
   Future<List<Receipt>> getReceipts() async {
