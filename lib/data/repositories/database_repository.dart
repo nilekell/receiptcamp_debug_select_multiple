@@ -70,6 +70,10 @@ class DatabaseRepository {
     return await _databaseService.renameReceipt(id, newName);
   }
 
+  Future<void> moveReceipt(Receipt receipt, String targetFolderId) async {
+    return await _databaseService.moveReceipt(receipt, targetFolderId);
+  }
+
   Future<List<Receipt>> getRecentReceipts() async {
     return await _databaseService.getRecentReceipts();
   }
