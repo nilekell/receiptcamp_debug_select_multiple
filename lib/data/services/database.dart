@@ -1,3 +1,4 @@
+import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/models/tag.dart';
@@ -179,26 +180,32 @@ class DatabaseService {
   // Method to delete a Folder object from the database based on its id.
   Future<void> deleteFolder(String id) async {
     final db = await database;
+
     // Check if folder contains any subfolders
     final List<Map<String, dynamic>> subfolders = await db.rawQuery('''
-    SELECT *
-    FROM folders
-    WHERE parentId = ?
-  ''', [id]);
+      SELECT *
+      FROM folders
+      WHERE parentId = ?
+    ''', [id]);
 
     // Check if folder contains any receipts
     final List<Map<String, dynamic>> receipts = await db.rawQuery('''
-    SELECT *
-    FROM receipts
-    WHERE parentId = ?
-  ''', [id]);
+      SELECT *
+      FROM receipts
+      WHERE parentId = ?
+    ''', [id]);
 
     // If the folder is not empty, recursively delete its contents
     if (subfolders.isNotEmpty || receipts.isNotEmpty) {
       for (var folder in subfolders) {
         await deleteFolder(folder['id']);
       }
+
       for (var receipt in receipts) {
+        // deleting receipt image in local storage
+        await FileService.deleteImageFromPath(receipt['localPath']);
+
+        // deleting receipt record in db
         await db
             .rawDelete('DELETE FROM receipts WHERE id = ?', [receipt['id']]);
       }
@@ -235,7 +242,6 @@ class DatabaseService {
       return false;
     }
   }
-
 
   // Add Receipt operations
 
@@ -276,7 +282,7 @@ class DatabaseService {
     if (await folderExists(id: targetFolderId) == false) {
       return;
     } else {
-    await db.rawUpdate('''
+      await db.rawUpdate('''
       UPDATE folders
       SET parentId = ?
       WHERE id = ?
