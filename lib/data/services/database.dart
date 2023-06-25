@@ -133,7 +133,15 @@ class DatabaseService {
     ''', [newName, folderId]);
   }
 
-  // Method to delete folder
+  // Method to move a receipt to a different folder
+  Future<void> moveReceipt(Receipt receipt, String targetFolderId) async {
+    final db = await database;
+    await db.rawUpdate('''
+      UPDATE receipts
+      SET parentId = ?
+      WHERE id = ?
+    ''', [targetFolderId, receipt.id]);
+  }
 
   // Method to insert a Folder object into the database.
   Future<void> insertFolder(Folder folder) async {
@@ -239,6 +247,8 @@ class DatabaseService {
       whereArgs: [id],
     );
   }
+
+  // Method to move a folder to another folder
 
   // Method to get all Receipt objects from the database.
   Future<List<Receipt>> getReceipts() async {
