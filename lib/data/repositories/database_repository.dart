@@ -66,6 +66,10 @@ class DatabaseRepository {
     return await _databaseService.deleteReceipt(id);
   }
 
+  Future<String> getReceiptNameById(String receiptId) async {
+    return await _databaseService.getReceiptNameById(receiptId);
+  }
+
   Future<List<Receipt>> getReceipts() async {
     return await _databaseService.getReceipts();
   }
