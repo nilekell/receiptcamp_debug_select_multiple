@@ -278,6 +278,22 @@ class DatabaseService {
     );
   }
 
+  // Method to return receipt name by id
+  Future<String> getReceiptNameById(String receiptId) async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT name
+      FROM receipts
+      WHERE id = ?
+    ''', [receiptId]);
+
+    if (result.isNotEmpty) {
+      return result.first['name'].toString();
+    } else {
+      throw Exception('Receipt with id $receiptId not found');
+    }
+  }
+
   // Method to delete a Receipt object from the database based on its id.
   Future<int> deleteReceipt(String id) async {
     final db = await database;
