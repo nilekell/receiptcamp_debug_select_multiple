@@ -42,7 +42,7 @@ class _HomeState extends State<Home> {
               child: ListView.builder(
                   itemCount: state.receipts.length,
                   itemBuilder: (context, index) {
-                    return ListTile(title: Text(state.receipts[index].name));
+                    return ListTile(title: Text(state.receipts[index].name.split('.').first));
                   }));
         default:
           print('Home Screen: ${state.toString()}');
