@@ -4,7 +4,7 @@ import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 
-part 'file_editing_cubit_state.dart';
+part 'file_editing_state.dart';
 
 class FileEditingCubit extends Cubit<FileEditingCubitState> {
   FileEditingCubit() : super(FileEditingCubitInitial());

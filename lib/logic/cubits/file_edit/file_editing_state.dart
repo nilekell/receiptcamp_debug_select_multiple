@@ -1,4 +1,4 @@
-part of 'file_editing_cubit_cubit.dart';
+part of 'file_editing_cubit.dart';
 
 sealed class FileEditingCubitState extends Equatable {
   const FileEditingCubitState();
