@@ -15,10 +15,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
     final oldName = receipt.name;
     try {
       await DatabaseRepository.instance.renameReceipt(receipt.id, newName);
-      emit(FileEditingCubitRenameReceiptSuccess(oldName: oldName, newName: newName));
+      emit(FileEditingCubitRenameSuccess(oldName: oldName, newName: newName));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitRenameReceiptFailure());
+      emit(FileEditingCubitRenameFailure(oldName: oldName, newName: newName));
     }
   }
 
@@ -27,10 +27,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
     final newFolder = await DatabaseRepository.instance.getFolderById(targetFolderId);
     try {
       await DatabaseRepository.instance.moveReceipt(receipt, targetFolderId);
-      emit(FileEditingCubitMoveReceiptSuccess(oldFolder: oldFolder.name, newFolder: newFolder.name));
+      emit(FileEditingCubitMoveSuccess(oldName: oldFolder.name, newName: newFolder.name));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitMoveReceiptFailure());
+      emit(FileEditingCubitMoveFailure(oldName: oldFolder.name, newName: newFolder.name));
     }
   }
 
@@ -38,10 +38,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
     final receipt = await DatabaseRepository.instance.getReceiptById(receiptId);
     try {
       await DatabaseRepository.instance.deleteReceipt(receiptId);
-      emit(FileEditingCubitDeleteReceiptSuccess(deletedReceiptName: receipt.name));
+      emit(FileEditingCubitDeleteSuccess(deletedName: receipt.name));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitDeleteReceiptFailure());
+      emit(FileEditingCubitDeleteFailure(deletedName: receipt.name));
     }
   }
 
@@ -51,10 +51,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
     final oldName = folder.name;
     try {
       await DatabaseRepository.instance.renameFolder(folder.id, newName);
-      emit(FileEditingCubitRenameFolderSuccess(oldName: oldName, newName: newName));
+      emit(FileEditingCubitRenameSuccess(oldName: oldName, newName: newName));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitRenameFolderFailure());
+      emit(FileEditingCubitRenameFailure(oldName: oldName, newName: newName));
     }
   }
   
@@ -64,10 +64,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
     final targetFolderName = targetFolder.name;
     try {
       await DatabaseRepository.instance.moveFolder(folder, targetFolderId);
-      emit(FileEditingCubitMoveFolderSuccess(oldFolder: oldFolder, newFolder: targetFolderName));
+      emit(FileEditingCubitMoveSuccess(oldName: oldFolder, newName: targetFolderName));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitMoveFolderFailure());
+      emit(FileEditingCubitMoveFailure(oldName: oldFolder, newName: targetFolderName));
     }
   }
 
@@ -75,10 +75,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
     final folder = await DatabaseRepository.instance.getFolderById(folderId);
     try {
       await DatabaseRepository.instance.deleteFolder(folderId);
-      emit(FileEditingCubitDeleteFolderSuccess(deletedFolderName: folder.name));
+      emit(FileEditingCubitDeleteSuccess(deletedName: folder.name));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitDeleteFolderFailure());
+      emit(FileEditingCubitDeleteFailure(deletedName: folder.name));
     }
   }
 }
