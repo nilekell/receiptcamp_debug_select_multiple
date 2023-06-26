@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
 
-Future<void> showFolderDialog(
+Future<void> showCreateFolderDialog(
     BuildContext context, UploadBloc uploadBloc) async {
   return await showDialog(
       context: context,

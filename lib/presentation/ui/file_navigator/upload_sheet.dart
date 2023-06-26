@@ -30,7 +30,7 @@ void showUploadOptions(BuildContext context, UploadBloc uploadBloc) {
           onTap: () {
             // closing bottom sheet
             Navigator.of(bottomSheetContext).pop();
-            showFolderDialog(bottomSheetContext, uploadBloc);
+            showCreateFolderDialog(bottomSheetContext, uploadBloc);
           },
         ),
       ],
