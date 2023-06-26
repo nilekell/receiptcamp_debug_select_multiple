@@ -1,8 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:share_plus/share_plus.dart';
 
 part 'file_editing_state.dart';
 
@@ -81,4 +83,29 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
       emit(FileEditingCubitDeleteFailure(deletedName: folder.name));
     }
   }
+
+  shareReceipt(Receipt receipt) async {
+  try {
+    // shows platform share sheet
+    await Share.shareXFiles([XFile(receipt.localPath)], subject: receipt.name);
+    emit(FileEditingCubitShareSuccess(receiptName: receipt.name));
+  } on Exception catch (e) {
+    print(e.toString());
+    emit(FileEditingCubitShareFailure(receiptName: receipt.name));
+  }
+}
+
+// Saving methods
+
+saveImageToCameraRoll(Receipt receipt) async {
+  try {
+    await GallerySaver.saveImage(receipt.localPath);
+    print('image saved to camera roll');
+    emit(FileEditingCubitSaveImageSuccess(receiptName: receipt.name));
+  } on Exception catch (e) {
+    print(e.toString());
+    emit(FileEditingCubitSaveImageFailure(receiptName: receipt.name));
+  }
+}
+
 }

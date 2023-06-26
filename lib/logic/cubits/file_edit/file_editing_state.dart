@@ -71,3 +71,43 @@ final class FileEditingCubitDeleteFailure extends FileEditingCubitState {
   @override
   List<Object> get props => [deletedName];
 }
+
+// Sharing states
+
+final class FileEditingCubitShareSuccess extends FileEditingCubitState {
+  const FileEditingCubitShareSuccess({required this.receiptName});
+
+  final String receiptName;
+
+  @override
+  List<Object> get props => [receiptName];
+}
+
+final class FileEditingCubitShareFailure extends FileEditingCubitState {
+  const FileEditingCubitShareFailure({required this.receiptName});
+
+  final String receiptName;
+
+  @override
+  List<Object> get props => [receiptName];
+}
+
+// Saving states
+
+final class FileEditingCubitSaveImageSuccess extends FileEditingCubitState {
+  const FileEditingCubitSaveImageSuccess({required this.receiptName});
+
+  final String receiptName;
+
+  @override
+  List<Object> get props => [receiptName];
+}
+
+final class FileEditingCubitSaveImageFailure extends FileEditingCubitState {
+  const FileEditingCubitSaveImageFailure({required this.receiptName});
+
+  final String receiptName;
+
+  @override
+  List<Object> get props => [receiptName];
+}
