@@ -6,6 +6,7 @@ import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
 import 'package:receiptcamp/logic/cubits/file_edit/file_editing_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/ui/file_navigator/receipt/receipt_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/upload_sheet.dart';
 
 class FileExplorer extends StatefulWidget {
@@ -112,12 +113,16 @@ class _FileExplorerState extends State<FileExplorer> {
                                   listener: (context, state) {
                                     switch (state) {
                                       case FileEditingCubitRenameSuccess():
+                                        // reloading list to show new changes
+                                        context
+                                            .read<ExplorerBloc>()
+                                            .add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     '${state.oldName} renamed to ${state.newName}'),
                                                 duration: const Duration(
-                                                    milliseconds: 1300)));
+                                                    milliseconds: 2000)));
                                       case FileEditingCubitRenameFailure():
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
@@ -194,6 +199,20 @@ class _FileExplorerState extends State<FileExplorer> {
                                       final file = state.files[index];
                                       if (file is Receipt) {
                                         return ListTile(
+                                          trailing: IconButton(
+                                            icon: Icon(
+                                              Icons.more,
+                                              size: 20.0,
+                                              color: Colors.brown[900],
+                                            ),
+                                            onPressed: () {
+                                              showReceiptOptions(
+                                                  context,
+                                                  context
+                                                      .read<FileEditingCubit>(),
+                                                  file);
+                                            },
+                                          ),
                                           title: Text(file.name),
                                           // can return some properties specific to Receipt
                                         );
