@@ -213,7 +213,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                                   file);
                                             },
                                           ),
-                                          title: Text(file.name),
+                                          title: Text(file.name.split('.').first),
                                           // can return some properties specific to Receipt
                                         );
                                       } else if (file is Folder) {
