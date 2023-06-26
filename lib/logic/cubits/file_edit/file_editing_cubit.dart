@@ -23,7 +23,7 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
     final newNameWithExtension = '$newName.$extension';
 
     try {
-      await DatabaseRepository.instance.renameReceipt(receipt.id, newName);
+      await DatabaseRepository.instance.renameReceipt(receipt.id, newNameWithExtension);
       emit(FileEditingCubitRenameSuccess(oldName: oldName, newName: newNameWithExtension));
     } on Exception catch (e) {
       print(e.toString());
