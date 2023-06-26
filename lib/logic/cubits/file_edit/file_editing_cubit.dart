@@ -15,12 +15,19 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
 
   renameReceipt(Receipt receipt, String newName) async {
     final oldName = receipt.name;
+
+    // Get extension from the old name
+    final extension = oldName.split('.').last;
+
+    // Append extension to the new name
+    final newNameWithExtension = '$newName.$extension';
+
     try {
       await DatabaseRepository.instance.renameReceipt(receipt.id, newName);
-      emit(FileEditingCubitRenameSuccess(oldName: oldName, newName: newName));
+      emit(FileEditingCubitRenameSuccess(oldName: oldName, newName: newNameWithExtension));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitRenameFailure(oldName: oldName, newName: newName));
+      emit(FileEditingCubitRenameFailure(oldName: oldName, newName: newNameWithExtension));
     }
   }
 
