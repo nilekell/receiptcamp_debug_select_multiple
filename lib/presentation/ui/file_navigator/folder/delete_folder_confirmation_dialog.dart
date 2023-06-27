@@ -7,7 +7,7 @@ Future<void> showDeleteFolderDialog(BuildContext context,
     FileEditingCubit fileEditingCubit, Folder folder) async {
   return await showDialog(
     context: context,
-    builder: (deleteReceiptDialogContext) {
+    builder: (deleteFolderDialogContext) {
       return BlocProvider.value(
         value: fileEditingCubit,
         child: DeleteFolderDialog(folder: folder,),

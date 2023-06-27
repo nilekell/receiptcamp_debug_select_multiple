@@ -6,7 +6,7 @@ Future<void> showCreateFolderDialog(
     BuildContext context, UploadBloc uploadBloc) async {
   return await showDialog(
       context: context,
-      builder: (folderDialogContext) {
+      builder: (createFolderDialogContext) {
         return BlocProvider.value(
           value: uploadBloc,
           child: const FolderDialog(),
