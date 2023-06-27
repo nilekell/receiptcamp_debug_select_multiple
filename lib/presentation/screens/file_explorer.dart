@@ -46,13 +46,13 @@ class _FileExplorerState extends State<FileExplorer> {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text(
                         'Receipt ${state.receipt.name} added successfully'),
-                    duration: const Duration(milliseconds: 1300)));
+                    duration: const Duration(milliseconds: 2000)));
               case UploadFolderSuccess():
                 context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content:
                         Text('Folder ${state.folder.name} added successfully'),
-                    duration: const Duration(milliseconds: 1300)));
+                    duration: const Duration(milliseconds: 2000)));
               case UploadFailed():
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Failed to save file object'),
@@ -115,9 +115,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                     switch (state) {
                                       case FileEditingCubitRenameSuccess():
                                         // reloading list to show new changes
-                                        context
-                                            .read<ExplorerBloc>()
-                                            .add(ExplorerFetchFilesEvent());
+                                        context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
@@ -125,71 +123,76 @@ class _FileExplorerState extends State<FileExplorer> {
                                                 duration: const Duration(
                                                     milliseconds: 2000)));
                                       case FileEditingCubitRenameFailure():
+                                        context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Failed to rename ${state.oldName}'),
                                                 duration: const Duration(
-                                                    milliseconds: 1300)));
+                                                    milliseconds: 2000)));
                                       case FileEditingCubitMoveSuccess():
+                                        context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     '${state.oldName} moved to ${state.newName}'),
                                                 duration: const Duration(
-                                                    milliseconds: 1300)));
+                                                    milliseconds: 2000)));
                                       case FileEditingCubitMoveFailure():
+                                        context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Failed to move ${state.oldName}'),
                                                 duration: const Duration(
-                                                    milliseconds: 1300)));
+                                                    milliseconds: 2000)));
                                       case FileEditingCubitDeleteSuccess():
+                                        context
+                                            .read<ExplorerBloc>()
+                                            .add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Deleted ${state.deletedName}'),
                                                 duration: const Duration(
-                                                    milliseconds: 1300)));
+                                                    milliseconds: 2000)));
                                       case FileEditingCubitDeleteFailure():
+                                        context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Failed to delete ${state.deletedName}'),
                                                 duration: const Duration(
-                                                    milliseconds: 1300)));
+                                                    milliseconds: 2000)));
                                       case FileEditingCubitShareSuccess():
+                                        context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Shared ${state.receiptName}'),
                                                 duration: const Duration(
-                                                    milliseconds: 1300)));
-                                        break;
+                                                    milliseconds: 2000)));
                                       case FileEditingCubitShareFailure():
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Failed to share ${state.receiptName}'),
                                                 duration: const Duration(
-                                                    milliseconds: 1300)));
-                                        break;
+                                                    milliseconds: 2000)));
                                       case FileEditingCubitSaveImageSuccess():
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Saved ${state.receiptName} to camera roll'),
                                                 duration: const Duration(
-                                                    milliseconds: 1300)));
-                                        break;
+                                                    milliseconds: 2000)));
                                       case FileEditingCubitSaveImageFailure():
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Failed to save ${state.receiptName} to camera roll'),
                                                 duration: const Duration(
-                                                    milliseconds: 1300)));
+                                                    milliseconds: 2000)));
                                       default:
                                         return;
                                     }

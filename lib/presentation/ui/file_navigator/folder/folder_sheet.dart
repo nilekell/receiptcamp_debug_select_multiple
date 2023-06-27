@@ -25,7 +25,6 @@ void showFolderOptions(BuildContext context, FileEditingCubit fileEditingCubit, 
             // closing bottom sheet
             Navigator.of(bottomSheetContext).pop();
             // show move folder dialog
-            showRenameFolderDialog(context, fileEditingCubit, folder);
           },
         ),
         ListTile(
@@ -33,6 +32,7 @@ void showFolderOptions(BuildContext context, FileEditingCubit fileEditingCubit, 
           title: const Text('Delete'),
           onTap: () {
             fileEditingCubit.deleteFolder(folder.id);
+            Navigator.of(bottomSheetContext).pop();
           },
         ),
       ],
