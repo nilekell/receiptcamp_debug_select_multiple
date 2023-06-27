@@ -165,7 +165,6 @@ class _FileExplorerState extends State<FileExplorer> {
                                                 duration: const Duration(
                                                     milliseconds: 2000)));
                                       case FileEditingCubitShareSuccess():
-                                        context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(

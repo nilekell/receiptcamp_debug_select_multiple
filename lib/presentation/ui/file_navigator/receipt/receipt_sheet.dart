@@ -40,7 +40,7 @@ void showReceiptOptions(BuildContext context, FileEditingCubit fileEditingCubit,
           leading: const Icon(Icons.download),
           title: const Text('Download'),
           onTap: () {
-            // Navigator.of(bottomSheetContext).pop();
+            Navigator.of(bottomSheetContext).pop();
             fileEditingCubit.saveImageToCameraRoll(receipt);
           },
         ),
@@ -48,7 +48,7 @@ void showReceiptOptions(BuildContext context, FileEditingCubit fileEditingCubit,
           leading: const Icon(Icons.share),
           title: const Text('Share'),
           onTap: () {
-            // Navigator.of(bottomSheetContext).pop();
+            Navigator.of(bottomSheetContext).pop();
             fileEditingCubit.shareReceipt(receipt);
           },
         ),
