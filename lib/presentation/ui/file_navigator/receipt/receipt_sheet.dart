@@ -31,6 +31,7 @@ void showReceiptOptions(BuildContext context, FileEditingCubit fileEditingCubit,
           title: const Text('Delete'),
           onTap: () {
             fileEditingCubit.deleteReceipt(receipt.id);
+            Navigator.of(bottomSheetContext).pop();
           },
         ),
         ListTile(
