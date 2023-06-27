@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:receiptcamp/logic/cubits/file_edit/file_editing_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/folder/delete_folder_confirmation_dialog.dart';
+import 'package:receiptcamp/presentation/ui/file_navigator/folder/move_folder_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/folder/rename_folder_dialog.dart';
 void showFolderOptions(BuildContext context, FileEditingCubit fileEditingCubit, Folder folder) {
   showModalBottomSheet(
@@ -26,6 +27,7 @@ void showFolderOptions(BuildContext context, FileEditingCubit fileEditingCubit, 
             // closing bottom sheet
             Navigator.of(bottomSheetContext).pop();
             // show move folder dialog
+            showMoveFolderDialog(bottomSheetContext, fileEditingCubit, folder);
           },
         ),
         ListTile(
