@@ -183,6 +183,26 @@ class DatabaseService {
     });
   }
 
+  // Method to get list of folders except for a specified folder
+  Future<List<Folder>> getFoldersExceptSpecified(String specificFolderId) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT *
+      FROM folders
+      WHERE id != ?
+    ''', [specificFolderId]);
+
+    return List.generate(maps.length, (i) {
+      return Folder(
+        id: maps[i]['id'],
+        name: maps[i]['name'],
+        lastModified: maps[i]['lastModified'],
+        parentId: maps[i]['parentId'],
+      );
+    });
+  }
+
   // Method to delete a Folder object from the database based on its id.
   Future<void> deleteFolder(String id) async {
     final db = await database;

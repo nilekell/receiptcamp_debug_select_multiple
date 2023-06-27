@@ -24,6 +24,11 @@ class DatabaseRepository {
     return await _databaseService.getFolderContents(folderId);
   }
 
+  // Method to get list of folders except for a specified folder
+  Future<List<Folder>> getFoldersExceptSpecified(String specificFolderId) async {
+    return await _databaseService.getFoldersExceptSpecified(specificFolderId);
+  }
+
   Future<void> insertFolder(Folder folder) async {
     return await _databaseService.insertFolder(folder);
   }
