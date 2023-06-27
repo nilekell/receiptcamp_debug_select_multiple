@@ -32,14 +32,13 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
   }
 
   moveReceipt(Receipt receipt, String targetFolderId) async {
-    final oldFolder = await DatabaseRepository.instance.getFolderById(receipt.parentId);
     final newFolder = await DatabaseRepository.instance.getFolderById(targetFolderId);
     try {
       await DatabaseRepository.instance.moveReceipt(receipt, targetFolderId);
-      emit(FileEditingCubitMoveSuccess(oldName: oldFolder.name, newName: newFolder.name));
+      emit(FileEditingCubitMoveSuccess(oldName: receipt.name, newName: newFolder.name));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitMoveFailure(oldName: oldFolder.name, newName: newFolder.name));
+      emit(FileEditingCubitMoveFailure(oldName: receipt.name, newName: newFolder.name));
     }
   }
 
