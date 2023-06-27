@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/explorer/explorer_bloc.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
+import 'package:receiptcamp/logic/cubits/file_edit/file_editing_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/ui/file_navigator/folder/folder_sheet.dart';
+import 'package:receiptcamp/presentation/ui/file_navigator/receipt/receipt_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/upload_sheet.dart';
 
 class FileExplorer extends StatefulWidget {
@@ -31,6 +34,9 @@ class _FileExplorerState extends State<FileExplorer> {
           BlocProvider<ExplorerBloc>(
             create: (context) => ExplorerBloc()..add(ExplorerFetchFilesEvent()),
           ),
+          BlocProvider<FileEditingCubit>(
+            create: (context) => FileEditingCubit(),
+          ),
         ],
         child: BlocConsumer<UploadBloc, UploadState>(
           listener: (context, state) {
@@ -40,13 +46,13 @@ class _FileExplorerState extends State<FileExplorer> {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text(
                         'Receipt ${state.receipt.name} added successfully'),
-                    duration: const Duration(milliseconds: 1300)));
+                    duration: const Duration(milliseconds: 2000)));
               case UploadFolderSuccess():
                 context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content:
                         Text('Folder ${state.folder.name} added successfully'),
-                    duration: const Duration(milliseconds: 1300)));
+                    duration: const Duration(milliseconds: 2000)));
               case UploadFailed():
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Failed to save file object'),
@@ -103,27 +109,144 @@ class _FileExplorerState extends State<FileExplorer> {
                                       .read<ExplorerBloc>()
                                       .add(ExplorerFetchFilesEvent());
                                 },
-                                child: ListView.builder(
-                                  itemCount: state.files.length,
-                                  itemBuilder: (context, index) {
-                                    final file = state.files[index];
-
-                                    if (file is Receipt) {
-                                      return ListTile(
-                                        title: Text(file.name),
-                                        // can return some properties specific to Receipt
-                                      );
-                                    } else if (file is Folder) {
-                                      return ListTile(
-                                        title: Text(file.name),
-                                        // can return some properties specific to Folder
-                                      );
-                                    } else {
-                                      return const ListTile(
-                                        title: Text('Unknown file'),
-                                      );
+                                child: BlocListener<FileEditingCubit,
+                                    FileEditingCubitState>(
+                                  listener: (context, state) {
+                                    switch (state) {
+                                      case FileEditingCubitRenameSuccess():
+                                        // reloading list to show new changes
+                                        context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    '${state.oldName} renamed to ${state.newName}'),
+                                                duration: const Duration(
+                                                    milliseconds: 2000)));
+                                      case FileEditingCubitRenameFailure():
+                                        context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Failed to rename ${state.oldName}'),
+                                                duration: const Duration(
+                                                    milliseconds: 2000)));
+                                      case FileEditingCubitMoveSuccess():
+                                        context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    '${state.oldName} moved to ${state.newName}'),
+                                                duration: const Duration(
+                                                    milliseconds: 2000)));
+                                      case FileEditingCubitMoveFailure():
+                                        context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Failed to move ${state.oldName}'),
+                                                duration: const Duration(
+                                                    milliseconds: 2000)));
+                                      case FileEditingCubitDeleteSuccess():
+                                        context
+                                            .read<ExplorerBloc>()
+                                            .add(ExplorerFetchFilesEvent());
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Deleted ${state.deletedName}'),
+                                                duration: const Duration(
+                                                    milliseconds: 2000)));
+                                      case FileEditingCubitDeleteFailure():
+                                        context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Failed to delete ${state.deletedName}'),
+                                                duration: const Duration(
+                                                    milliseconds: 2000)));
+                                      case FileEditingCubitShareSuccess():
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Shared ${state.receiptName}'),
+                                                duration: const Duration(
+                                                    milliseconds: 2000)));
+                                      case FileEditingCubitShareFailure():
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Failed to share ${state.receiptName}'),
+                                                duration: const Duration(
+                                                    milliseconds: 2000)));
+                                      case FileEditingCubitSaveImageSuccess():
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Saved ${state.receiptName} to camera roll'),
+                                                duration: const Duration(
+                                                    milliseconds: 2000)));
+                                      case FileEditingCubitSaveImageFailure():
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Failed to save ${state.receiptName} to camera roll'),
+                                                duration: const Duration(
+                                                    milliseconds: 2000)));
+                                      default:
+                                        return;
                                     }
                                   },
+                                  child: ListView.builder(
+                                    itemCount: state.files.length,
+                                    itemBuilder: (context, index) {
+                                      final file = state.files[index];
+                                      if (file is Receipt) {
+                                        return ListTile(
+                                          leading: const Icon(Icons.receipt),
+                                          trailing: IconButton(
+                                            icon: Icon(
+                                              Icons.more,
+                                              size: 20.0,
+                                              color: Colors.brown[900],
+                                            ),
+                                            onPressed: () {
+                                              showReceiptOptions(
+                                                  context,
+                                                  context
+                                                      .read<FileEditingCubit>(),
+                                                  file);
+                                            },
+                                          ),
+                                          title: Text(file.name.split('.').first),
+                                          // can return some properties specific to Receipt
+                                        );
+                                      } else if (file is Folder) {
+                                        return ListTile(
+                                          leading: const Icon(Icons.folder),
+                                          trailing: IconButton(
+                                            icon: Icon(
+                                              Icons.more,
+                                              size: 20.0,
+                                              color: Colors.brown[900],
+                                            ),
+                                            onPressed: () {
+                                              showFolderOptions(
+                                                  context,
+                                                  context
+                                                      .read<FileEditingCubit>(),
+                                                  file);
+                                            },
+                                          ),
+                                          title: Text(file.name.split('.').first),
+                                          // can return some properties specific to Receipt
+                                        );
+                                      } else {
+                                        return const ListTile(
+                                          title: Text('Unknown file'),
+                                        );
+                                      }
+                                    },
+                                  ),
                                 ))),
                         Align(
                           alignment: Alignment.bottomRight,
