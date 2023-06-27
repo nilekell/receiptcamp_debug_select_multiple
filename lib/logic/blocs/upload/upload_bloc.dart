@@ -87,9 +87,10 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     try {
       // creating folder id
       final folderId = Utility.generateUid();
+      final currentTime = Utility.getCurrentTime();
 
       // create folder object
-      final folder = Folder(id: folderId, name: event.name, parentId: event.parentId );
+      final folder = Folder(id: folderId, name: event.name, lastModified: currentTime, parentId: event.parentId );
 
       // save folder
       DatabaseRepository.instance.insertFolder(folder);
