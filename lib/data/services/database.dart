@@ -1,3 +1,5 @@
+import 'package:receiptcamp/data/utils/file_helper.dart';
+import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/models/tag.dart';
@@ -42,16 +44,18 @@ class DatabaseService {
           CREATE TABLE folders (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
+            lastModified INTEGER NOT NULL,
             parentId TEXT NOT NULL,
             FOREIGN KEY (parentId) REFERENCES folders(id)
           )
         ''');
 
+        final currentTime = Utility.getCurrentTime();
         // creating an initial folder for all receipts to first be added to when they are created
         await db.execute('''
-          INSERT INTO folders (id, name, parentId)
-          VALUES('a1','all','null')
-        ''');
+          INSERT INTO folders (id, name, lastModified, parentId)
+          VALUES('a1','all', ?, 'null')
+        ''', [currentTime]);
 
         // create receipts table
         await db.execute('''
@@ -97,6 +101,7 @@ class DatabaseService {
       return Folder(
         id: folders[i]['id'],
         name: folders[i]['name'],
+        lastModified: folders[i]['lastModified'],
         parentId: folders[i]['parentId'],
       );
     });
@@ -123,17 +128,36 @@ class DatabaseService {
   }
 
   // Method to rename folder
-
   Future<void> renameFolder(String folderId, String newName) async {
     final db = await database;
-    await db.rawUpdate('''
-      UPDATE folders
-      SET name = ?
-      WHERE id = ?
-    ''', [newName, folderId]);
+    final currentTime = Utility.getCurrentTime();
+    // folders can have the same name
+    if (await folderExists(id: folderId) == false) {
+      return;
+    } else {
+      await db.rawUpdate('''
+        UPDATE folders
+        SET name = ?, lastModified = ?
+        WHERE id = ?
+        ''', [newName, currentTime, folderId]);
+    }
   }
 
-  // Method to delete folder
+  // Method to move a receipt to a different folder
+  Future<void> moveReceipt(Receipt receipt, String targetFolderId) async {
+    final db = await database;
+
+    if (await folderExists(id: targetFolderId) == false) {
+      return;
+    } else {
+      final currentTime = Utility.getCurrentTime();
+      await db.rawUpdate('''
+      UPDATE receipts
+      SET parentId = ?, lastModified = ?
+      WHERE id = ?
+    ''', [targetFolderId, currentTime, receipt.id]);
+    }
+  }
 
   // Method to insert a Folder object into the database.
   Future<void> insertFolder(Folder folder) async {
@@ -153,34 +177,66 @@ class DatabaseService {
       return Folder(
         id: maps[i]['id'],
         name: maps[i]['name'],
+        lastModified: maps[i]['lastModified'],
         parentId: maps[i]['parentId'],
       );
     });
   }
 
+  // Method to get list of folders except for a list of specified folders
+    Future<List<Folder>> getFoldersExceptSpecified(List<String> specificFolderIds) async {
+    final db = await database;
+    
+    // Create a string of question marks separated by commas, matching the count of specificFolderIds
+    // example contents of placeholders variables: ('folderId1', 'folderId2', 'folderId3')
+    var placeholders = List<String>.filled(specificFolderIds.length, '?').join(', ');
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT *
+      FROM folders
+      WHERE id NOT IN ($placeholders)
+    ''', specificFolderIds);  // Pass the whole list to the rawQuery method
+
+    return List.generate(maps.length, (i) {
+      return Folder(
+        id: maps[i]['id'],
+        name: maps[i]['name'],
+        lastModified: maps[i]['lastModified'],
+        parentId: maps[i]['parentId'],
+      );
+    });
+  }
+
+
   // Method to delete a Folder object from the database based on its id.
   Future<void> deleteFolder(String id) async {
     final db = await database;
+
     // Check if folder contains any subfolders
     final List<Map<String, dynamic>> subfolders = await db.rawQuery('''
-    SELECT *
-    FROM folders
-    WHERE parentId = ?
-  ''', [id]);
+      SELECT *
+      FROM folders
+      WHERE parentId = ?
+    ''', [id]);
 
     // Check if folder contains any receipts
     final List<Map<String, dynamic>> receipts = await db.rawQuery('''
-    SELECT *
-    FROM receipts
-    WHERE parentId = ?
-  ''', [id]);
+      SELECT *
+      FROM receipts
+      WHERE parentId = ?
+    ''', [id]);
 
     // If the folder is not empty, recursively delete its contents
     if (subfolders.isNotEmpty || receipts.isNotEmpty) {
       for (var folder in subfolders) {
         await deleteFolder(folder['id']);
       }
+
       for (var receipt in receipts) {
+        // deleting receipt image in local storage
+        await FileService.deleteImageFromPath(receipt['localPath']);
+
+        // deleting receipt record in db
         await db
             .rawDelete('DELETE FROM receipts WHERE id = ?', [receipt['id']]);
       }
@@ -191,13 +247,23 @@ class DatabaseService {
   }
 
   // method to check if folder already exists
-  Future<bool> folderExists(String id, String name) async {
+  Future<bool> folderExists({String? id, String? name}) async {
     final db = await database;
-    final countResult = await db.rawQuery('''
-      SELECT COUNT (*)
-      FROM folders
-      WHERE id=? or name=? 
-      ''', [id, name]);
+    List<Object?> arguments = [];
+    String query = 'SELECT COUNT (*) FROM folders WHERE ';
+
+    if (id != null) {
+      query += 'id=?';
+      arguments.add(id);
+    }
+
+    if (name != null) {
+      if (id != null) query += ' OR ';
+      query += 'name=?';
+      arguments.add(name);
+    }
+
+    final countResult = await db.rawQuery(query, arguments);
 
     int? numSameFolders = Sqflite.firstIntValue(countResult);
 
@@ -207,6 +273,23 @@ class DatabaseService {
       return false;
     }
   }
+
+  // Method to get folder by its id
+  Future<Folder> getFolderById(String folderId) async {
+  final db = await database;
+  final result = await db.rawQuery('''
+    SELECT *
+    FROM folders
+    WHERE id = ?
+  ''', [folderId]);
+
+  if (result.isNotEmpty) {
+    final folderResult = result.first;
+    return Folder.fromMap(folderResult);
+  } else {
+    throw Exception('Folder with id $folderId not found');
+  }
+}
 
   // Add Receipt operations
 
@@ -227,6 +310,23 @@ class DatabaseService {
     );
   }
 
+  // Method to return receipt by id
+  Future<Receipt> getReceiptById(String receiptId) async {
+  final db = await database;
+  final result = await db.rawQuery('''
+    SELECT *
+    FROM receipts
+    WHERE id = ?
+  ''', [receiptId]);
+
+  if (result.isNotEmpty) {
+    final receiptResult = result.first;
+    return Receipt.fromMap(receiptResult);
+  } else {
+    throw Exception('Receipt with id $receiptId not found');
+  }
+}
+
   // Method to delete a Receipt object from the database based on its id.
   Future<int> deleteReceipt(String id) async {
     final db = await database;
@@ -238,6 +338,22 @@ class DatabaseService {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  // Method to move a folder to another folder
+  Future<void> moveFolder(Folder folder, String targetFolderId) async {
+    final db = await database;
+
+    if (await folderExists(id: targetFolderId) == false) {
+      return;
+    } else {
+      final currentTime = Utility.getCurrentTime();
+      await db.rawUpdate('''
+      UPDATE folders
+      SET parentId = ?, lastModified = ?
+      WHERE id = ?
+    ''', [targetFolderId, currentTime, folder.id]);
+    }
   }
 
   // Method to get all Receipt objects from the database.
@@ -308,11 +424,12 @@ class DatabaseService {
   // Method to rename receipt
   Future<void> renameReceipt(String id, String newName) async {
     final db = await database;
+    final currentTime = Utility.getCurrentTime();
     await db.rawUpdate('''
       UPDATE receipts
-      SET name = ?
+      SET name = ?, lastModified = ?
       WHERE id = ?
-    ''', [newName, id]);
+    ''', [newName, currentTime, id]);
   }
 
   // Method to get recently created receipts from database

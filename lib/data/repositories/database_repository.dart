@@ -24,6 +24,11 @@ class DatabaseRepository {
     return await _databaseService.getFolderContents(folderId);
   }
 
+  // Method to get list of folders except for a specified folder
+  Future<List<Folder>> getFoldersExceptSpecified(List<String> specificFolderIds) async {
+    return await _databaseService.getFoldersExceptSpecified(specificFolderIds);
+  }
+
   Future<void> insertFolder(Folder folder) async {
     return await _databaseService.insertFolder(folder);
   }
@@ -32,16 +37,24 @@ class DatabaseRepository {
     return await _databaseService.renameFolder(folderId, newName);
   }
 
+  Future<void> moveFolder(Folder folder, String targetFolderId) async {
+    return await _databaseService.moveFolder(folder, targetFolderId);
+  }
+
   Future<List<Folder>> getFolders() async {
     return await _databaseService.getFolders();
+  }
+
+  Future<Folder> getFolderById(String folderId) async {
+    return await _databaseService.getFolderById(folderId);
   }
 
   Future<void> deleteFolder(String folderId) async {
     return await _databaseService.deleteFolder(folderId);
   }
 
-  Future<bool> folderExists(String id, String name) async {
-    return await _databaseService.folderExists(id, name);
+  Future<bool> folderExists({String? id, String? name}) async {
+    return await _databaseService.folderExists(id: id, name: name);
   }
 
   // Receipt methods
@@ -58,6 +71,10 @@ class DatabaseRepository {
     return await _databaseService.deleteReceipt(id);
   }
 
+  Future<Receipt> getReceiptById(String receiptId) async {
+    return await _databaseService.getReceiptById(receiptId);
+  }
+
   Future<List<Receipt>> getReceipts() async {
     return await _databaseService.getReceipts();
   }
@@ -68,6 +85,10 @@ class DatabaseRepository {
 
   Future<void> renameReceipt(String id, String newName) async {
     return await _databaseService.renameReceipt(id, newName);
+  }
+
+  Future<void> moveReceipt(Receipt receipt, String targetFolderId) async {
+    return await _databaseService.moveReceipt(receipt, targetFolderId);
   }
 
   Future<List<Receipt>> getRecentReceipts() async {
