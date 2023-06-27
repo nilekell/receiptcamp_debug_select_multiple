@@ -1,4 +1,5 @@
 import 'package:receiptcamp/data/utils/file_helper.dart';
+import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/models/tag.dart';
@@ -126,16 +127,16 @@ class DatabaseService {
   // Method to rename folder
   Future<void> renameFolder(String folderId, String newName) async {
     final db = await database;
-
+    final currentTime = Utility.getCurrentTime();
     // folders can have the same name
     if (await folderExists(id: folderId) == false) {
       return;
     } else {
       await db.rawUpdate('''
         UPDATE folders
-        SET name = ?
+        SET name = ?, lastModified = ?
         WHERE id = ?
-        ''', [newName, folderId]);
+        ''', [newName, currentTime, folderId]);
     }
   }
 
@@ -146,11 +147,12 @@ class DatabaseService {
     if (await folderExists(id: targetFolderId) == false) {
       return;
     } else {
+      final currentTime = Utility.getCurrentTime();
       await db.rawUpdate('''
       UPDATE receipts
-      SET parentId = ?
+      SET parentId = ?, lastModified = ?
       WHERE id = ?
-    ''', [targetFolderId, receipt.id]);
+    ''', [targetFolderId, currentTime, receipt.id]);
     }
   }
 
@@ -316,11 +318,12 @@ class DatabaseService {
     if (await folderExists(id: targetFolderId) == false) {
       return;
     } else {
+      final currentTime = Utility.getCurrentTime();
       await db.rawUpdate('''
       UPDATE folders
-      SET parentId = ?
+      SET parentId = ?, lastModified = ?
       WHERE id = ?
-    ''', [targetFolderId, folder.id]);
+    ''', [targetFolderId, currentTime, folder.id]);
     }
   }
 
@@ -392,11 +395,12 @@ class DatabaseService {
   // Method to rename receipt
   Future<void> renameReceipt(String id, String newName) async {
     final db = await database;
+    final currentTime = Utility.getCurrentTime();
     await db.rawUpdate('''
       UPDATE receipts
-      SET name = ?
+      SET name = ?, lastModified = ?
       WHERE id = ?
-    ''', [newName, id]);
+    ''', [newName, currentTime, id]);
   }
 
   // Method to get recently created receipts from database
