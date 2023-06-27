@@ -44,16 +44,18 @@ class DatabaseService {
           CREATE TABLE folders (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
+            lastModified INTEGER NOT NULL,
             parentId TEXT NOT NULL,
             FOREIGN KEY (parentId) REFERENCES folders(id)
           )
         ''');
 
+        final currentTime = Utility.getCurrentTime();
         // creating an initial folder for all receipts to first be added to when they are created
         await db.execute('''
-          INSERT INTO folders (id, name, parentId)
-          VALUES('a1','all','null')
-        ''');
+          INSERT INTO folders (id, name, lastModified, parentId)
+          VALUES('a1','all', ?, 'null')
+        ''', [currentTime]);
 
         // create receipts table
         await db.execute('''
@@ -99,6 +101,7 @@ class DatabaseService {
       return Folder(
         id: folders[i]['id'],
         name: folders[i]['name'],
+        lastModified: folders[i]['lastModified'],
         parentId: folders[i]['parentId'],
       );
     });
@@ -174,6 +177,7 @@ class DatabaseService {
       return Folder(
         id: maps[i]['id'],
         name: maps[i]['name'],
+        lastModified: maps[i]['lastModified'],
         parentId: maps[i]['parentId'],
       );
     });
