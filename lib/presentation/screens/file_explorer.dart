@@ -6,6 +6,7 @@ import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
 import 'package:receiptcamp/logic/cubits/file_edit/file_editing_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/ui/file_navigator/folder/folder_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/receipt/receipt_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/upload_sheet.dart';
 
@@ -199,6 +200,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                       final file = state.files[index];
                                       if (file is Receipt) {
                                         return ListTile(
+                                          leading: const Icon(Icons.receipt),
                                           trailing: IconButton(
                                             icon: Icon(
                                               Icons.more,
@@ -218,8 +220,23 @@ class _FileExplorerState extends State<FileExplorer> {
                                         );
                                       } else if (file is Folder) {
                                         return ListTile(
-                                          title: Text(file.name),
-                                          // can return some properties specific to Folder
+                                          leading: const Icon(Icons.folder),
+                                          trailing: IconButton(
+                                            icon: Icon(
+                                              Icons.more,
+                                              size: 20.0,
+                                              color: Colors.brown[900],
+                                            ),
+                                            onPressed: () {
+                                              showFolderOptions(
+                                                  context,
+                                                  context
+                                                      .read<FileEditingCubit>(),
+                                                  file);
+                                            },
+                                          ),
+                                          title: Text(file.name.split('.').first),
+                                          // can return some properties specific to Receipt
                                         );
                                       } else {
                                         return const ListTile(
