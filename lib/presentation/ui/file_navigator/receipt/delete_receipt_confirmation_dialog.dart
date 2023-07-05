@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:receiptcamp/logic/cubits/file_edit/file_editing_cubit.dart';
+import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
 import 'package:receiptcamp/models/receipt.dart';
 
 Future<void> showDeleteReceiptDialog(BuildContext context,
-    FileEditingCubit fileEditingCubit, Receipt receipt) async {
+    FileSystemCubit FileSystemCubit, Receipt receipt) async {
   return await showDialog(
     context: context,
     builder: (deleteReceiptDialogContext) {
       return BlocProvider.value(
-        value: fileEditingCubit,
+        value: FileSystemCubit,
         child: DeleteReceiptDialog(receipt: receipt)
       );
     },

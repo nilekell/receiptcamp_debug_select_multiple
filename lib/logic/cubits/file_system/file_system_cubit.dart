@@ -6,11 +6,27 @@ import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:share_plus/share_plus.dart';
 
-part 'file_editing_state.dart';
+part 'file_system_state.dart';
 
-class FileEditingCubit extends Cubit<FileEditingCubitState> {
-  FileEditingCubit() : super(FileEditingCubitInitial());
+// responsible for all CRUD operations on files and folders (upload, delete, rename, move).
+class FileSystemCubit extends Cubit<FileSystemCubitState> {
+  FileSystemCubit() : super(FileSystemCubitInitial());
 
+  // uploadReceipt
+  // deleteReceipt
+  // renameReceipt
+  // moveReceipt
+
+  // uploadFolder
+  // deleteFolder
+  // renameFolder
+  // moveFolder
+  
+
+
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
   // Receipt methods
 
   renameReceipt(Receipt receipt, String newName) async {
@@ -24,10 +40,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
 
     try {
       await DatabaseRepository.instance.renameReceipt(receipt.id, newNameWithExtension);
-      emit(FileEditingCubitRenameSuccess(oldName: oldName, newName: newNameWithExtension));
+      emit(FileSystemCubitRenameSuccess(oldName: oldName, newName: newNameWithExtension));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitRenameFailure(oldName: oldName, newName: newNameWithExtension));
+      emit(FileSystemCubitRenameFailure(oldName: oldName, newName: newNameWithExtension));
     }
   }
 
@@ -35,10 +51,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
     final newFolder = await DatabaseRepository.instance.getFolderById(targetFolderId);
     try {
       await DatabaseRepository.instance.moveReceipt(receipt, targetFolderId);
-      emit(FileEditingCubitMoveSuccess(oldName: receipt.name, newName: newFolder.name));
+      emit(FileSystemCubitMoveSuccess(oldName: receipt.name, newName: newFolder.name));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitMoveFailure(oldName: receipt.name, newName: newFolder.name));
+      emit(FileSystemCubitMoveFailure(oldName: receipt.name, newName: newFolder.name));
     }
   }
 
@@ -46,10 +62,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
     final receipt = await DatabaseRepository.instance.getReceiptById(receiptId);
     try {
       await DatabaseRepository.instance.deleteReceipt(receiptId);
-      emit(FileEditingCubitDeleteSuccess(deletedName: receipt.name));
+      emit(FileSystemCubitDeleteSuccess(deletedName: receipt.name));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitDeleteFailure(deletedName: receipt.name));
+      emit(FileSystemCubitDeleteFailure(deletedName: receipt.name));
     }
   }
 
@@ -59,10 +75,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
     final oldName = folder.name;
     try {
       await DatabaseRepository.instance.renameFolder(folder.id, newName);
-      emit(FileEditingCubitRenameSuccess(oldName: oldName, newName: newName));
+      emit(FileSystemCubitRenameSuccess(oldName: oldName, newName: newName));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitRenameFailure(oldName: oldName, newName: newName));
+      emit(FileSystemCubitRenameFailure(oldName: oldName, newName: newName));
     }
   }
   
@@ -72,10 +88,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
     final targetFolderName = targetFolder.name;
     try {
       await DatabaseRepository.instance.moveFolder(folder, targetFolderId);
-      emit(FileEditingCubitMoveSuccess(oldName: oldFolder, newName: targetFolderName));
+      emit(FileSystemCubitMoveSuccess(oldName: oldFolder, newName: targetFolderName));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitMoveFailure(oldName: oldFolder, newName: targetFolderName));
+      emit(FileSystemCubitMoveFailure(oldName: oldFolder, newName: targetFolderName));
     }
   }
 
@@ -83,10 +99,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
     final folder = await DatabaseRepository.instance.getFolderById(folderId);
     try {
       await DatabaseRepository.instance.deleteFolder(folderId);
-      emit(FileEditingCubitDeleteSuccess(deletedName: folder.name));
+      emit(FileSystemCubitDeleteSuccess(deletedName: folder.name));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileEditingCubitDeleteFailure(deletedName: folder.name));
+      emit(FileSystemCubitDeleteFailure(deletedName: folder.name));
     }
   }
 
@@ -94,10 +110,10 @@ class FileEditingCubit extends Cubit<FileEditingCubitState> {
   try {
     // shows platform share sheet
     await Share.shareXFiles([XFile(receipt.localPath)], subject: receipt.name);
-    emit(FileEditingCubitShareSuccess(receiptName: receipt.name));
+    emit(FileSystemCubitShareSuccess(receiptName: receipt.name));
   } on Exception catch (e) {
     print(e.toString());
-    emit(FileEditingCubitShareFailure(receiptName: receipt.name));
+    emit(FileSystemCubitShareFailure(receiptName: receipt.name));
   }
 }
 
@@ -107,10 +123,10 @@ saveImageToCameraRoll(Receipt receipt) async {
   try {
     await GallerySaver.saveImage(receipt.localPath);
     print('image saved to camera roll');
-    emit(FileEditingCubitSaveImageSuccess(receiptName: receipt.name));
+    emit(FileSystemCubitSaveImageSuccess(receiptName: receipt.name));
   } on Exception catch (e) {
     print(e.toString());
-    emit(FileEditingCubitSaveImageFailure(receiptName: receipt.name));
+    emit(FileSystemCubitSaveImageFailure(receiptName: receipt.name));
   }
 }
 

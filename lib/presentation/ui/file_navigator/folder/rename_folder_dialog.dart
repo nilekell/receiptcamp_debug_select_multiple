@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:receiptcamp/logic/cubits/file_edit/file_editing_cubit.dart';
+import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 
 Future<void> showRenameFolderDialog(BuildContext context,
-    FileEditingCubit fileEditingCubit, Folder folder) async {
+    FileSystemCubit FileSystemCubit, Folder folder) async {
   return await showDialog(
       context: context,
       builder: (renameFolderDialogContext) {
         return BlocProvider.value(
-          value: fileEditingCubit,
+          value: FileSystemCubit,
           child: RenameFolderDialog(folder: folder),
         );
       });
@@ -33,7 +33,7 @@ class _RenameFolderDialogState extends State<RenameFolderDialog> {
 
   @override
   void initState() {
-    context.read<FileEditingCubit>();
+    context.read<FileSystemCubit>();
     // setting initial text shown in form to name of folder
     String nameWithoutExtension = widget.folder.name;
     textEditingController.text = nameWithoutExtension;
@@ -87,7 +87,7 @@ class _RenameFolderDialogState extends State<RenameFolderDialog> {
         TextButton(
           onPressed: isEnabled
               ? () {
-                  context.read<FileEditingCubit>().renameFolder(
+                  context.read<FileSystemCubit>().renameFolder(
                       widget.folder, textEditingController.value.text);
                   // closing folder dialog
                   Navigator.of(context).pop();

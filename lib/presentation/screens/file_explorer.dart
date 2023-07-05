@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/explorer/explorer_bloc.dart';
 import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
-import 'package:receiptcamp/logic/cubits/file_edit/file_editing_cubit.dart';
+import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/folder/folder_sheet.dart';
@@ -34,8 +34,8 @@ class _FileExplorerState extends State<FileExplorer> {
           BlocProvider<ExplorerBloc>(
             create: (context) => ExplorerBloc()..add(ExplorerFetchFilesEvent()),
           ),
-          BlocProvider<FileEditingCubit>(
-            create: (context) => FileEditingCubit(),
+          BlocProvider<FileSystemCubit>(
+            create: (context) => FileSystemCubit(),
           ),
         ],
         child: BlocConsumer<UploadBloc, UploadState>(
@@ -109,11 +109,11 @@ class _FileExplorerState extends State<FileExplorer> {
                                       .read<ExplorerBloc>()
                                       .add(ExplorerFetchFilesEvent());
                                 },
-                                child: BlocListener<FileEditingCubit,
-                                    FileEditingCubitState>(
+                                child: BlocListener<FileSystemCubit,
+                                    FileSystemCubitState>(
                                   listener: (context, state) {
                                     switch (state) {
-                                      case FileEditingCubitRenameSuccess():
+                                      case FileSystemCubitRenameSuccess():
                                         // reloading list to show new changes
                                         context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
@@ -122,7 +122,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                                     '${state.oldName} renamed to ${state.newName}'),
                                                 duration: const Duration(
                                                     milliseconds: 2000)));
-                                      case FileEditingCubitRenameFailure():
+                                      case FileSystemCubitRenameFailure():
                                         context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
@@ -130,7 +130,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                                     'Failed to rename ${state.oldName}'),
                                                 duration: const Duration(
                                                     milliseconds: 2000)));
-                                      case FileEditingCubitMoveSuccess():
+                                      case FileSystemCubitMoveSuccess():
                                         context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
@@ -138,7 +138,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                                     '${state.oldName} moved to ${state.newName}'),
                                                 duration: const Duration(
                                                     milliseconds: 2000)));
-                                      case FileEditingCubitMoveFailure():
+                                      case FileSystemCubitMoveFailure():
                                         context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
@@ -146,7 +146,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                                     'Failed to move ${state.oldName}'),
                                                 duration: const Duration(
                                                     milliseconds: 2000)));
-                                      case FileEditingCubitDeleteSuccess():
+                                      case FileSystemCubitDeleteSuccess():
                                         context
                                             .read<ExplorerBloc>()
                                             .add(ExplorerFetchFilesEvent());
@@ -156,7 +156,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                                     'Deleted ${state.deletedName}'),
                                                 duration: const Duration(
                                                     milliseconds: 2000)));
-                                      case FileEditingCubitDeleteFailure():
+                                      case FileSystemCubitDeleteFailure():
                                         context.read<ExplorerBloc>().add(ExplorerFetchFilesEvent());
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
@@ -164,28 +164,28 @@ class _FileExplorerState extends State<FileExplorer> {
                                                     'Failed to delete ${state.deletedName}'),
                                                 duration: const Duration(
                                                     milliseconds: 2000)));
-                                      case FileEditingCubitShareSuccess():
+                                      case FileSystemCubitShareSuccess():
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Shared ${state.receiptName}'),
                                                 duration: const Duration(
                                                     milliseconds: 2000)));
-                                      case FileEditingCubitShareFailure():
+                                      case FileSystemCubitShareFailure():
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Failed to share ${state.receiptName}'),
                                                 duration: const Duration(
                                                     milliseconds: 2000)));
-                                      case FileEditingCubitSaveImageSuccess():
+                                      case FileSystemCubitSaveImageSuccess():
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
                                                     'Saved ${state.receiptName} to camera roll'),
                                                 duration: const Duration(
                                                     milliseconds: 2000)));
-                                      case FileEditingCubitSaveImageFailure():
+                                      case FileSystemCubitSaveImageFailure():
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(SnackBar(
                                                 content: Text(
@@ -213,7 +213,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                               showReceiptOptions(
                                                   context,
                                                   context
-                                                      .read<FileEditingCubit>(),
+                                                      .read<FileSystemCubit>(),
                                                   file);
                                             },
                                           ),
@@ -233,7 +233,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                               showFolderOptions(
                                                   context,
                                                   context
-                                                      .read<FileEditingCubit>(),
+                                                      .read<FileSystemCubit>(),
                                                   file);
                                             },
                                           ),
