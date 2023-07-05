@@ -92,22 +92,14 @@ final class FileSystemCubitShareFailure extends FileSystemCubitState {
   List<Object> get props => [receiptName];
 }
 
-// Saving states
+final class FileSystemCubitUploadSuccess extends FileSystemCubitState {
+  final String uploadedName;
 
-final class FileSystemCubitSaveImageSuccess extends FileSystemCubitState {
-  const FileSystemCubitSaveImageSuccess({required this.receiptName});
-
-  final String receiptName;
+  const FileSystemCubitUploadSuccess(this.uploadedName);
 
   @override
-  List<Object> get props => [receiptName];
+  List<Object> get props => [uploadedName];
 }
 
-final class FileSystemCubitSaveImageFailure extends FileSystemCubitState {
-  const FileSystemCubitSaveImageFailure({required this.receiptName});
+final class FileSystemCubitUploadFailure extends FileSystemCubitState {}
 
-  final String receiptName;
-
-  @override
-  List<Object> get props => [receiptName];
-}

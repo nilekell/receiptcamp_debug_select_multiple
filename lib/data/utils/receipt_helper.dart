@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/data/utils/text_recognition.dart';
@@ -65,6 +67,28 @@ class ReceiptService {
 
   return tags;
 }
+
+  static Future<List<dynamic>> processingReceiptAndTags(XFile receiptImage) async {
+  // tag actions
+  final receiptUid = Utility.generateUid();
+  final tagsList = await ReceiptService.extractKeywordsAndGenerateTags(
+      receiptImage.path, receiptUid);
+
+  // compressing and saving image
+  final localReceiptImagePath = await FileService.getLocalImagePath();
+  final receiptImageFile = await FileService.compressFile(
+      File(receiptImage.path), localReceiptImagePath);
+
+  // deleting temporary image files
+  await FileService.deleteImageFromPath(receiptImage.path);
+
+  // creating receipt object
+  final receipt = await ReceiptService.createReceiptFromFile(
+      receiptImageFile!, basename(receiptImageFile.path));
+
+  return [receipt, tagsList];
+}
+
 
 
   // method to check file name is valid

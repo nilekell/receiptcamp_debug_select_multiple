@@ -9,19 +9,18 @@ sealed class ExplorerState extends Equatable {
 
 final class ExplorerInitialState extends ExplorerState {}
 
-final class ExplorerActionState extends ExplorerState {}
-
 final class ExplorerLoadingState extends ExplorerState {}
 
-final class ExplorerEmptyFilesState extends ExplorerState {}
-
 final class ExplorerLoadedSuccessState extends ExplorerState {
-  const ExplorerLoadedSuccessState({required this.files});
+  final List<Object> files;
 
-  final List<dynamic> files;
+  const ExplorerLoadedSuccessState({required this.files});
 
   @override
   List<Object> get props => [files];
 }
 
+final class ExplorerEmptyFilesState extends ExplorerState {}
+
 final class ExplorerErrorState extends ExplorerState {}
+
