@@ -11,6 +11,13 @@ class ExplorerBloc extends Bloc<ExplorerEvent, ExplorerState> {
     on<ExplorerFetchFilesEvent>(explorerFetchFilesEvent);
   }
 
+  // explorerInitialEvent
+  // explorerFolderSelectedEvent
+  // explorerBackNavigationEvent
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   FutureOr<void> explorerInitialEvent(
       ExplorerInitialEvent event, Emitter<ExplorerState> emit) {
     emit(ExplorerInitialState());

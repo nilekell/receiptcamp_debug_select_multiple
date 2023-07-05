@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
-import 'package:receiptcamp/logic/cubits/file_edit/file_editing_cubit.dart';
+import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 
 Future<void> showMoveFolderDialog(BuildContext context,
-    FileEditingCubit fileEditingCubit, Folder thisFolder) async {
+    FileSystemCubit FileSystemCubit, Folder thisFolder) async {
   return await showDialog(
       context: context,
       builder: (moveFolderDialogContext) {
         return BlocProvider.value(
-            value: fileEditingCubit,
+            value: FileSystemCubit,
             child: MoveFolderDialog(thisFolder: thisFolder));
       });
 }
@@ -83,7 +83,7 @@ class _MoveFolderDialogState extends State<MoveFolderDialog> {
           onPressed: () {
             // closing folder dialog
             Navigator.of(context).pop();
-            context.read<FileEditingCubit>().moveFolder(widget.thisFolder, selectedFolder!.id);
+            context.read<FileSystemCubit>().moveFolder(widget.thisFolder, selectedFolder!.id);
           },
           child: const Text('Move'),
         ),
