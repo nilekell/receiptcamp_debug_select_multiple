@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/receipt/delete_receipt_confirmation_dialog.dart';
@@ -44,7 +45,7 @@ void showReceiptOptions(BuildContext context, FileSystemCubit FileSystemCubit, R
           title: const Text('Download'),
           onTap: () {
             Navigator.of(bottomSheetContext).pop();
-            FileSystemCubit.saveImageToCameraRoll(receipt);
+            FileService.saveImageToCameraRoll(receipt);
           },
         ),
         ListTile(
@@ -52,7 +53,7 @@ void showReceiptOptions(BuildContext context, FileSystemCubit FileSystemCubit, R
           title: const Text('Share'),
           onTap: () {
             Navigator.of(bottomSheetContext).pop();
-            FileSystemCubit.shareReceipt(receipt);
+            FileService.shareReceipt(receipt);
           },
         ),
       ],
