@@ -9,7 +9,7 @@ abstract interface class SnackBarUtility {
     duration: const Duration(milliseconds: 2000),
   );
 
-  static void showFileEditSnackBar(BuildContext context, FileSystemCubitState state) {
+  static void showFileSystemSnackBar(BuildContext context, FileSystemCubitState state) {
     switch (state.runtimeType) {
       case FileSystemCubitUploadSuccess:
         FileSystemCubitUploadSuccess currentState = state as FileSystemCubitUploadSuccess;
