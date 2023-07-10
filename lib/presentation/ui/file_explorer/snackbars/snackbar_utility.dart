@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
 
-abstract interface class SnackBarUtility {
+abstract class SnackBarUtility {
   static String _message = '';
 
   static final SnackBar _appSnackBar = SnackBar(
@@ -10,49 +10,27 @@ abstract interface class SnackBarUtility {
   );
 
   static void showFileSystemSnackBar(BuildContext context, FileSystemCubitState state) {
-    switch (state.runtimeType) {
-      case FileSystemCubitUploadSuccess:
-        FileSystemCubitUploadSuccess currentState = state as FileSystemCubitUploadSuccess;
-        _message = '${currentState.uploadedName} added successfully';
-        ScaffoldMessenger.of(context).showSnackBar(_appSnackBar);
-        break;
-      case FileSystemCubitUploadFailure:
-        _message = 'Failed to save file object';
-        ScaffoldMessenger.of(context).showSnackBar(_appSnackBar);
-        break;
-      case FileSystemCubitRenameSuccess:
-        FileSystemCubitRenameSuccess currentState = state as FileSystemCubitRenameSuccess;
-        _message = '${currentState.oldName} renamed to ${currentState.newName}';
-        ScaffoldMessenger.of(context).showSnackBar(_appSnackBar);
-        break;
-      case FileSystemCubitRenameFailure:
-        FileSystemCubitRenameFailure currentState = state as FileSystemCubitRenameFailure;
-        _message = 'Failed to rename ${currentState.oldName}';
-        ScaffoldMessenger.of(context).showSnackBar(_appSnackBar);
-        break;
-      case FileSystemCubitMoveSuccess:
-        FileSystemCubitMoveSuccess currentState = state as FileSystemCubitMoveSuccess;
-        _message = 'Moved ${currentState.oldName} to ${currentState.newName}';
-        ScaffoldMessenger.of(context).showSnackBar(_appSnackBar);
-        break;
-      case FileSystemCubitMoveFailure:
-        FileSystemCubitMoveFailure currentState = state as FileSystemCubitMoveFailure;
-        _message = 'Failed to move ${currentState.oldName} to ${currentState.newName}';
-        ScaffoldMessenger.of(context).showSnackBar(_appSnackBar);
-        break;
-      case FileSystemCubitDeleteSuccess:
-        FileSystemCubitDeleteSuccess currentState = state as FileSystemCubitDeleteSuccess;
-        _message = 'Deleted ${currentState.deletedName}';
-        ScaffoldMessenger.of(context).showSnackBar(_appSnackBar);
-        break;
-      case FileSystemCubitDeleteFailure:
-        FileSystemCubitDeleteFailure currentState = state as FileSystemCubitDeleteFailure;
-        _message = 'Failed to delete ${currentState.deletedName}';
-        ScaffoldMessenger.of(context).showSnackBar(_appSnackBar);
-        break;
-      default:
-        print('state is ${state.runtimeType.toString()}');
-        return;
+    if (state is FileSystemCubitUploadSuccess) {
+      _message = '${state.uploadedName} added successfully';
+    } else if (state is FileSystemCubitUploadFailure) {
+      _message = 'Failed to save file object';
+    } else if (state is FileSystemCubitRenameSuccess) {
+      _message = '${state.oldName} renamed to ${state.newName}';
+    } else if (state is FileSystemCubitRenameFailure) {
+      _message = 'Failed to rename ${state.oldName}';
+    } else if (state is FileSystemCubitMoveSuccess) {
+      _message = 'Moved ${state.oldName} to ${state.newName}';
+    } else if (state is FileSystemCubitMoveFailure) {
+      _message = 'Failed to move ${state.oldName} to ${state.newName}';
+    } else if (state is FileSystemCubitDeleteSuccess) {
+      _message = 'Deleted ${state.deletedName}';
+    } else if (state is FileSystemCubitDeleteFailure) {
+      _message = 'Failed to delete ${state.deletedName}';
+    } else {
+      print('state is ${state.runtimeType.toString()}');
+      return;
     }
+    ScaffoldMessenger.of(context).showSnackBar(_appSnackBar);
   }
 }
+
