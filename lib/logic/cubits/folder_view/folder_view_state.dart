@@ -27,14 +27,6 @@ final class FolderViewLoadedSuccess extends FolderViewState {
 
 final class FolderViewError extends FolderViewState {}
 
-final class FolderViewNavigate extends FolderViewActionState {
-  const FolderViewNavigate({required super.folderId});
-}
-
-final class FolderViewGoBack extends FolderViewActionState {
-  const FolderViewGoBack({required super.folderId});
-}
-
 // Renaming States
 
 final class FolderViewRenameSuccess extends FolderViewActionState {
