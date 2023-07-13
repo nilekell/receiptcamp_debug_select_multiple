@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 
 abstract class SnackBarUtility {
   static String _message = '';
@@ -9,28 +9,28 @@ abstract class SnackBarUtility {
     duration: const Duration(milliseconds: 2000),
   );
 
-  static void showFileSystemSnackBar(BuildContext context, FileSystemCubitState state) {
-    if (state is FileSystemCubitUploadSuccess) {
+  static void showSnackBar(BuildContext context, FolderViewState state) {
+    if (state is FolderViewUploadSuccess) {
       _message = '${state.uploadedName} added successfully';
-    } else if (state is FileSystemCubitUploadFailure) {
+    } else if (state is FolderViewUploadFailure) {
       _message = 'Failed to save file object';
-    } else if (state is FileSystemCubitRenameSuccess) {
+    } else if (state is FolderViewRenameSuccess) {
       _message = '${state.oldName} renamed to ${state.newName}';
-    } else if (state is FileSystemCubitRenameFailure) {
+    } else if (state is FolderViewRenameFailure) {
       _message = 'Failed to rename ${state.oldName}';
-    } else if (state is FileSystemCubitMoveSuccess) {
+    } else if (state is FolderViewMoveSuccess) {
       _message = 'Moved ${state.oldName} to ${state.newName}';
-    } else if (state is FileSystemCubitMoveFailure) {
+    } else if (state is FolderViewMoveFailure) {
       _message = 'Failed to move ${state.oldName} to ${state.newName}';
-    } else if (state is FileSystemCubitDeleteSuccess) {
+    } else if (state is FolderViewDeleteSuccess) {
       _message = 'Deleted ${state.deletedName}';
-    } else if (state is FileSystemCubitDeleteFailure) {
+    } else if (state is FolderViewDeleteFailure) {
       _message = 'Failed to delete ${state.deletedName}';
     } else {
       print('showFileSystemSnackBar: state is ${state.runtimeType.toString()}');
       return;
     }
-    
+
     print(_message);
     ScaffoldMessenger.of(context).showSnackBar(_appSnackBar);
   }
