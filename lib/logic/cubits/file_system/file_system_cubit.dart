@@ -18,18 +18,18 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
   // method to display root folder contents when the bottom navigation tab switches to file explorer
   initializeFileSystemCubit() async {
     emit(FileSystemCubitInitial());
-    fetchFolderInformation('a1');
+    fetchFiles('a1');
   }
 
-  fetchFolderInformation(String folderId) async {
-    emit(FileSystemCubitLoading());
-    try {
-      final folder = await DatabaseRepository.instance.getFolderById(folderId);
-      emit(FileSystemCubitFolderInformationSuccess(folder: folder));
-    } catch (error) {
-      emit(FileSystemCubitError());
-    }
-  }
+  // fetchFolderInformation(String folderId) async {
+  //   emit(FileSystemCubitLoading());
+  //   try {
+  //     final folder = await DatabaseRepository.instance.getFolderById(folderId);
+  //     emit(FileSystemCubitFolderInformationSuccess(folder: folder));
+  //   } catch (error) {
+  //     emit(FileSystemCubitError());
+  //   }
+  // }
 
   fetchFiles(String folderId) async {
     emit(FileSystemCubitLoading());
@@ -60,11 +60,7 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
     try {
       final Folder parentFolder = await DatabaseRepository.instance.getFolderById(parentFolderId);
       final List<Object> files = await DatabaseRepository.instance.getFolderContents(parentFolderId);
-      if (files.isNotEmpty) {
-        emit(FileSystemCubitLoadedSuccess(files: files, folder: parentFolder));
-      } else {
-        emit(FileSystemCubitEmptyFiles());
-      }
+      emit(FileSystemCubitLoadedSuccess(files: files, folder: parentFolder));
     } catch (error) {
       emit(FileSystemCubitError());
     }
@@ -92,14 +88,14 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
 
       final folder = await DatabaseRepository.instance.getFolderById(currentFolderId);
       final currentFolderContents = await DatabaseRepository.instance.getFolderContents(receipt.parentId);
-      emit(FileSystemCubitUploadSuccess(uploadedName: receipt.name));
-      emit(FileSystemCubitFolderItemsChangedState(files: currentFolderContents, folder: folder));
+      emit(FileSystemCubitUploadSuccess(uploadedName: receipt.name, folderId: folder.parentId));
+      emit(FileSystemCubitLoadedSuccess(files: currentFolderContents, folder: folder));
     } on PlatformException catch (e) {
       print(e.toString());
-      emit(FileSystemCubitUploadFailure());
+      emit(const FileSystemCubitUploadFailure(folderId: ''));
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
-      emit(FileSystemCubitUploadFailure());
+      emit(const FileSystemCubitUploadFailure(folderId: ''));
       return;
     }
   }
@@ -123,15 +119,15 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
 
       final folder = await DatabaseRepository.instance.getFolderById(receipt.parentId);
       final currentFolderContents = await DatabaseRepository.instance.getFolderContents(receipt.parentId);
-      emit(FileSystemCubitFolderItemsChangedState(files: currentFolderContents, folder: folder));
+      emit(FileSystemCubitLoadedSuccess(files: currentFolderContents, folder: folder));
 
-      emit(FileSystemCubitUploadSuccess(uploadedName: receipt.name));
+      emit(FileSystemCubitUploadSuccess(uploadedName: receipt.name, folderId: receipt.parentId));
     } on PlatformException catch (e) {
       print(e.toString());
-      emit(FileSystemCubitUploadFailure());
+      emit(const FileSystemCubitUploadFailure(folderId: ''));
     } on Exception catch (e) {
       print('Error in uploadReceiptFromCamera: $e');
-      emit(FileSystemCubitUploadFailure());
+      emit(const FileSystemCubitUploadFailure(folderId: ''));
       return;
     }
   }
@@ -151,11 +147,11 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
 
       final currentFolderContents = await DatabaseRepository.instance.getFolderContents(folder.parentId);
 
-      emit(FileSystemCubitUploadSuccess(uploadedName: folder.name));
-      emit(FileSystemCubitFolderItemsChangedState(files: currentFolderContents, folder: folder));
+      emit(FileSystemCubitUploadSuccess(uploadedName: folder.name, folderId: parentFolderId));
+      emit(FileSystemCubitLoadedSuccess(files: currentFolderContents, folder: folder));
     } on Exception catch (e) {
       print('Error in uploadFolder: $e');
-      emit(FileSystemCubitUploadFailure());
+      emit(const FileSystemCubitUploadFailure(folderId: ''));
     }
   }
 
@@ -166,11 +162,11 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
     try {
       await DatabaseRepository.instance.deleteReceipt(receiptId);
       final files = await DatabaseRepository.instance.getFolderContents(receipt.parentId);
-      emit(FileSystemCubitFolderItemsChangedState(files: files, folder: folder));
-      emit(FileSystemCubitDeleteSuccess(deletedName: receipt.name));
+      emit(FileSystemCubitDeleteSuccess(deletedName: receipt.name, folderId: receipt.parentId));
+      emit(FileSystemCubitLoadedSuccess(files: files, folder: folder));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileSystemCubitDeleteFailure(deletedName: receipt.name));
+      emit(FileSystemCubitDeleteFailure(deletedName: receipt.name, folderId: ''));
     }
   }
 
@@ -178,10 +174,10 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
     final oldName = receipt.name;
     try {
       await DatabaseRepository.instance.renameReceipt(receipt.id, newName);
-      emit(FileSystemCubitRenameSuccess(oldName: oldName, newName: newName));
+      emit(FileSystemCubitRenameSuccess(oldName: oldName, newName: newName, folderId: receipt.parentId));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileSystemCubitRenameFailure(oldName: oldName, newName: newName));
+      emit(FileSystemCubitRenameFailure(oldName: oldName, newName: newName, folderId: ''));
     }
   }
 
@@ -190,11 +186,11 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
       await DatabaseRepository.instance.moveReceipt(receipt, targetFolderId);
       final folder = await DatabaseRepository.instance.getFolderById(receipt.parentId);
       final currentFolderContents = await DatabaseRepository.instance.getFolderContents(receipt.parentId);
-      emit(FileSystemCubitMoveSuccess(oldName: receipt.name, newName: targetFolderId));
-      emit(FileSystemCubitFolderItemsChangedState(files: currentFolderContents, folder: folder));
+      emit(FileSystemCubitMoveSuccess(oldName: receipt.name, newName: targetFolderId, folderId: folder.parentId));
+      emit(FileSystemCubitLoadedSuccess(files: currentFolderContents, folder: folder));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileSystemCubitMoveFailure(oldName: receipt.name, newName: targetFolderId));
+      emit(FileSystemCubitMoveFailure(oldName: receipt.name, newName: targetFolderId, folderId: ''));
     }
   }
 
@@ -205,11 +201,11 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
     try {
       await DatabaseRepository.instance.deleteFolder(folderId);
       final deletedFolderParentFiles = await DatabaseRepository.instance.getFolderContents(deletedFolderParent.id);
-      emit(FileSystemCubitDeleteSuccess(deletedName: deletedFolderName));
-      emit(FileSystemCubitFolderItemsChangedState(files: deletedFolderParentFiles, folder: deletedFolderParent));
+      emit(FileSystemCubitDeleteSuccess(deletedName: deletedFolderName, folderId: deletedFolderParent.id));
+      emit(FileSystemCubitLoadedSuccess(files: deletedFolderParentFiles, folder: deletedFolderParent));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileSystemCubitDeleteFailure(deletedName: deletedFolderName));
+      emit(FileSystemCubitDeleteFailure(deletedName: deletedFolderName, folderId: ''));
     }
   }
 
@@ -217,10 +213,10 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
     final oldName = folder.name;
     try {
       await DatabaseRepository.instance.renameFolder(folder.id, newName);
-      emit(FileSystemCubitRenameSuccess(oldName: oldName, newName: newName));
+      emit(FileSystemCubitRenameSuccess(oldName: oldName, newName: newName, folderId: folder.parentId));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileSystemCubitRenameFailure(oldName: oldName, newName: newName));
+      emit(FileSystemCubitRenameFailure(oldName: oldName, newName: newName, folderId: folder.parentId));
     }
   }
 
@@ -230,11 +226,11 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
 
     try {
       await DatabaseRepository.instance.moveFolder(folder, targetFolderId);
-      emit(FileSystemCubitMoveSuccess(oldName: folder.name, newName: targetFolderName));
-      emit(FileSystemCubitFolderItemsChangedState(files: currentFolderContents, folder: folder));
+      emit(FileSystemCubitMoveSuccess(oldName: folder.name, newName: targetFolderName, folderId: folder.parentId));
+      emit(FileSystemCubitLoadedSuccess(files: currentFolderContents, folder: folder));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileSystemCubitMoveFailure(oldName: folder.name, newName: targetFolderName));
+      emit(FileSystemCubitMoveFailure(oldName: folder.name, newName: targetFolderName, folderId: folder.parentId));
     }
   }
 
@@ -242,10 +238,10 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
     try {
       final Folder thisFolder = await DatabaseRepository.instance.getFolderById(folderId);
       final files = await DatabaseRepository.instance.getFolderContents(folderId);
-      emit(FileSystemCubitFolderItemsChangedState(files: files, folder: thisFolder));
+      emit(FileSystemCubitLoadedSuccess(files: files, folder: thisFolder));
     } on Exception catch (e) {
       print(e.toString());
-      emit(FileSystemCubitRefreshFailureState());
+      emit(const FileSystemCubitRefreshFailureState(folderId: ''));
     }
   }
 }

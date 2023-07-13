@@ -7,7 +7,11 @@ sealed class FileSystemCubitState extends Equatable {
   List<Object> get props => [];
 }
 
-final class FileSystemCubitActionState extends FileSystemCubitState {}
+final class FileSystemCubitActionState extends FileSystemCubitState {
+  final String folderId;
+
+  const FileSystemCubitActionState({required this.folderId});
+}
 
 final class FileSystemCubitInitial extends FileSystemCubitState {}
 
@@ -29,26 +33,12 @@ final class FileSystemCubitLoadedSuccess extends FileSystemCubitState {
   const FileSystemCubitLoadedSuccess({required this.files, required this.folder});
 }
 
-final class FileSystemCubitFolderItemsChangedState extends FileSystemCubitActionState {
-  final List<dynamic> files;
-  final Folder folder;
-
-  FileSystemCubitFolderItemsChangedState({required this.files, required this.folder});
-
-
-
-  @override
-  List<Object> get props => [files];
-}
-
-final class FileSystemCubitEmptyFiles extends FileSystemCubitState {}
-
 final class FileSystemCubitError extends FileSystemCubitState {}
 
 // Renaming States
 
 final class FileSystemCubitRenameSuccess extends FileSystemCubitActionState {
-  FileSystemCubitRenameSuccess({required this.oldName, required this.newName});
+  const FileSystemCubitRenameSuccess({required this.oldName, required this.newName, required super.folderId});
   final String oldName;
   final String newName;
 
@@ -60,7 +50,7 @@ final class FileSystemCubitRenameFailure extends FileSystemCubitActionState {
   final String oldName;
   final String newName;
 
-  FileSystemCubitRenameFailure({required this.oldName, required this.newName});
+  const FileSystemCubitRenameFailure({required this.oldName, required this.newName, required super.folderId});
 
   @override
   List<Object> get props => [oldName, newName];
@@ -69,7 +59,7 @@ final class FileSystemCubitRenameFailure extends FileSystemCubitActionState {
 // Moving states
 
 final class FileSystemCubitMoveSuccess extends FileSystemCubitActionState {
-  FileSystemCubitMoveSuccess({required this.oldName, required this.newName});
+  const FileSystemCubitMoveSuccess({required this.oldName, required this.newName, required super.folderId});
 
   final String oldName;
   final String newName;
@@ -79,7 +69,7 @@ final class FileSystemCubitMoveSuccess extends FileSystemCubitActionState {
 }
 
 final class FileSystemCubitMoveFailure extends FileSystemCubitActionState {
-  FileSystemCubitMoveFailure({required this.oldName, required this.newName});
+  const FileSystemCubitMoveFailure({required this.oldName, required this.newName, required super.folderId});
 
   final String oldName;
   final String newName;
@@ -91,7 +81,7 @@ final class FileSystemCubitMoveFailure extends FileSystemCubitActionState {
 // Deleting states
 
 final class FileSystemCubitDeleteSuccess extends FileSystemCubitActionState {
-  FileSystemCubitDeleteSuccess({required this.deletedName});
+  const FileSystemCubitDeleteSuccess({required this.deletedName, required super.folderId});
 
   final String deletedName;
 
@@ -100,7 +90,7 @@ final class FileSystemCubitDeleteSuccess extends FileSystemCubitActionState {
 }
 
 final class FileSystemCubitDeleteFailure extends FileSystemCubitActionState {
-  FileSystemCubitDeleteFailure({required this.deletedName});
+  const FileSystemCubitDeleteFailure({required this.deletedName, required super.folderId});
 
   final String deletedName;
 
@@ -111,7 +101,7 @@ final class FileSystemCubitDeleteFailure extends FileSystemCubitActionState {
 // Sharing states
 
 final class FileSystemCubitShareSuccess extends FileSystemCubitActionState {
-  FileSystemCubitShareSuccess({required this.receiptName});
+  const FileSystemCubitShareSuccess({required this.receiptName, required super.folderId});
 
   final String receiptName;
 
@@ -120,7 +110,7 @@ final class FileSystemCubitShareSuccess extends FileSystemCubitActionState {
 }
 
 final class FileSystemCubitShareFailure extends FileSystemCubitActionState {
-  FileSystemCubitShareFailure({required this.receiptName});
+  const FileSystemCubitShareFailure({required this.receiptName, required super.folderId});
 
   final String receiptName;
 
@@ -131,21 +121,25 @@ final class FileSystemCubitShareFailure extends FileSystemCubitActionState {
 final class FileSystemCubitUploadSuccess extends FileSystemCubitActionState {
   final String uploadedName;
 
-  FileSystemCubitUploadSuccess({required this.uploadedName});
+  const FileSystemCubitUploadSuccess({required this.uploadedName, required super.folderId});
 
   @override
   List<Object> get props => [uploadedName];
 }
 
-final class FileSystemCubitUploadFailure extends FileSystemCubitActionState {}
+final class FileSystemCubitUploadFailure extends FileSystemCubitActionState {
+  const FileSystemCubitUploadFailure({required super.folderId});
+}
 
 final class FileSystemCubitRefreshSuccessState extends FileSystemCubitActionState {
   final List<Object> files;
 
-  FileSystemCubitRefreshSuccessState(this.files);
+  const FileSystemCubitRefreshSuccessState({required super.folderId, required this.files});
 
   @override
   List<Object> get props => [files];
 }
 
-final class FileSystemCubitRefreshFailureState extends FileSystemCubitActionState {}
+final class FileSystemCubitRefreshFailureState extends FileSystemCubitActionState {
+  const FileSystemCubitRefreshFailureState({required super.folderId});
+}
