@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 
 Future<void> showCreateFolderDialog(
-    BuildContext context, FileSystemCubit fileSystemCubit) async {
+    BuildContext context, FolderViewCubit folderViewCubit) async {
   return await showDialog(
       context: context,
       builder: (createFolderDialogContext) {
         return BlocProvider.value(
-          value: fileSystemCubit,
+          value: folderViewCubit,
           child: const FolderDialog(),
         );
       });
@@ -28,7 +28,7 @@ class _FolderDialogState extends State<FolderDialog> {
 
   @override
   void initState() {
-    context.read<FileSystemCubit>();
+    context.read<FolderViewCubit>();
     isEnabled = textEditingController.text.isNotEmpty;
     textEditingController.addListener(_textPresenceListener);
     super.initState();
@@ -69,7 +69,7 @@ class _FolderDialogState extends State<FolderDialog> {
         TextButton(
           onPressed: isEnabled
               ? () {
-                  context.read<FileSystemCubit>().uploadFolder(textEditingController.value.text, 'a1');
+                  context.read<FolderViewCubit>().uploadFolder(textEditingController.value.text, 'a1');
                   // closing folder dialog
                   Navigator.of(context).pop();
                 }

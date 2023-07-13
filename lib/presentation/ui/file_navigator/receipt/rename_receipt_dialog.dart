@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/receipt.dart';
 
 Future<void> showRenameReceiptDialog(BuildContext context,
-    FileSystemCubit FileSystemCubit, Receipt receipt) async {
+    FolderViewCubit folderViewCubit, Receipt receipt) async {
   return await showDialog(
       context: context,
       builder: (renameReceiptDialogContext) {
         return BlocProvider.value(
-          value: FileSystemCubit,
+          value: folderViewCubit,
           child: RenameReceiptDialog(receipt: receipt),
         );
       });
@@ -33,7 +33,7 @@ class _RenameReceiptDialogState extends State<RenameReceiptDialog> {
 
   @override
   void initState() {
-    context.read<FileSystemCubit>();
+    context.read<FolderViewCubit>();
     // setting initial text shown in form to name of receipt without extension
     String nameWithoutExtension = widget.receipt.name.split('.').first;
     textEditingController.text = nameWithoutExtension;
@@ -87,7 +87,7 @@ class _RenameReceiptDialogState extends State<RenameReceiptDialog> {
         TextButton(
           onPressed: isEnabled
               ? () {
-                  context.read<FileSystemCubit>().renameReceipt(
+                  context.read<FolderViewCubit>().renameReceipt(
                       widget.receipt, textEditingController.value.text);
                   // closing folder dialog
                   Navigator.of(context).pop();
