@@ -10,16 +10,16 @@ void showUploadOptions(BuildContext context, FolderViewCubit folderViewCubit, Fo
     builder: (bottomSheetContext) {
       return BlocProvider.value(
         value: folderViewCubit,
-        child: UploadOptionsBottomSheet(currentFolderId: currentFolder.id,),
+        child: UploadOptionsBottomSheet(currentFolder: currentFolder),
       );
     },
   );
 }
 
 class UploadOptionsBottomSheet extends StatelessWidget {
-  final String currentFolderId;
+  final Folder currentFolder;
 
-  const UploadOptionsBottomSheet({super.key, required this.currentFolderId});
+  const UploadOptionsBottomSheet({super.key, required this.currentFolder});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class UploadOptionsBottomSheet extends StatelessWidget {
           leading: const Icon(Icons.photo_library),
           title: const Text('Choose from gallery'),
           onTap: () {
-            context.read<FolderViewCubit>().uploadReceipt(currentFolderId);
+            context.read<FolderViewCubit>().uploadReceipt(currentFolder.id);
             // closing bottom sheet
             Navigator.of(context).pop();
           },
@@ -39,7 +39,7 @@ class UploadOptionsBottomSheet extends StatelessWidget {
           leading: const Icon(Icons.camera),
           title: const Text('Take a photo'),
           onTap: () {
-            context.read<FolderViewCubit>().uploadReceiptFromCamera(currentFolderId);
+            context.read<FolderViewCubit>().uploadReceiptFromCamera(currentFolder.id);
             // closing bottom sheet
             Navigator.of(context).pop();
           },
@@ -50,7 +50,7 @@ class UploadOptionsBottomSheet extends StatelessWidget {
           onTap: () {
             // closing bottom sheet
             Navigator.of(context).pop();
-            showCreateFolderDialog(context, context.read<FolderViewCubit>());
+            showCreateFolderDialog(context, context.read<FolderViewCubit>(), currentFolder);
           },
         ),
       ],
