@@ -16,9 +16,9 @@ class FolderViewCubit extends Cubit<FolderViewState> {
   FolderViewCubit() : super(FolderViewInitial());
 
   // init folderview
-  initFolderView() {
+  initFolderView(String currentFolderId) {
     emit(FolderViewInitial());
-    fetchFiles('a1');
+    fetchFiles(currentFolderId);
   }
 
   // get folder files
@@ -72,6 +72,7 @@ uploadFolder(String folderName, String parentFolderId) async {
     DatabaseRepository.instance.insertFolder(folder);
     print('Folder ${folder.name} saved in ${folder.parentId}');
 
+    emit(FolderViewUploadSuccess(uploadedName: folder.name, folderId: folder.parentId));
     fetchFiles(parentFolderId);
   } on Exception catch (e) {
     print('Error in uploadFolder: $e');
@@ -134,6 +135,7 @@ uploadReceipt(String currentFolderId) async {
     await DatabaseRepository.instance.insertReceipt(receipt);
     print('Image ${receipt.name} saved at ${receipt.localPath}');
 
+    emit(FolderViewUploadSuccess(uploadedName: receipt.name, folderId: receipt.parentId));
     fetchFiles(receipt.parentId);
   } on Exception catch (e) {
     print('Error in uploadReceipt: $e');
@@ -158,6 +160,7 @@ uploadReceiptFromCamera(String currentFolderId) async {
     await DatabaseRepository.instance.insertReceipt(receipt);
     print('Image ${receipt.name} saved at ${receipt.localPath}');
 
+    emit(FolderViewUploadSuccess(uploadedName: receipt.name, folderId: receipt.parentId));
     fetchFiles(receipt.parentId);
   } on Exception catch (e) {
     print('Error in uploadReceipt: $e');
