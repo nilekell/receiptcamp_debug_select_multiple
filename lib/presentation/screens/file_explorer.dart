@@ -9,6 +9,7 @@ import 'package:receiptcamp/presentation/ui/file_navigator/folder/folder_sheet.d
 import 'package:receiptcamp/presentation/ui/file_navigator/receipt/receipt_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/upload_sheet.dart';
 
+/*
 class FileExplorer extends StatefulWidget {
   const FileExplorer({super.key});
 
@@ -25,54 +26,131 @@ class _FileExplorerState extends State<FileExplorer> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<FileSystemCubit, FileSystemCubitState>(
+    return BlocListener<FileSystemCubit, FileSystemCubitState>(
         listenWhen: (previous, current) =>
             current is FileSystemCubitActionState,
         listener: (context, state) {
           SnackBarUtility.showFileSystemSnackBar(context, state);
         },
-        builder: (context, state) {
-          if (state is FileSystemCubitInitial ||
-              state is FileSystemCubitLoading) {
-            return const CircularProgressIndicator();
-          } else if (state is FileSystemCubitFolderInformationSuccess) {
+        child: BlocBuilder<FileSystemCubit, FileSystemCubitState>(
+          builder: (context, state) {
             return Scaffold(
-              body: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  state.folder.id != 'a1'
-                      ? FolderName(
-                          name: state.folder.name,
-                        )
-                      : const FolderName(
-                          name: 'My Receipts',
+              body: () {
+                switch (state) {
+                  case FileSystemCubitActionState():
+                    return Container();
+                  case FileSystemCubitError():
+                    return const Center(
+                      child: Text('Error State'),
+                    );
+                  case FileSystemCubitInitial():
+                  case FileSystemCubitLoading():
+                    return const CircularProgressIndicator();
+                  case FileSystemCubitFolderInformationSuccess():
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        state.folder.id != 'a1'
+                            ? FolderName(
+                                name: state.folder.name,
+                              )
+                            : const FolderName(
+                                name: 'My Receipts',
+                              ),
+                        const SizedBox(
+                          height: 5.0,
                         ),
-                  const SizedBox(
-                    height: 5.0,
-                  ),
-                  state.folder.id != 'a1'
-                      ? BackButton(
-                          previousFolderId: state.folder.parentId,
-                          currentFolderId: state.folder.id,
+                        state.folder.id != 'a1'
+                            ? BackButton(
+                                previousFolderId: state.folder.parentId,
+                                currentFolderId: state.folder.id,
+                              )
+                            : Container(),
+                        const Expanded(
+                          child: RefreshableFolderView(),
                         )
-                      : Container(),
-                  const Expanded(
-                    child: RefreshableFolderView(),
-                  )
-                ],
-              ),
-              floatingActionButton: UploadButton(currentFolder: state.folder),
+                      ],
+                    );
+                  default:
+                    return Container();
+                }
+              }(),
+              floatingActionButton:
+                  state is FileSystemCubitFolderInformationSuccess
+                      ? UploadButton(currentFolder: state.folder)
+                      : null,
             );
-          } else if (state is FileSystemCubitError) {
+          },
+        ));
+  }
+}
+*/
+
+class FileExplorer extends StatefulWidget {
+  const FileExplorer({super.key});
+
+  @override
+  State<FileExplorer> createState() => _FileExplorerState();
+}
+
+class _FileExplorerState extends State<FileExplorer> {
+  @override
+  void initState() {
+    context.read<FileSystemCubit>().initializeFileSystemCubit();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: BlocBuilder<FileSystemCubit, FileSystemCubitState>(
+          builder: ((context, state) {
+        switch (state) {
+          case FileSystemCubitInitial() || FileSystemCubitLoading():
+            return const CircularProgressIndicator();
+          case FileSystemCubitLoadedSuccess():
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                state.folder.id != 'a1'
+                    ? FolderName(
+                        name: state.folder.name,
+                      )
+                    : const FolderName(
+                        name: 'My Receipts',
+                      ),
+                const SizedBox(
+                  height: 5.0,
+                ),
+                state.folder.id != 'a1'
+                    ? BackButton(
+                        previousFolderId: state.folder.parentId,
+                        currentFolderId: state.folder.id,
+                      )
+                    : Container(),
+                const Expanded(
+                  child: RefreshableFolderView(),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 30, 30),
+                      child: UploadButton(currentFolder: state.folder),
+                    ),
+                  ],
+                )
+              ],
+            );
+          case FileSystemCubitError():
             return const Center(
               child: Text('Error State'),
             );
-          } else {
-            return const Center(
-              child: Text('Unknown State'),
-            );
-          }
-        });
+          default:
+            return Container();
+        }
+      })),
+    );
   }
 }
 
@@ -131,75 +209,46 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
   Folder? folder;
 
   @override
-  void initState() {
-   context.read<FileSystemCubit>().fetchFiles('a1');
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      onRefresh: () async {
-        context.read<FileSystemCubit>().refreshFiles(folder!.id);
-      },
-      child: BlocConsumer<FileSystemCubit, FileSystemCubitState>(
-        listener: (context, state) {
-          SnackBarUtility.showFileSystemSnackBar(context, state);
+        onRefresh: () async {
+          context.read<FileSystemCubit>().refreshFiles(folder!.id);
         },
-        builder: (context, state) {
-          if (state is FileSystemCubitInitial || state is FileSystemCubitLoading) {
-            return const CircularProgressIndicator();
-          } else if (state is FileSystemCubitFolderItemsChangedState) {
-            setState(() {
-              files = state.files;
-            });
-
-            return files.isNotEmpty ? ListView.builder(
-              itemCount: files.length,
-              itemBuilder: (context, index) {
-                var item = files[index];
-                if (item is Receipt) {
-                  return ReceiptListTile(receipt: item);
-                } else if (item is Folder) {
-                  return FolderListTile(folder: item);
-                }
-                return null;
-              },
-            )
-          : const Padding(
-              padding: EdgeInsets.all(100.0),
-              child: Text('No receipts/folders to show'),
-            );
-          } else if (state is FileSystemCubitLoadedSuccess) {
-            setState(() {
-              files = state.files;
-            });
-
-            return files.isNotEmpty ? ListView.builder(
-              itemCount: files.length,
-              itemBuilder: (context, index) {
-                var item = files[index];
-                if (item is Receipt) {
-                  return ReceiptListTile(receipt: item);
-                } else if (item is Folder) {
-                  return FolderListTile(folder: item);
-                }
-                return null;
-              },
-            )
-          : const Padding(
-              padding: EdgeInsets.all(100.0),
-              child: Text('No receipts/folders to show'),
-            );
-          } else {
-            return const Text('Unknown state');
-          }
-          
-          
-        },
-      )
-          
-    );
+        child: BlocConsumer<FileSystemCubit, FileSystemCubitState>(
+            listenWhen: (previous, current) =>
+                current is FileSystemCubitActionState,
+            listener: (context, state) {
+              SnackBarUtility.showFileSystemSnackBar(context, state);
+              context.read<FileSystemCubit>().fetchFiles(folder!.id);
+            },
+            builder: (context, state) {
+              switch (state) {
+                case FileSystemCubitInitial() || FileSystemCubitLoading():
+                  return const CircularProgressIndicator();
+                case FileSystemCubitLoadedSuccess():
+                  folder = state.folder;
+                  files = state.files;
+                  return files.isNotEmpty
+                      ? ListView.builder(
+                          itemCount: files.length,
+                          itemBuilder: (context, index) {
+                            var item = files[index];
+                            if (item is Receipt) {
+                              return ReceiptListTile(receipt: item);
+                            } else if (item is Folder) {
+                              return FolderListTile(folder: item);
+                            }
+                            return null;
+                          },
+                        )
+                      : const Padding(
+                          padding: EdgeInsets.all(100.0),
+                          child: Text('No receipts/folders to show'),
+                        );
+                default:
+                  return Container();
+              }
+            }));
   }
 }
 
@@ -210,9 +259,7 @@ class FolderListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FileSystemCubit, FileSystemCubitState>(
-      builder: (context, state) {
-        return ListTile(
+    return ListTile(
           leading: const Icon(Icons.folder),
           trailing: IconButton(
             icon: Icon(
@@ -230,8 +277,6 @@ class FolderListTile extends StatelessWidget {
           },
           title: Text(folder.name),
         );
-      },
-    );
   }
 }
 

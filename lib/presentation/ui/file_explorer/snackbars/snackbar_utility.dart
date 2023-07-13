@@ -27,9 +27,11 @@ abstract class SnackBarUtility {
     } else if (state is FileSystemCubitDeleteFailure) {
       _message = 'Failed to delete ${state.deletedName}';
     } else {
-      print('state is ${state.runtimeType.toString()}');
+      print('showFileSystemSnackBar: state is ${state.runtimeType.toString()}');
       return;
     }
+    
+    print(_message);
     ScaffoldMessenger.of(context).showSnackBar(_appSnackBar);
   }
 }
