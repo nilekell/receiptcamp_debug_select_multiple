@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/folder/delete_folder_confirmation_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/folder/move_folder_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/folder/rename_folder_dialog.dart';
-void showFolderOptions(BuildContext context, FileSystemCubit FileSystemCubit, Folder folder) {
+void showFolderOptions(BuildContext context, FolderViewCubit folderViewCubit, Folder folder) {
   showModalBottomSheet(
     context: context,
     builder: (bottomSheetContext) => Column(
@@ -17,7 +17,7 @@ void showFolderOptions(BuildContext context, FileSystemCubit FileSystemCubit, Fo
             // closing bottom sheet
             Navigator.of(bottomSheetContext).pop();
             // opening rename folder dialog
-            showRenameFolderDialog(bottomSheetContext, FileSystemCubit, folder);
+            showRenameFolderDialog(bottomSheetContext, folderViewCubit, folder);
           },
         ),
         ListTile(
@@ -27,7 +27,7 @@ void showFolderOptions(BuildContext context, FileSystemCubit FileSystemCubit, Fo
             // closing bottom sheet
             Navigator.of(bottomSheetContext).pop();
             // show move folder dialog
-            showMoveFolderDialog(bottomSheetContext, FileSystemCubit, folder);
+            showMoveFolderDialog(bottomSheetContext, folderViewCubit, folder);
           },
         ),
         ListTile(
@@ -36,7 +36,7 @@ void showFolderOptions(BuildContext context, FileSystemCubit FileSystemCubit, Fo
           onTap: () {
             Navigator.of(bottomSheetContext).pop();
             // opening deleting folder dialog
-            showDeleteFolderDialog(bottomSheetContext, FileSystemCubit, folder);
+            showDeleteFolderDialog(bottomSheetContext, folderViewCubit, folder);
           },
         ),
       ],

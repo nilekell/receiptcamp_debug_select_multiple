@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
-import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/receipt/delete_receipt_confirmation_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/receipt/move_receipt_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/receipt/rename_receipt_dialog.dart';
 
-void showReceiptOptions(BuildContext context, FileSystemCubit FileSystemCubit, Receipt receipt) {
+void showReceiptOptions(BuildContext context, FolderViewCubit folderViewCubit, Receipt receipt) {
   showModalBottomSheet(
     context: context,
     builder: (bottomSheetContext) => Column(
@@ -19,7 +19,7 @@ void showReceiptOptions(BuildContext context, FileSystemCubit FileSystemCubit, R
             // closing bottom sheet
             Navigator.of(bottomSheetContext).pop();
             // opening rename receipt dialog
-            showRenameReceiptDialog(bottomSheetContext, FileSystemCubit, receipt);
+            showRenameReceiptDialog(bottomSheetContext, folderViewCubit, receipt);
           },
         ),
         ListTile(
@@ -28,7 +28,7 @@ void showReceiptOptions(BuildContext context, FileSystemCubit FileSystemCubit, R
           onTap: () {
             Navigator.of(bottomSheetContext).pop();
             // show move receipt dialog
-            showMoveReceiptDialog(context, FileSystemCubit, receipt);
+            showMoveReceiptDialog(context, folderViewCubit, receipt);
           },
         ),
         ListTile(
@@ -37,7 +37,7 @@ void showReceiptOptions(BuildContext context, FileSystemCubit FileSystemCubit, R
           onTap: () {
             Navigator.of(bottomSheetContext).pop();
             // opening delete receipt dialog
-            showDeleteReceiptDialog(bottomSheetContext, FileSystemCubit, receipt);
+            showDeleteReceiptDialog(bottomSheetContext, folderViewCubit, receipt);
           },
         ),
         ListTile(
