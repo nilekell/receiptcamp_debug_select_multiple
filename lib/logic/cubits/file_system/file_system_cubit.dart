@@ -32,7 +32,6 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
     try {
       final folder = await DatabaseRepository.instance.getFolderById(folderId);
       emit(FileSystemCubitFolderInformationSuccess(folder: folder));
-      // emit(FileSystemCubitLoadedSuccess(files: files, folder: folder));
     } catch (error) {
       emit(FileSystemCubitError());
     }
