@@ -206,27 +206,22 @@ class FolderListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FileSystemCubit, FileSystemCubitState>(
-      builder: (context, state) {
-        return ListTile(
-          leading: const Icon(Icons.folder),
-          trailing: IconButton(
-            icon: Icon(
-              Icons.more,
-              size: 20.0,
-              color: Colors.brown[900],
-            ),
-            onPressed: () {
-              showFolderOptions(
-                  context, context.read<FolderViewCubit>(), folder);
-            },
-          ),
-          onTap: () {
-            context.read<FileSystemCubit>().selectFolder(folder.id);
-          },
-          title: Text(folder.name),
-        );
+    return ListTile(
+      leading: const Icon(Icons.folder),
+      trailing: IconButton(
+        icon: Icon(
+          Icons.more,
+          size: 20.0,
+          color: Colors.brown[900],
+        ),
+        onPressed: () {
+          showFolderOptions(context, context.read<FolderViewCubit>(), folder);
+        },
+      ),
+      onTap: () {
+        context.read<FileSystemCubit>().selectFolder(folder.id);
       },
+      title: Text(folder.name),
     );
   }
 }
@@ -238,27 +233,23 @@ class ReceiptListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FileSystemCubit, FileSystemCubitState>(
-      builder: (context, state) {
-        return ListTile(
-            leading: const Icon(Icons.receipt),
-            trailing: IconButton(
-              icon: Icon(
-                Icons.more,
-                size: 20.0,
-                color: Colors.brown[900],
-              ),
-              onPressed: () {
-                showReceiptOptions(
-                    context, context.read<FolderViewCubit>(), receipt);
-              },
-            ),
-            onTap: () {
-              // show receipt preview
-            },
-            title: Text(receipt.name.split('.').first));
-      },
-    );
+    return ListTile(
+        leading: const Icon(Icons.receipt),
+        trailing: IconButton(
+          icon: Icon(
+            Icons.more,
+            size: 20.0,
+            color: Colors.brown[900],
+          ),
+          onPressed: () {
+            showReceiptOptions(
+                context, context.read<FolderViewCubit>(), receipt);
+          },
+        ),
+        onTap: () {
+          // show receipt preview
+        },
+        title: Text(receipt.name.split('.').first));
   }
 }
 
@@ -270,16 +261,12 @@ class UploadButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('UploadButton built with ${currentFolder.name}');
-    return BlocBuilder<FileSystemCubit, FileSystemCubitState>(
-      builder: (context, state) {
-        return FloatingActionButton(
-          onPressed: () {
-            showUploadOptions(
-                context, context.read<FolderViewCubit>(), currentFolder);
-          },
-          child: const Icon(Icons.add),
-        );
+    return FloatingActionButton(
+      onPressed: () {
+        showUploadOptions(
+            context, context.read<FolderViewCubit>(), currentFolder);
       },
+      child: const Icon(Icons.add),
     );
   }
 }
