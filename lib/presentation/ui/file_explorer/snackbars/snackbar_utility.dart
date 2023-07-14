@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 
+// utility class that creates and shows snackbars displayed on file explorer screen
 abstract class SnackBarUtility {
   static void showSnackBar(BuildContext context, FolderViewState state) {
     String message = '';

@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
@@ -143,8 +142,6 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
     return BlocListener<FileSystemCubit, FileSystemCubitState>(
         listener: (context, state) {
           switch (state) {
-            // i think this code is causing the listview to always fetch files from the root folder
-            // may need to communicate with FileSystemCubit
             case FileSystemCubitFolderInformationSuccess():
               context.read<FolderViewCubit>().fetchFiles(state.folder.id);
             default:
