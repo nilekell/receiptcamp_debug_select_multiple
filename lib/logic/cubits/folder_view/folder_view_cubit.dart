@@ -35,13 +35,14 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
   // move folder
 moveFolder(Folder folder, String targetFolderId) async {
+  final String targetFolderName = (await DatabaseRepository.instance.getFolderById(targetFolderId)).name;
   try {
     await DatabaseRepository.instance.moveFolder(folder, targetFolderId);
-    emit(FolderViewMoveSuccess(oldName: folder.name, newName: targetFolderId, folderId: folder.parentId));
+    emit(FolderViewMoveSuccess(oldName: folder.name, newName: targetFolderName, folderId: folder.parentId));
     fetchFiles(folder.parentId);
   } on Exception catch (e) {
     print(e.toString());
-    emit(FolderViewMoveFailure(oldName: folder.name, newName: targetFolderId, folderId: folder.parentId));
+    emit(FolderViewMoveFailure(oldName: folder.name, newName: targetFolderName, folderId: folder.parentId));
   }
 }
 
@@ -94,13 +95,14 @@ renameFolder(Folder folder, String newName) async {
 
 // move receipt
 moveReceipt(Receipt receipt, String targetFolderId) async {
+  final String targetFolderName = (await DatabaseRepository.instance.getFolderById(targetFolderId)).name;
   try {
     await DatabaseRepository.instance.moveReceipt(receipt, targetFolderId);
-    emit(FolderViewMoveSuccess(oldName: receipt.name, newName: targetFolderId, folderId: receipt.parentId));
+    emit(FolderViewMoveSuccess(oldName: receipt.name, newName: targetFolderName, folderId: receipt.parentId));
     fetchFiles(receipt.parentId);
   } on Exception catch (e) {
     print(e.toString());
-    emit(FolderViewMoveFailure(oldName: receipt.name, newName: targetFolderId, folderId: receipt.parentId));
+    emit(FolderViewMoveFailure(oldName: receipt.name, newName: targetFolderName, folderId: receipt.parentId));
   }
 }
 
@@ -180,12 +182,4 @@ renameReceipt(Receipt receipt, String newName) async {
     emit(FolderViewRenameFailure(oldName: receipt.name, newName: newName, folderId: receipt.parentId));
   }
 }
-
-  // method: navigate to folder - this method needs to call the navigate method within FileSystemCubit 
-
-  // method: go back to parent folder -this method needs to call the go back method within FileSystemCubit 
-
-
-
-
 }
