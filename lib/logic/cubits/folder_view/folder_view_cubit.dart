@@ -71,7 +71,6 @@ uploadFolder(String folderName, String parentFolderId) async {
 
     // save folder
     DatabaseRepository.instance.insertFolder(folder);
-    print('Folder ${folder.name} saved in ${folder.parentId}');
 
     emit(FolderViewUploadSuccess(uploadedName: folder.name, folderId: folder.parentId));
     fetchFiles(parentFolderId);
