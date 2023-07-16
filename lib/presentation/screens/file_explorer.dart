@@ -159,7 +159,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
               case FolderViewInitial() || FolderViewLoading():
                 return const CircularProgressIndicator();
               case FolderViewLoadedSuccess():
-              print('FolderView built with folder: ${state.folder.name}');
+              print('RefreshableFolderView built with folder: ${state.folder.name}');
                 return RefreshIndicator(
                   onRefresh: () async {
                     print('refreshing folder ${state.folder.name}');
