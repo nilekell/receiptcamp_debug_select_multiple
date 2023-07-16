@@ -143,6 +143,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
         listener: (context, state) {
           switch (state) {
             case FileSystemCubitFolderInformationSuccess():
+              print('RefreshableFolderView: fetchFiles for ${state.folder.name}');
               context.read<FolderViewCubit>().fetchFiles(state.folder.id);
             default:
               print('RefreshableFolderViewState: ${state.toString()}');
@@ -158,6 +159,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
               case FolderViewInitial() || FolderViewLoading():
                 return const CircularProgressIndicator();
               case FolderViewLoadedSuccess():
+              print('FolderView built with folder: ${state.folder.name}');
                 return RefreshIndicator(
                   onRefresh: () async {
                     print('refreshing folder ${state.folder.name}');
@@ -260,7 +262,7 @@ class UploadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('UploadButton built with ${currentFolder.name}');
+    print('UploadButton built with folder: ${currentFolder.name}');
     return FloatingActionButton(
       onPressed: () {
         showUploadOptions(
