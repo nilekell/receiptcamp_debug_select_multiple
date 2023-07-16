@@ -72,11 +72,7 @@ class _FolderDialogState extends State<FolderDialog> {
         TextButton(
           onPressed: isEnabled
               ? () {
-                print('saving folder in ${widget.currentFolder.name}');
-
-                  // 'a1' is the root folder id
-                  // this used to be:
-                  // context.read<FolderViewCubit>().uploadFolder(textEditingController.value.text,'a1')
+                print('saving ${textEditingController.value.text} in ${widget.currentFolder.name}');
                   context.read<FolderViewCubit>().uploadFolder(textEditingController.value.text, widget.currentFolder.id);
                   // closing folder dialog
                   Navigator.of(context).pop();
