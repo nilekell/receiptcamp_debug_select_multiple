@@ -32,12 +32,13 @@ class DeleteReceiptDialog extends StatelessWidget {
         TextButton(
           child: const Text('Cancel'),
           onPressed: () {
-            context.read<FolderViewCubit>().deleteReceipt(receipt.id);
+            Navigator.of(context).pop();
           },
         ),
         TextButton(
           child: const Text('Delete'),
           onPressed: () {
+            context.read<FolderViewCubit>().deleteReceipt(receipt.id);
             Navigator.of(context).pop();
           },
         ),
