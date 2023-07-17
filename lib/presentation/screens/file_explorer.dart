@@ -30,7 +30,12 @@ class _FileExplorerState extends State<FileExplorer> {
           builder: ((context, state) {
         switch (state) {
           case FileSystemCubitInitial() || FileSystemCubitLoading():
-            return const CircularProgressIndicator();
+            return const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(child: CircularProgressIndicator()),
+              ],
+            );
           case FileSystemCubitFolderInformationSuccess():
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,7 +167,12 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
           builder: (context, state) {
             switch (state) {
               case FolderViewInitial() || FolderViewLoading():
-                return const CircularProgressIndicator();
+                return const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(child: CircularProgressIndicator()),
+              ],
+            );
               case FolderViewLoadedSuccess():
               print('RefreshableFolderView built with folder: ${state.folder.name}');
                 return RefreshIndicator(
