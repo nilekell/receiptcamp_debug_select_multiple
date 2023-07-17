@@ -330,8 +330,16 @@ class DatabaseService {
   // Method to delete a Receipt object from the database based on its id.
   Future<int> deleteReceipt(String id) async {
     final db = await database;
+
+    // retrieving path of deleted receipt
+    final String deletedReceiptPath = (await getReceiptById(id)).localPath;
+
     // deleting all tags associated to a receipt
     await deleteTagsForAReceipt(id);
+
+    // deleting receipt image in local storage
+    await FileService.deleteImageFromPath(deletedReceiptPath);
+
     // deleting receipt record in receipts table
     return await db.delete(
       'receipts',
