@@ -128,7 +128,7 @@ uploadReceipt(String currentFolderId) async {
       return;
     }
 
-    final List<dynamic> results = await ReceiptService.processingReceiptAndTags(receiptImage);
+    final List<dynamic> results = await ReceiptService.processingReceiptAndTags(receiptImage, currentFolderId);
     final Receipt receipt = results[0];
     final List<Tag> tags = results[1];
 
@@ -153,7 +153,7 @@ uploadReceiptFromCamera(String currentFolderId) async {
       return;
     }
 
-    final List<dynamic> results = await ReceiptService.processingReceiptAndTags(receiptPhoto);
+    final List<dynamic> results = await ReceiptService.processingReceiptAndTags(receiptPhoto, currentFolderId);
     final Receipt receipt = results[0];
     final List<Tag> tags = results[1];
 
