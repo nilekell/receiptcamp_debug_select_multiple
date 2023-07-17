@@ -51,8 +51,23 @@ class _FileExplorerState extends State<FileExplorer> {
                         currentFolderId: state.folder.id,
                       )
                     : Container(),
-                const Expanded(
-                  child: RefreshableFolderView(),
+                Expanded(
+                  child: BlocListener<FileSystemCubit, FileSystemCubitState>(
+                    listener: (context, state) {
+                      switch (state) {
+                        case FileSystemCubitFolderInformationSuccess():
+                          print(
+                              'RefreshableFolderView: fetchFiles for ${state.folder.name}');
+                          context
+                              .read<FolderViewCubit>()
+                              .fetchFiles(state.folder.id);
+                        default:
+                          print(
+                              'RefreshableFolderViewState: ${state.toString()}');
+                      }
+                    },
+                    child: const RefreshableFolderView(),
+                  ),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -139,17 +154,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<FileSystemCubit, FileSystemCubitState>(
-        listener: (context, state) {
-          switch (state) {
-            case FileSystemCubitFolderInformationSuccess():
-              print('RefreshableFolderView: fetchFiles for ${state.folder.name}');
-              context.read<FolderViewCubit>().fetchFiles(state.folder.id);
-            default:
-              print('RefreshableFolderViewState: ${state.toString()}');
-          }
-        },
-        child: BlocConsumer<FolderViewCubit, FolderViewState>(
+    return BlocConsumer<FolderViewCubit, FolderViewState>(
           listenWhen: (previous, current) => current is FolderViewActionState,
           listener: (context, state) {
             SnackBarUtility.showSnackBar(context, state);
@@ -197,7 +202,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                 return Container();
             }
           },
-        ));
+        );
   }
 }
 
