@@ -183,20 +183,34 @@ class DatabaseService {
     });
   }
 
-  // Method to get list of folders except for a list of specified folders
-    Future<List<Folder>> getFoldersExceptSpecified(List<String> specificFolderIds) async {
+  // Method to get list of folders that a folder can logically be moved to
+  // This will not include:
+  // - the folder itself
+  // - the parent of the folder
+  // - any folders that are under the folder in the hierarchy
+  Future<List<Folder>> getFoldersThatCanBeMovedTo(String fileToBeMovedId, String fileToBeMovedParentId) async {
     final db = await database;
-    
-    // Create a string of question marks separated by commas, matching the count of specificFolderIds
-    // example contents of placeholders variables: ('folderId1', 'folderId2', 'folderId3')
-    var placeholders = List<String>.filled(specificFolderIds.length, '?').join(', ');
 
+    // initialising list of folders to explicitly not retrieve, starting with the folder itself and its parent
+    List<String> exceptionFolderIds = [fileToBeMovedId, fileToBeMovedParentId];
+
+    // getting folderIds of any folders that are 'under' the current folder in the file system hierarchy
+    final subFolderIds = await getRecursiveSubFolderIds(fileToBeMovedId);
+    // adding these folders so they are excluded in the returned list of eligible folders that can be moved to
+    exceptionFolderIds.addAll(subFolderIds);
+
+    // Create a string of placeholders for sqlite query
+    String placeholders = exceptionFolderIds.map((_) => '?').join(',');
+    print('placeholders: $placeholders');
+
+    // querying for all folders except for those in [exceptionFolderIds]
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
       SELECT *
       FROM folders
       WHERE id NOT IN ($placeholders)
-    ''', specificFolderIds);  // Pass the whole list to the rawQuery method
+    ''', exceptionFolderIds);
 
+    // returning list of folders
     return List.generate(maps.length, (i) {
       return Folder(
         id: maps[i]['id'],
@@ -207,6 +221,37 @@ class DatabaseService {
     });
   }
 
+  // method to retrieve ids for folders and their subfolders for a specific folder
+  Future<List<String>> getRecursiveSubFolderIds(String folderId) async {
+    final db = await database;
+
+    // initialising list of ids that will be returned
+    List<String> subfolderIds = [];
+
+    // method to get subfolders for a specific id
+    Future<void> getSubFolderIds(String id) async {
+      final List<Map<String, dynamic>> mapOfFolderIds = await db.rawQuery('''
+        SELECT id
+        FROM folders
+        WHERE parentId = ?
+        ''', [id]);
+
+      // mapping each item in [mapOfFolderIds] to an element in [idList]
+      List<String> idList =
+          mapOfFolderIds.map((item) => item['id'].toString()).toList();
+
+      subfolderIds.addAll(idList);
+
+      // recursively get subfolders for each subfolder
+      for (final id in idList) {
+        await getSubFolderIds(id);
+      }
+    }
+
+    await getSubFolderIds(folderId);
+
+    return subfolderIds;
+  }
 
   // Method to delete a Folder object from the database based on its id.
   Future<void> deleteFolder(String id) async {
@@ -276,20 +321,20 @@ class DatabaseService {
 
   // Method to get folder by its id
   Future<Folder> getFolderById(String folderId) async {
-  final db = await database;
-  final result = await db.rawQuery('''
+    final db = await database;
+    final result = await db.rawQuery('''
     SELECT *
     FROM folders
     WHERE id = ?
   ''', [folderId]);
 
-  if (result.isNotEmpty) {
-    final folderResult = result.first;
-    return Folder.fromMap(folderResult);
-  } else {
-    throw Exception('Folder with id $folderId not found');
+    if (result.isNotEmpty) {
+      final folderResult = result.first;
+      return Folder.fromMap(folderResult);
+    } else {
+      throw Exception('Folder with id $folderId not found');
+    }
   }
-}
 
   // Add Receipt operations
 
@@ -312,20 +357,20 @@ class DatabaseService {
 
   // Method to return receipt by id
   Future<Receipt> getReceiptById(String receiptId) async {
-  final db = await database;
-  final result = await db.rawQuery('''
+    final db = await database;
+    final result = await db.rawQuery('''
     SELECT *
     FROM receipts
     WHERE id = ?
   ''', [receiptId]);
 
-  if (result.isNotEmpty) {
-    final receiptResult = result.first;
-    return Receipt.fromMap(receiptResult);
-  } else {
-    throw Exception('Receipt with id $receiptId not found');
+    if (result.isNotEmpty) {
+      final receiptResult = result.first;
+      return Receipt.fromMap(receiptResult);
+    } else {
+      throw Exception('Receipt with id $receiptId not found');
+    }
   }
-}
 
   // Method to delete a Receipt object from the database based on its id.
   Future<int> deleteReceipt(String id) async {
