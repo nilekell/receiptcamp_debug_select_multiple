@@ -36,7 +36,7 @@ class _MoveReceiptDialogState extends State<MoveReceiptDialog> {
   }
 
   Future<void> loadFolders() async {
-    folders = await DatabaseRepository.instance.getFoldersExceptSpecified([widget.receipt.parentId]);
+    folders = await DatabaseRepository.instance.getFoldersThatCanBeMovedTo(widget.receipt.id, widget.receipt.parentId);
     if (folders.isNotEmpty) {
       setState(() {
         selectedFolder = folders[0];
