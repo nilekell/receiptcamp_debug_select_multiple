@@ -1,27 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
+import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/folder/create_folder_dialog.dart';
 
-void showUploadOptions(BuildContext context, UploadBloc uploadBloc) {
+void showUploadOptions(BuildContext context, FolderViewCubit folderViewCubit, Folder currentFolder) {
   showModalBottomSheet(
     context: context,
-    builder: (bottomSheetContext) => Column(
+    builder: (bottomSheetContext) {
+      return BlocProvider.value(
+        value: folderViewCubit,
+        child: UploadOptionsBottomSheet(currentFolder: currentFolder),
+      );
+    },
+  );
+}
+
+class UploadOptionsBottomSheet extends StatelessWidget {
+  final Folder currentFolder;
+
+  const UploadOptionsBottomSheet({super.key, required this.currentFolder});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
           leading: const Icon(Icons.photo_library),
           title: const Text('Choose from gallery'),
           onTap: () {
-            Navigator.of(bottomSheetContext).pop();
-            uploadBloc.add(UploadTapEvent());
+            context.read<FolderViewCubit>().uploadReceipt(currentFolder.id);
+            // closing bottom sheet
+            Navigator.of(context).pop();
           },
         ),
         ListTile(
           leading: const Icon(Icons.camera),
           title: const Text('Take a photo'),
           onTap: () {
-            Navigator.of(bottomSheetContext).pop();
-            uploadBloc.add(CameraTapEvent());
+            context.read<FolderViewCubit>().uploadReceiptFromCamera(currentFolder.id);
+            // closing bottom sheet
+            Navigator.of(context).pop();
           },
         ),
         ListTile(
@@ -29,11 +49,12 @@ void showUploadOptions(BuildContext context, UploadBloc uploadBloc) {
           title: const Text('New folder'),
           onTap: () {
             // closing bottom sheet
-            Navigator.of(bottomSheetContext).pop();
-            showCreateFolderDialog(bottomSheetContext, uploadBloc);
+            Navigator.of(context).pop();
+            showCreateFolderDialog(context, context.read<FolderViewCubit>(), currentFolder);
           },
         ),
       ],
-    ),
-  );
+    );
+  }
 }
+

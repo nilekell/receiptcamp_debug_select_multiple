@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:receiptcamp/logic/cubits/file_edit/file_editing_cubit.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/receipt.dart';
 
 Future<void> showDeleteReceiptDialog(BuildContext context,
-    FileEditingCubit fileEditingCubit, Receipt receipt) async {
+    FolderViewCubit folderViewCubit, Receipt receipt) async {
   return await showDialog(
     context: context,
     builder: (deleteReceiptDialogContext) {
       return BlocProvider.value(
-        value: fileEditingCubit,
+        value: folderViewCubit,
         child: DeleteReceiptDialog(receipt: receipt)
       );
     },
@@ -38,6 +38,7 @@ class DeleteReceiptDialog extends StatelessWidget {
         TextButton(
           child: const Text('Delete'),
           onPressed: () {
+            context.read<FolderViewCubit>().deleteReceipt(receipt.id);
             Navigator.of(context).pop();
           },
         ),

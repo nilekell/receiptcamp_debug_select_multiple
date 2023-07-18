@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:receiptcamp/logic/cubits/file_edit/file_editing_cubit.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 
 Future<void> showDeleteFolderDialog(BuildContext context,
-    FileEditingCubit fileEditingCubit, Folder folder) async {
+    FolderViewCubit folderViewCubit, Folder folder) async {
   return await showDialog(
     context: context,
     builder: (deleteFolderDialogContext) {
       return BlocProvider.value(
-        value: fileEditingCubit,
+        value: folderViewCubit,
         child: DeleteFolderDialog(folder: folder,),
       );
     },
@@ -38,7 +38,7 @@ class DeleteFolderDialog extends StatelessWidget {
         TextButton(
           child: const Text('Delete'),
           onPressed: () {
-            context.read<FileEditingCubit>().deleteFolder(folder.id);
+            context.read<FolderViewCubit>().deleteFolder(folder.id);
             Navigator.of(context).pop();
           },
         ),

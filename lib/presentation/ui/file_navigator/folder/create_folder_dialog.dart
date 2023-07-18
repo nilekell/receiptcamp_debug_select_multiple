@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:receiptcamp/logic/blocs/upload/upload_bloc.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
+import 'package:receiptcamp/models/folder.dart';
 
 Future<void> showCreateFolderDialog(
-    BuildContext context, UploadBloc uploadBloc) async {
+    BuildContext context, FolderViewCubit folderViewCubit, Folder currentFolder) async {
   return await showDialog(
       context: context,
       builder: (createFolderDialogContext) {
         return BlocProvider.value(
-          value: uploadBloc,
-          child: const FolderDialog(),
+          value: folderViewCubit,
+          child: FolderDialog(currentFolder: currentFolder),
         );
       });
 }
 
 class FolderDialog extends StatefulWidget {
-  const FolderDialog({super.key});
+  final Folder currentFolder;
+
+  const FolderDialog({super.key, required this.currentFolder});
 
   @override
   State<FolderDialog> createState() => _FolderDialogState();
@@ -28,7 +31,7 @@ class _FolderDialogState extends State<FolderDialog> {
 
   @override
   void initState() {
-    context.read<UploadBloc>();
+    context.read<FolderViewCubit>();
     isEnabled = textEditingController.text.isNotEmpty;
     textEditingController.addListener(_textPresenceListener);
     super.initState();
@@ -69,8 +72,8 @@ class _FolderDialogState extends State<FolderDialog> {
         TextButton(
           onPressed: isEnabled
               ? () {
-                  context.read<UploadBloc>().add(FolderCreateEvent(
-                      name: textEditingController.value.text, parentId: 'a1'));
+                print('saving ${textEditingController.value.text} in ${widget.currentFolder.name}');
+                  context.read<FolderViewCubit>().uploadFolder(textEditingController.value.text, widget.currentFolder.id);
                   // closing folder dialog
                   Navigator.of(context).pop();
                 }

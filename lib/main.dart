@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
-import 'package:receiptcamp/logic/blocs/explorer/explorer_bloc.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/bloc_observer.dart';
 import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
@@ -22,8 +21,6 @@ void main() async {
       BlocProvider<HomeBloc>(
         create: (BuildContext context) => HomeBloc(databaseRepository: DatabaseRepository.instance)..add(HomeInitialEvent()),
       ),
-      BlocProvider<ExplorerBloc>(
-        create: (BuildContext context) => ExplorerBloc()..add(ExplorerInitialEvent())),
     ],
     child: const MyApp(),
   ));
