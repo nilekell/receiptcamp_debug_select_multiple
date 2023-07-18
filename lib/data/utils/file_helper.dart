@@ -2,9 +2,12 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
+import 'package:receiptcamp/models/receipt.dart';
+import 'package:share_plus/share_plus.dart';
 
 class FileService {
   static Future<File?> compressFile(File imageFile, String targetPath) async {
@@ -99,6 +102,28 @@ class FileService {
     } on Exception catch (e) {
       print('Error in bytesToSizeString: $e');
       return '';
+    }
+  }
+
+  // share receipt image
+  static Future<void> shareReceipt(Receipt receipt) async {
+    try {
+      // shows platform share sheet
+      await Share.shareXFiles([XFile(receipt.localPath)], subject: receipt.name);
+    } on Exception catch (e) {
+      print('Error in shareReceipt: $e');
+      throw e;
+    }
+  }
+
+  // download image to camera roll
+  static Future<void> saveImageToCameraRoll(Receipt receipt) async {
+    try {
+      await GallerySaver.saveImage(receipt.localPath);
+      print('image saved to camera roll');
+    } on Exception catch (e) {
+      print('Error in saveImageToCameraRoll: $e');
+      throw e;
     }
   }
 }

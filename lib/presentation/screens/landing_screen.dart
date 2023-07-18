@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
 import 'package:receiptcamp/presentation/screens/file_explorer.dart';
 import 'package:receiptcamp/presentation/screens/home.dart';
@@ -27,7 +29,17 @@ class LandingScreen extends StatelessWidget {
       case 0:
         return const Home();
       case 1:
-        return const FileExplorer();
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<FileSystemCubit>(
+              create: (context) => FileSystemCubit(),
+            ),
+            BlocProvider(
+              create: (context) => FolderViewCubit(),
+            ),
+          ],
+          child: const FileExplorer(),
+        );
       default:
         return const Scaffold(
           body: Center(

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:receiptcamp/logic/cubits/file_edit/file_editing_cubit.dart';
+import 'package:receiptcamp/data/utils/file_helper.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/receipt/delete_receipt_confirmation_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/receipt/move_receipt_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/receipt/rename_receipt_dialog.dart';
 
-void showReceiptOptions(BuildContext context, FileEditingCubit fileEditingCubit, Receipt receipt) {
+void showReceiptOptions(BuildContext context, FolderViewCubit folderViewCubit, Receipt receipt) {
   showModalBottomSheet(
     context: context,
     builder: (bottomSheetContext) => Column(
@@ -18,7 +19,7 @@ void showReceiptOptions(BuildContext context, FileEditingCubit fileEditingCubit,
             // closing bottom sheet
             Navigator.of(bottomSheetContext).pop();
             // opening rename receipt dialog
-            showRenameReceiptDialog(bottomSheetContext, fileEditingCubit, receipt);
+            showRenameReceiptDialog(bottomSheetContext, folderViewCubit, receipt);
           },
         ),
         ListTile(
@@ -27,7 +28,7 @@ void showReceiptOptions(BuildContext context, FileEditingCubit fileEditingCubit,
           onTap: () {
             Navigator.of(bottomSheetContext).pop();
             // show move receipt dialog
-            showMoveReceiptDialog(context, fileEditingCubit, receipt);
+            showMoveReceiptDialog(context, folderViewCubit, receipt);
           },
         ),
         ListTile(
@@ -36,7 +37,7 @@ void showReceiptOptions(BuildContext context, FileEditingCubit fileEditingCubit,
           onTap: () {
             Navigator.of(bottomSheetContext).pop();
             // opening delete receipt dialog
-            showDeleteReceiptDialog(bottomSheetContext, fileEditingCubit, receipt);
+            showDeleteReceiptDialog(bottomSheetContext, folderViewCubit, receipt);
           },
         ),
         ListTile(
@@ -44,7 +45,7 @@ void showReceiptOptions(BuildContext context, FileEditingCubit fileEditingCubit,
           title: const Text('Download'),
           onTap: () {
             Navigator.of(bottomSheetContext).pop();
-            fileEditingCubit.saveImageToCameraRoll(receipt);
+            FileService.saveImageToCameraRoll(receipt);
           },
         ),
         ListTile(
@@ -52,7 +53,7 @@ void showReceiptOptions(BuildContext context, FileEditingCubit fileEditingCubit,
           title: const Text('Share'),
           onTap: () {
             Navigator.of(bottomSheetContext).pop();
-            fileEditingCubit.shareReceipt(receipt);
+            FileService.shareReceipt(receipt);
           },
         ),
       ],
