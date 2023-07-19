@@ -1,13 +1,15 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
-import 'package:receiptcamp/presentation/ui/file_explorer/snackbars/snackbar_utility.dart';
+import 'package:receiptcamp/presentation/ui/file_navigator/snackbar_utility.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/folder/folder_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/receipt/receipt_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/upload_sheet.dart';
+import 'package:easy_image_viewer/easy_image_viewer.dart';
 
 class FileExplorer extends StatefulWidget {
   const FileExplorer({super.key});
@@ -264,7 +266,8 @@ class ReceiptListTile extends StatelessWidget {
           },
         ),
         onTap: () {
-          // show receipt preview
+          final imageProvider = Image.file(File(receipt.localPath)).image;
+          showImageViewer(context, imageProvider);
         },
         title: Text(receipt.name.split('.').first));
   }
