@@ -4,7 +4,7 @@ import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
-import 'package:receiptcamp/presentation/ui/file_explorer/snackbars/snackbar_utility.dart';
+import 'package:receiptcamp/presentation/ui/file_navigator/snackbar_utility.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/folder/folder_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/receipt/receipt_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_navigator/upload_sheet.dart';
