@@ -19,5 +19,24 @@ final class TextChanged extends SearchEvent {
   String toString() => 'TextChanged { text: $text }';
 }
 
+final class FetchSuggestions extends SearchEvent {
+
+  final String queryText;
+
+  const FetchSuggestions({required this.queryText});
+
+  @override
+  List<Object> get props => [queryText];
+}
+
+final class FetchResults extends SearchEvent {
+  final String queryText;
+
+  const FetchResults({required this.queryText});
+
+  @override
+  List<Object> get props => [queryText];
+}
+
 
 

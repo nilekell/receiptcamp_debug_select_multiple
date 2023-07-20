@@ -17,23 +17,28 @@ EventTransformer<Event> debounce<Event>(Duration duration) {
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   SearchBloc({required this.databaseRepository}) : super(SearchInitial()) {
     on<TextChanged>(_onTextChanged, transformer: debounce(_duration));
+    on<FetchSuggestions>(_fetchSuggestions);
+    on<FetchResults>(_fetchResults);
   }
   final DatabaseRepository databaseRepository;
 
 
 
   FutureOr<void> _onTextChanged(TextChanged event, Emitter<SearchState> emit) async {
+    emit(SearchStateLoading());
     final searchTerm = event.text;
 
-    if (searchTerm.isEmpty) return emit(SearchStateEmpty());
+    if (searchTerm.isEmpty) {
+      emit(SearchStateEmpty());
+      return;
+    } 
 
-    emit(SearchStateLoading());
+   add(FetchSuggestions(queryText: event.text));
+  }
 
-    try {
-      // final results = await databaseRepository.search(searchTerm);
-      // emit(SearchStateSuccess(results.items));
-    } catch (error) {
-      emit(const SearchStateError('something went wrong'));
-    }
+  FutureOr<void> _fetchSuggestions(FetchSuggestions event, Emitter<SearchState> emit) {
+  }
+
+  FutureOr<void> _fetchResults(FetchResults event, Emitter<SearchState> emit) {
   }
 }
