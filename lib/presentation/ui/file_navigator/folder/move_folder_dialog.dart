@@ -37,7 +37,7 @@ class _MoveFolderDialogState extends State<MoveFolderDialog> {
 
   // this method is only called once, when the widget is inserted into them widget tree
   Future<void> loadFolders() async {
-    // getting all folders except for the folder to be moved, its parent folder, and (NEED TO ADD THIS FEATURE) any of its child folders and subfolders
+    // getting all folders except for the folder to be moved, its parent folder, and  any of its child folders and subfolders
     // this ensure we don't show any folders that are illogical to move to in the dropdown menu
     folders = await DatabaseRepository.instance
         .getFoldersThatCanBeMovedTo(widget.thisFolder.id, widget.thisFolder.parentId);
