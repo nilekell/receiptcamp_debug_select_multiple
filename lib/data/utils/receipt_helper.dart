@@ -29,12 +29,10 @@ class ReceiptService {
 
   // create and return receipt object
   static Future<Receipt> createReceiptFromFile(
-      File receiptFile, String fileName, String folderId) async {
+      File receiptFile, String fileName, String folderId, String receiptUid) async {
     // Generating receipt object properties
 
     final path = receiptFile.path;
-    // Generating new uuid for receipt in local db
-    final String myReceiptUid = Utility.generateUid();
     // Getting current time for image creation
     final currentTime = Utility.getCurrentTime();
 
@@ -43,7 +41,7 @@ class ReceiptService {
 
     // Creating receipt object to be stored in local db
     Receipt thisReceipt = Receipt(
-        id: myReceiptUid,
+        id: receiptUid,
         name: fileName,
         localPath: path,
         dateCreated: currentTime,
@@ -60,6 +58,7 @@ class ReceiptService {
 
   try {
     final receiptKeyWords = await TextRecognitionService().extractKeywordsFromPath(imagePath);
+    print(receiptKeyWords);
     tags = _generateTags(receiptKeyWords, receiptId);
   } on Exception catch (e) {
     print('Error in extractKeywordsAndGenerateTags: $e');
@@ -84,7 +83,7 @@ class ReceiptService {
 
   // creating receipt object
   final receipt = await ReceiptService.createReceiptFromFile(
-      receiptImageFile!, basename(receiptImageFile.path), folderId);
+      receiptImageFile!, basename(receiptImageFile.path), folderId, receiptUid);
 
   return [receipt, tagsList];
 }
