@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/bloc_observer.dart';
+import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
 import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
 import 'package:receiptcamp/presentation/router/app_router.dart';
 import 'package:receiptcamp/presentation/screens/landing_screen.dart';
@@ -17,10 +18,14 @@ void main() async {
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider<LandingCubit>(
-        create: (BuildContext context) => LandingCubit()),
+          create: (BuildContext context) => LandingCubit()),
       BlocProvider<HomeBloc>(
-        create: (BuildContext context) => HomeBloc(databaseRepository: DatabaseRepository.instance)..add(HomeInitialEvent()),
+        create: (BuildContext context) =>
+            HomeBloc(databaseRepository: DatabaseRepository.instance)
+              ..add(HomeInitialEvent()),
       ),
+      BlocProvider(create: (BuildContext context) => SearchBloc(databaseRepository: DatabaseRepository.instance)
+              ..add(const SearchInitialEvent()))
     ],
     child: const MyApp(),
   ));
