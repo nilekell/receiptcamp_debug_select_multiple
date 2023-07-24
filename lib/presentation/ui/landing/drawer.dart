@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:receiptcamp/data/repositories/database_repository.dart';
 
 class NavDrawer extends StatelessWidget {
   const NavDrawer({super.key});
@@ -36,7 +37,16 @@ class NavDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.print),
             title: const Text('Print all receipts'),
-            onTap: () {},
+            onTap: () {
+              DatabaseRepository.instance.printAllReceipts();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.print),
+            title: const Text('Print all tags'),
+            onTap: () {
+              DatabaseRepository.instance.printAllTags();
+            },
           )
         ],
       ),
