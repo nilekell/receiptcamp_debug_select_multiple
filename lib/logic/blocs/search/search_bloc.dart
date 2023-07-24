@@ -10,19 +10,22 @@ part 'search_state.dart';
 
 const _duration = Duration(milliseconds: 300);
 
-EventTransformer<Event> debounce<Event>(Duration duration) {
+EventTransformer<SearchEvent> debounce<SearchEvent>(Duration duration) {
   return (events, mapper) => events.debounce(duration).switchMap(mapper);
 }
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   SearchBloc({required this.databaseRepository}) : super(SearchInitial()) {
+    on<SearchInitialEvent>(_initial);
     on<TextChanged>(_onTextChanged, transformer: debounce(_duration));
     on<FetchSuggestions>(_fetchSuggestions);
     on<FetchResults>(_fetchResults);
   }
   final DatabaseRepository databaseRepository;
 
-
+  FutureOr<void> _initial(SearchInitialEvent event, Emitter<SearchState> emit) {
+    emit(SearchInitial());
+  }
 
   FutureOr<void> _onTextChanged(TextChanged event, Emitter<SearchState> emit) async {
     emit(SearchStateLoading());
@@ -33,12 +36,27 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       return;
     } 
 
-   add(FetchSuggestions(queryText: event.text));
+   add(FetchSuggestions(queryText: searchTerm));
   }
 
-  FutureOr<void> _fetchSuggestions(FetchSuggestions event, Emitter<SearchState> emit) {
+  FutureOr<void> _fetchSuggestions(FetchSuggestions event, Emitter<SearchState> emit) async {
+    emit(SearchStateLoading());
+    try {
+      final receipts = await databaseRepository.getSuggestedReceiptsByTags(event.queryText);
+      
+      if (receipts.isEmpty) {
+        emit(SearchStateEmpty());
+        return;
+      }
+
+      emit(SearchStateSuccess(receipts));
+
+    } catch (e) {
+      emit(SearchStateError(e.toString()));
+    } 
   }
 
   FutureOr<void> _fetchResults(FetchResults event, Emitter<SearchState> emit) {
+    emit(SearchStateLoading());
   }
 }
