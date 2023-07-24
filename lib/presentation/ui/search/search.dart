@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
+import 'package:receiptcamp/presentation/screens/file_explorer.dart';
 
 class CustomSearchDelegate extends SearchDelegate {
   final SearchBloc searchBloc;
@@ -35,7 +36,7 @@ class CustomSearchDelegate extends SearchDelegate {
   }
 
   // third overridden method to show the querying process at the runtime
-  // method is called when the user submits a query
+  // method is called when the user submits a query in the keyboard
   @override
   Widget buildResults(BuildContext context) {
     return BlocBuilder<SearchBloc, SearchState>(
@@ -55,17 +56,31 @@ class CustomSearchDelegate extends SearchDelegate {
   // method is called whenever the content of [query] changes
   @override
   Widget buildSuggestions(BuildContext context) {
-    searchBloc.add(TextChanged(text: query));
+    searchBloc.add(TextChanged(text: query.trim().toLowerCase()));
 
     return BlocBuilder<SearchBloc, SearchState>(
       builder: (context, state) {
-        return ListView(
-          children: const [
-            Text('suggestion 1'),
-            Text('suggestion 2'),
-            Text('suggestion 3'),
-          ],
-        );
+        switch (state) {
+          case SearchInitial():
+            return Container();
+          case SearchStateLoading():
+            return const Center(child: CircularProgressIndicator());
+          case SearchStateEmpty():
+            return const Center(child: Text("Sorry, we couldn't find any results"));
+          case SearchStateSuccess():
+            return Scrollbar(
+              child: ListView.builder(
+                itemCount: state.items.length,
+                itemBuilder: (context, index) {
+                  final receipt = state.items[index];
+                  return ReceiptListTile(receipt: receipt);
+                }));
+          case SearchStateError():
+            return const Center(child:Text('Sorry, an unexpected error occured, please try again'));
+          default:
+            return Container();
+
+        }
       },
     );
   }
