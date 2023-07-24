@@ -109,10 +109,14 @@ class DatabaseRepository {
     return await _databaseService.insertTags(tags);
   }
   
-
   Future<List<Tag>> getTagsByReceiptID(String receiptId) async {
     return await _databaseService.getTagsByReceiptID(receiptId);
   }
+
+  Future<void> printAllTags() async {
+    _databaseService.printAllTags();
+  }
+
   // Delete all data
 
   Future<void> deleteAll() async {
