@@ -7,6 +7,13 @@ sealed class SearchEvent extends Equatable {
   List<Object> get props => [];
 }
 
+final class SearchInitialEvent extends SearchEvent {
+  const SearchInitialEvent();
+
+   @override
+   List<Object> get props => [];
+}
+
 final class TextChanged extends SearchEvent {
   const TextChanged({required this.text});
 
@@ -15,7 +22,7 @@ final class TextChanged extends SearchEvent {
   @override
   List<Object> get props => [text];
 
-   @override
+  @override
   String toString() => 'TextChanged { text: $text }';
 }
 
