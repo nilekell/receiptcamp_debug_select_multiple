@@ -49,6 +49,8 @@ class CustomSearchDelegate extends SearchDelegate {
             return Container();
           case SearchStateLoading():
             return const Center(child: CircularProgressIndicator());
+          case SearchStateNoQuery():
+            return const Center(child: Text('Start searching for any words on a receipt'));
           case SearchStateEmpty():
             return const Center(
                 child: Text("Sorry, we couldn't find any results"));
@@ -84,6 +86,8 @@ class CustomSearchDelegate extends SearchDelegate {
             return Container();
           case SearchStateLoading():
             return const Center(child: CircularProgressIndicator());
+          case SearchStateNoQuery():
+            return const Center(child: Text('Start searching for any words on a receipt'));
           case SearchStateEmpty():
             return const Center(
                 child: Text("Sorry, we couldn't find any results"));

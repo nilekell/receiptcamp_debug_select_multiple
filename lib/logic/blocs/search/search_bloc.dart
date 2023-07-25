@@ -34,7 +34,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     final searchTerm = event.text;
 
     if (searchTerm.isEmpty) {
-      emit(SearchStateEmpty());
+      emit(SearchStateNoQuery());
       return;
     } 
 
