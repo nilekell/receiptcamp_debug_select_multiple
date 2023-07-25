@@ -56,7 +56,8 @@ class TextRecognitionService {
       // Filter out any stop words and return the remaining words.
       final keywords = words
           .where((word) => !_commonReceiptWords.contains(word.toLowerCase()))
-          .toList();
+          .toSet() // Convert list to set to remove duplicates
+          .toList(); // Convert set back to list
       return keywords;
     } on Exception catch (e) {
       print('Error in extractKeywords: $e');
