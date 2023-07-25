@@ -510,11 +510,11 @@ class DatabaseService {
     final db = await database;
     // delete() returns number (int) of rows deleted
     // deleting all rows in the receipts table NOT SPECIFIC TO USER
-    print(await db.delete('receipts'));
+    print('total receipts deleted: ${await db.delete('receipts')}');
     // deleting ALL tags in database NOT SPECIFIC TO USER
-    print(await db.delete('tags'));
-    // deleting all folders in database NOT SPECIFIC TO USER
-    print(await db.delete('folders'));
+    print('total tags deleted: ${await db.delete('tags')}');
+    // deleting all folders in database (except root folder) NOT SPECIFIC TO USER
+    print('total folders deleted: ${await db.delete('folders', where: 'id != ?', whereArgs: ['a1'])}');
   }
 
   // Add Tag operations
