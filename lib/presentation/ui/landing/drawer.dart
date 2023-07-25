@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 
@@ -13,6 +14,13 @@ class NavDrawer extends StatelessWidget {
           const SizedBox(
             height: 100
           ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(10, 0, 0, 10),
+            child: Text('ReceiptCamp',
+            style: TextStyle(fontSize: 25,
+            fontWeight: FontWeight.bold),),
+          ),
+          const Divider(height: 4,),
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Settings'),
@@ -23,31 +31,29 @@ class NavDrawer extends StatelessWidget {
             title: const Text('Feedback'),
             onTap: () => {Navigator.of(context).pop()},
           ),
-          ListTile(
-            leading: const Icon(Icons.exit_to_app),
-            title: const Text('Logout'),
-            onTap: () {},
-          ),
           // temporary buttons for debugging
-          ListTile(
+          kDebugMode ? 
+            ListTile(
             leading: const Icon(Icons.delete),
             title: const Text('Delete all receipts'),
-            onTap: () {},
-          ),
-          ListTile(
+            onTap: () {
+              DatabaseRepository.instance.deleteAll();
+            },
+          ) : Container(),
+          kDebugMode ? ListTile(
             leading: const Icon(Icons.print),
             title: const Text('Print all receipts'),
             onTap: () {
               DatabaseRepository.instance.printAllReceipts();
             },
-          ),
-          ListTile(
+          )  : Container(),
+          kDebugMode ? ListTile(
             leading: const Icon(Icons.print),
             title: const Text('Print all tags'),
             onTap: () {
               DatabaseRepository.instance.printAllTags();
             },
-          )
+          ) : Container()
         ],
       ),
     );
