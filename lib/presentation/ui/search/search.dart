@@ -7,7 +7,7 @@ class CustomSearchDelegate extends SearchDelegate {
   final SearchBloc searchBloc;
 
   CustomSearchDelegate({required this.searchBloc}) : super();
-  
+
   // first overridden method to build ui that appears after search field
   @override
   List<Widget>? buildActions(BuildContext context) {
@@ -41,13 +41,29 @@ class CustomSearchDelegate extends SearchDelegate {
   Widget buildResults(BuildContext context) {
     return BlocBuilder<SearchBloc, SearchState>(
       builder: (context, state) {
-        return ListView(
-          children: const [
-            Text('result 1'),
-            Text('result 2'),
-            Text('result 3'),
-          ],
-        );
+        switch (state) {
+          case SearchInitial():
+            return Container();
+          case SearchStateLoading():
+            return const Center(child: CircularProgressIndicator());
+          case SearchStateEmpty():
+            return const Center(
+                child: Text("Sorry, we couldn't find any results"));
+          case SearchStateSuccess():
+            return Scrollbar(
+                child: ListView.builder(
+                    itemCount: state.items.length,
+                    itemBuilder: (context, index) {
+                      final receipt = state.items[index];
+                      return ReceiptListTile(receipt: receipt);
+                    }));
+          case SearchStateError():
+            return const Center(
+                child: Text(
+                    'Sorry, an unexpected error occured, please try again'));
+          default:
+            return Container();
+        }
       },
     );
   }
@@ -66,20 +82,22 @@ class CustomSearchDelegate extends SearchDelegate {
           case SearchStateLoading():
             return const Center(child: CircularProgressIndicator());
           case SearchStateEmpty():
-            return const Center(child: Text("Sorry, we couldn't find any results"));
+            return const Center(
+                child: Text("Sorry, we couldn't find any results"));
           case SearchStateSuccess():
             return Scrollbar(
-              child: ListView.builder(
-                itemCount: state.items.length,
-                itemBuilder: (context, index) {
-                  final receipt = state.items[index];
-                  return ReceiptListTile(receipt: receipt);
-                }));
+                child: ListView.builder(
+                    itemCount: state.items.length,
+                    itemBuilder: (context, index) {
+                      final receipt = state.items[index];
+                      return ReceiptListTile(receipt: receipt);
+                    }));
           case SearchStateError():
-            return const Center(child:Text('Sorry, an unexpected error occured, please try again'));
+            return const Center(
+                child: Text(
+                    'Sorry, an unexpected error occured, please try again'));
           default:
             return Container();
-
         }
       },
     );
