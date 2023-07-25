@@ -10,6 +10,8 @@ part 'search_state.dart';
 
 const _duration = Duration(milliseconds: 300);
 
+// delays the calling of _onTextChanged() by a set duration. This reduces unnecessary
+// database calls in _fetchSuggestions() as _onTextChanged() is called whenever the contents of the [query] changes in CustomSearchDelegate
 EventTransformer<SearchEvent> debounce<SearchEvent>(Duration duration) {
   return (events, mapper) => events.debounce(duration).switchMap(mapper);
 }
@@ -56,7 +58,20 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     } 
   }
 
-  FutureOr<void> _fetchResults(FetchResults event, Emitter<SearchState> emit) {
+  FutureOr<void> _fetchResults(FetchResults event, Emitter<SearchState> emit) async {
     emit(SearchStateLoading());
+    try {
+      final receipts = await databaseRepository.getFinalReceiptsByTags(event.queryText);
+      
+      if (receipts.isEmpty) {
+        emit(SearchStateEmpty());
+        return;
+      }
+
+      emit(SearchStateSuccess(receipts));
+
+    } catch (e) {
+      emit(SearchStateError(e.toString()));
+    } 
   }
 }
