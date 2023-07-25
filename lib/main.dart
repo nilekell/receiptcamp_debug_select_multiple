@@ -7,6 +7,7 @@ import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
 import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
 import 'package:receiptcamp/presentation/router/app_router.dart';
 import 'package:receiptcamp/presentation/screens/landing_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 // import 'package:flutter/scheduler.dart' show timeDilation;
 
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'ReceiptCamp',
         theme: ThemeData(
+          textTheme: GoogleFonts.latoTextTheme(),
           primarySwatch: Colors.blue,
         ),
         onGenerateRoute: AppRouter().onGenerateRoute,
