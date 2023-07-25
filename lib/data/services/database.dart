@@ -587,7 +587,6 @@ class DatabaseService {
           parentId: maps[i]['parentId']);
     });
 
-    print(receiptList.length);
     return receiptList;
   }
 
@@ -620,5 +619,22 @@ class DatabaseService {
 
     print('num of receipts: ${receiptList.length}');
     return receiptList;
+  }
+
+  void printAllTags() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('tags');
+
+    final tags = List.generate(maps.length, (i) {
+      return Tag(
+        id: maps[i]['id'],
+        receiptId: maps[i]['receiptId'],
+        tag: maps[i]['tag'],
+      );
+    });
+
+    for (var tag in tags) {
+      print('${tag.id}, ${tag.receiptId}, ${tag.tag}');
+    }
   }
 }
