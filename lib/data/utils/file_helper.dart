@@ -11,20 +11,49 @@ import 'package:share_plus/share_plus.dart';
 
 class FileService {
   static Future<File?> compressFile(File imageFile, String targetPath) async {
+    CompressFormat format;
+    final fileExtension = extension(imageFile.path);
+
+    // final sizeBeforeCompression = await bytesToSizeString(await getFileSize(imageFile.path, 2));
+    // print('file size before compression: $sizeBeforeCompression');
+
+    // print('${basename(imageFile.path)} has extension $fileExtension');
+
+    // ImagePicker library automatically converts images to .jpg format, so all uploaded into app via camera or library will have
+    // .jpg ending, so below cases '.png' & '.heic' are redundant, but kept in code for future proofing
+    switch (fileExtension) {
+      case '.jpeg' || '.jpg':
+        format = CompressFormat.jpeg;
+      case '.png':
+        format = CompressFormat.png;
+      case '.heic':
+        format = CompressFormat.heic;
+      default:
+        throw Exception(
+            'Exception occurred in FileService.compressFile(): Cannot compress file type: $fileExtension');
+    }
+
     try {
       var result = await FlutterImageCompress.compressAndGetFile(
         imageFile.absolute.path,
         targetPath,
-        quality: 88,
-        format: CompressFormat.jpeg,
+        // quality: 88 -> reduced in size by ~50%
+        // quality: 1 -> reduced in size by ~95%
+        // quality: 30 -> reduced in size by ~95%
+        // quality: 50 -> reduced in size by ~87%
+        quality: 50,
+        format: format,
       );
       if (result == null) {
         return null;
       } else {
+        // final sizeAfterCompression = await bytesToSizeString(await getFileSize(result.path, 2));
+        // print('file size after compression: $sizeAfterCompression');
+        // print('filename after compression ${basename(result.path)}');
         return File(result.path);
       }
     } on Exception catch (e) {
-      print('Error in compressFile: $e');
+      print('Error in FlutterImageCompress.compressAndGetFile(): $e');
       return null;
     }
   }
@@ -109,10 +138,11 @@ class FileService {
   static Future<void> shareReceipt(Receipt receipt) async {
     try {
       // shows platform share sheet
-      await Share.shareXFiles([XFile(receipt.localPath)], subject: receipt.name);
+      await Share.shareXFiles([XFile(receipt.localPath)],
+          subject: receipt.name);
     } on Exception catch (e) {
       print('Error in shareReceipt: $e');
-      throw e;
+      return;
     }
   }
 
@@ -123,7 +153,7 @@ class FileService {
       print('image saved to camera roll');
     } on Exception catch (e) {
       print('Error in saveImageToCameraRoll: $e');
-      throw e;
+      rethrow;
     }
   }
 }
