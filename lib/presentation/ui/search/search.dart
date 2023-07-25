@@ -1,7 +1,10 @@
+import 'dart:io';
+
+import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
-import 'package:receiptcamp/presentation/screens/file_explorer.dart';
+import 'package:receiptcamp/models/receipt.dart';
 
 class CustomSearchDelegate extends SearchDelegate {
   final SearchBloc searchBloc;
@@ -55,7 +58,7 @@ class CustomSearchDelegate extends SearchDelegate {
                     itemCount: state.items.length,
                     itemBuilder: (context, index) {
                       final receipt = state.items[index];
-                      return ReceiptListTile(receipt: receipt);
+                      return ReceiptSearchTile(receipt: receipt);
                     }));
           case SearchStateError():
             return const Center(
@@ -90,7 +93,7 @@ class CustomSearchDelegate extends SearchDelegate {
                     itemCount: state.items.length,
                     itemBuilder: (context, index) {
                       final receipt = state.items[index];
-                      return ReceiptListTile(receipt: receipt);
+                      return ReceiptSearchTile(receipt: receipt);
                     }));
           case SearchStateError():
             return const Center(
@@ -101,5 +104,22 @@ class CustomSearchDelegate extends SearchDelegate {
         }
       },
     );
+  }
+}
+
+class ReceiptSearchTile extends StatelessWidget {
+  final Receipt receipt;
+
+  const ReceiptSearchTile({super.key, required this.receipt});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+        leading: const Icon(Icons.receipt),
+        onTap: () {
+          final imageProvider = Image.file(File(receipt.localPath)).image;
+          showImageViewer(context, imageProvider);
+        },
+        title: Text(receipt.name.split('.').first));
   }
 }
