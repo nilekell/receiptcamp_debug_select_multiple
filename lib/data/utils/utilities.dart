@@ -32,8 +32,21 @@ class Utility {
       return unixTimestamp;
     } catch (e) {
       print('Error in formatUnixTimeStampFromDateTime: $e');
-      throw e;
+      rethrow;
     }
+  }
+
+  static String formatDisplayDateFromDateTime(String formattedDateTime) {
+    try {
+      final originalFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+      final targetFormat = DateFormat('d MMMM yyyy');
+      DateTime dateTime = originalFormat.parse(formattedDateTime);
+      return targetFormat.format(dateTime);
+    } catch (e) {
+      print('Error in formatDisplayDateFromDateTime: $e');
+      rethrow;
+    }
+
   }
 
   static Future<String> bytesToSizeString(int bytes) async {

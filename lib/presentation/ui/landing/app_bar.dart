@@ -13,7 +13,8 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget{
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.blue,
-      title: const Text("ReceiptCamp"),
+      title: const Text("ReceiptCamp",
+      style: TextStyle(fontSize: 27),),
       actions: [
         IconButton(
           onPressed: () {
