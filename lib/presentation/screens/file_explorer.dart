@@ -58,32 +58,32 @@ class _FileExplorerState extends State<FileExplorer> {
                       )
                     : Container(),
                 Expanded(
-                  child: BlocListener<FileSystemCubit, FileSystemCubitState>(
-                    listener: (context, state) {
-                      switch (state) {
-                        case FileSystemCubitFolderInformationSuccess():
-                          print(
-                              'RefreshableFolderView: fetchFiles for ${state.folder.name}');
-                          context
-                              .read<FolderViewCubit>()
-                              .fetchFiles(state.folder.id);
-                        default:
-                          print(
-                              'RefreshableFolderViewState: ${state.toString()}');
-                      }
-                    },
-                    child: const RefreshableFolderView(),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 35, 35),
+                  child: Stack(
+                    children: [
+                      BlocListener<FileSystemCubit, FileSystemCubitState>(
+                      listener: (context, state) {
+                        switch (state) {
+                          case FileSystemCubitFolderInformationSuccess():
+                            print(
+                                'RefreshableFolderView: fetchFiles for ${state.folder.name}');
+                            context
+                                .read<FolderViewCubit>()
+                                .fetchFiles(state.folder.id);
+                          default:
+                            print(
+                                'RefreshableFolderViewState: ${state.toString()}');
+                        }
+                      },
+                      child: const RefreshableFolderView(),
+                    ),
+                    Positioned(
+                      right: 28,
+                      bottom: 28,
                       child: UploadButton(currentFolder: state.folder),
                     ),
                   ],
-                )
+                  ),
+                ),
               ],
             );
           case FileSystemCubitError():
@@ -207,7 +207,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                         children: <Widget>[
                           SizedBox(height: 20),
                           Text(
-                            "To start saving receipts, tap the upload button below",
+                            "To add receipts, tap the upload button below",
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.w500),
                             textAlign: TextAlign.center,
@@ -248,7 +248,7 @@ class FolderListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      subtitle: Text(displayDate),
+      subtitle: Text('Modified $displayDate'),
       leading: const Icon(
         Icons.folder,
         size: 35,
@@ -293,7 +293,7 @@ class ReceiptListTile extends StatelessWidget {
             fit: BoxFit.cover,
           ),
         ),
-        subtitle: Text(displayDate),
+        subtitle: Text('Created $displayDate'),
         trailing: IconButton(
           icon: const Icon(
             Icons.more_horiz,
