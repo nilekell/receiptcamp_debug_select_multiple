@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
-import 'package:receiptcamp/presentation/ui/file_navigator/folder/create_folder_dialog.dart';
+import 'package:receiptcamp/presentation/ui/file_explorer/folder/create_folder_dialog.dart';
 
 void showUploadOptions(BuildContext context, FolderViewCubit folderViewCubit, Folder currentFolder) {
   showModalBottomSheet(
