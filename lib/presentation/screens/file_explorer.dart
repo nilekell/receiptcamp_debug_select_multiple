@@ -80,7 +80,7 @@ class _FileExplorerState extends State<FileExplorer> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 30, 30),
+                      padding: const EdgeInsets.fromLTRB(0, 0, 35, 35),
                       child: UploadButton(currentFolder: state.folder),
                     ),
                   ],
@@ -162,59 +162,79 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<FolderViewCubit, FolderViewState>(
-          listenWhen: (previous, current) => current is FolderViewActionState,
-          listener: (context, state) {
-            SnackBarUtility.showSnackBar(context, state);
-          },
-          builder: (context, state) {
-            switch (state) {
-              case FolderViewInitial() || FolderViewLoading():
-                return const Column(
+      listenWhen: (previous, current) => current is FolderViewActionState,
+      listener: (context, state) {
+        SnackBarUtility.showSnackBar(context, state);
+      },
+      builder: (context, state) {
+        switch (state) {
+          case FolderViewInitial() || FolderViewLoading():
+            return const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Center(child: CircularProgressIndicator()),
               ],
             );
-              case FolderViewLoadedSuccess():
-              print('RefreshableFolderView built with folder: ${state.folder.name}');
-                return RefreshIndicator(
-                  onRefresh: () async {
-                    print('refreshing folder ${state.folder.name}');
-                    context.read<FolderViewCubit>().fetchFiles(state.folder.id);
-                  },
-                  child: state.files.isNotEmpty
-                      ? ListView.builder(
-                          itemCount: state.files.length,
-                          itemBuilder: (context, index) {
-                            var item = state.files[index];
-                            if (item is Receipt) {
-                              return ReceiptListTile(receipt: item);
-                            } else if (item is Folder) {
-                              return FolderListTile(folder: item);
-                            } else {
-                              return const ListTile(
-                                  title: Text('Unknown file type'));
-                            }
-                          },
-                        )
-                      : const Padding(
-                          padding: EdgeInsets.all(100.0),
-                          child: Text('No receipts/folders to show'),
-                        ),
-                );
-              case FolderViewError():
-                print(
-                    'FolderViewCubitError with state: ${state.runtimeType.toString()}');
-                return const Center(
-                  child: Text('Error State'),
-                );
-              default:
-                print(
-                    'RefreshableFolderView BlocBuilder - Unaccounted for state: ${state.runtimeType.toString()}');
-                return Container();
-            }
-          },
-        );
+          case FolderViewLoadedSuccess():
+            print(
+                'RefreshableFolderView built with folder: ${state.folder.name}');
+            return RefreshIndicator(
+              onRefresh: () async {
+                print('refreshing folder ${state.folder.name}');
+                context.read<FolderViewCubit>().fetchFiles(state.folder.id);
+              },
+              child: state.files.isNotEmpty
+                  ? ListView.builder(
+                      itemCount: state.files.length,
+                      itemBuilder: (context, index) {
+                        var item = state.files[index];
+                        if (item is Receipt) {
+                          return ReceiptListTile(receipt: item);
+                        } else if (item is Folder) {
+                          return FolderListTile(folder: item);
+                        } else {
+                          return const ListTile(
+                              title: Text('Unknown file type'));
+                        }
+                      },
+                    )
+                  : const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          SizedBox(
+                              height:
+                                  20), // provide some space between image and text
+                          Text(
+                            "You haven't saved any receipts yet :(",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w500),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "To start saving receipts, tap the upload button below",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w500),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+            );
+          case FolderViewError():
+            print(
+                'FolderViewCubitError with state: ${state.runtimeType.toString()}');
+            return const Center(
+              child: Text('Error State'),
+            );
+          default:
+            print(
+                'RefreshableFolderView BlocBuilder - Unaccounted for state: ${state.runtimeType.toString()}');
+            return Container();
+        }
+      },
+    );
   }
 }
 
@@ -281,7 +301,7 @@ class UploadButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('UploadButton built with folder: ${currentFolder.name}');
-    return FloatingActionButton(
+    return FloatingActionButton.large(
       onPressed: () {
         showUploadOptions(
             context, context.read<FolderViewCubit>(), currentFolder);
