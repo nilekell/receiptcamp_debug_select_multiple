@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
@@ -47,12 +48,9 @@ class _FileExplorerState extends State<FileExplorer> {
                         name: state.folder.name,
                       )
                     : const FolderName(
-                        name: 'My Receipts',
+                        name: 'All Receipts',
                       ),
                 const Divider(thickness: 2),
-                const SizedBox(
-                  height: 5.0,
-                ),
                 state.folder.id != 'a1'
                     ? BackButton(
                         previousFolderId: state.folder.parentId,
@@ -190,9 +188,12 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                       itemBuilder: (context, index) {
                         var item = state.files[index];
                         if (item is Receipt) {
-                          return ReceiptListTile(receipt: item);
+                          return SizedBox(
+                              height: 60,
+                              child: ReceiptListTile(receipt: item));
                         } else if (item is Folder) {
-                          return FolderListTile(folder: item);
+                          return SizedBox(
+                              height: 60, child: FolderListTile(folder: item));
                         } else {
                           return const ListTile(
                               title: Text('Unknown file type'));
@@ -204,15 +205,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          SizedBox(
-                              height:
-                                  20), // provide some space between image and text
-                          Text(
-                            "You haven't saved any receipts yet :(",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w500),
-                            textAlign: TextAlign.center,
-                          ),
+                          SizedBox(height: 20),
                           Text(
                             "To start saving receipts, tap the upload button below",
                             style: TextStyle(
@@ -241,18 +234,27 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
 
 class FolderListTile extends StatelessWidget {
   final Folder folder;
+  final String displayName;
+  final String displayDate;
 
-  const FolderListTile({super.key, required this.folder});
+  FolderListTile({Key? key, required this.folder})
+      : displayName = folder.name.length > 25
+            ? "${folder.name.substring(0, 25)}..."
+            : folder.name,
+        displayDate = Utility.formatDisplayDateFromDateTime(
+            Utility.formatDateTimeFromUnixTimestamp(folder.lastModified)),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const Icon(Icons.folder),
+      leading: const Icon(
+        Icons.folder,
+        size: 35,
+      ),
       trailing: IconButton(
-        icon: Icon(
-          Icons.more,
-          size: 20.0,
-          color: Colors.brown[900],
+        icon: const Icon(
+          Icons.more_horiz,
         ),
         onPressed: () {
           showFolderOptions(context, context.read<FolderViewCubit>(), folder);
@@ -261,25 +263,39 @@ class FolderListTile extends StatelessWidget {
       onTap: () {
         context.read<FileSystemCubit>().selectFolder(folder.id);
       },
-      title: Text(folder.name),
+      title: Text(displayName),
     );
   }
 }
 
 class ReceiptListTile extends StatelessWidget {
   final Receipt receipt;
+  final String displayName;
+  final String displayDate;
 
-  const ReceiptListTile({super.key, required this.receipt});
+  ReceiptListTile({Key? key, required this.receipt})
+      : displayName = receipt.name.length > 25
+            ? "${receipt.name.substring(0, 25)}..."
+            : receipt.name,
+        displayDate = Utility.formatDisplayDateFromDateTime(
+            Utility.formatDateTimeFromUnixTimestamp(receipt.lastModified)),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        leading: const Icon(Icons.receipt),
+        leading: ClipRRect(
+          // square image corners
+          borderRadius: const BorderRadius.all(Radius.zero),
+          child: Image.file(
+            File(receipt.localPath),
+            fit: BoxFit.cover,
+          ),
+        ),
+        subtitle: Text(displayDate),
         trailing: IconButton(
-          icon: Icon(
-            Icons.more,
-            size: 20.0,
-            color: Colors.brown[900],
+          icon: const Icon(
+            Icons.more_horiz,
           ),
           onPressed: () {
             showReceiptOptions(
@@ -290,7 +306,7 @@ class ReceiptListTile extends StatelessWidget {
           final imageProvider = Image.file(File(receipt.localPath)).image;
           showImageViewer(context, imageProvider);
         },
-        title: Text(receipt.name.split('.').first));
+        title: Text(displayName));
   }
 }
 
