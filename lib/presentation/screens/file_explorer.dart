@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
@@ -20,10 +21,31 @@ class FileExplorer extends StatefulWidget {
 }
 
 class _FileExplorerState extends State<FileExplorer> {
+  late ScrollController _scrollController;
+  bool _showUploadButton = true;
+
   @override
   void initState() {
+    _scrollController = ScrollController();
+    _scrollController.addListener(_scrollListener);
     context.read<FileSystemCubit>().initializeFileSystemCubit();
     super.initState();
+  }
+
+  _scrollListener() {
+    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+      // Hide the upload button when user scroll down
+      if (_showUploadButton) setState(() => _showUploadButton = false);
+    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
+      // Show the upload button when user scroll up or stop scrolling
+      if (!_showUploadButton) setState(() => _showUploadButton = true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -74,13 +96,14 @@ class _FileExplorerState extends State<FileExplorer> {
                                 'RefreshableFolderViewState: ${state.toString()}');
                         }
                       },
-                      child: const RefreshableFolderView(),
+                      child: RefreshableFolderView(scrollController: _scrollController),
                     ),
+                  if (_showUploadButton) 
                     Positioned(
                       right: 28,
                       bottom: 28,
                       child: UploadButton(currentFolder: state.folder),
-                    ),
+                    )
                   ],
                   ),
                 ),
@@ -144,7 +167,9 @@ class BackButton extends StatelessWidget {
 }
 
 class RefreshableFolderView extends StatefulWidget {
-  const RefreshableFolderView({super.key});
+  final ScrollController scrollController;
+
+  const RefreshableFolderView({super.key, required this.scrollController});
 
   @override
   State<RefreshableFolderView> createState() => _RefreshableFolderViewState();
@@ -184,6 +209,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
               },
               child: state.files.isNotEmpty
                   ? ListView.builder(
+                    controller: widget.scrollController,
                       itemCount: state.files.length,
                       itemBuilder: (context, index) {
                         var item = state.files[index];
