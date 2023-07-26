@@ -49,6 +49,7 @@ class _FileExplorerState extends State<FileExplorer> {
                     : const FolderName(
                         name: 'My Receipts',
                       ),
+                const Divider(thickness: 2),
                 const SizedBox(
                   height: 5.0,
                 ),
