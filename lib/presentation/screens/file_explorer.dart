@@ -248,6 +248,7 @@ class FolderListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      subtitle: Text(displayDate),
       leading: const Icon(
         Icons.folder,
         size: 35,
