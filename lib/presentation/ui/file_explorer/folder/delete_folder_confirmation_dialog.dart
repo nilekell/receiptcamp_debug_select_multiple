@@ -26,8 +26,8 @@ class DeleteFolderDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Delete Forever'),
-      content: Text('${folder.name} will be deleted forever.'),
+      title: const Text('Delete forever?', textAlign: TextAlign.left, style: TextStyle(fontWeight: FontWeight.w500),),
+      content: Text("'${folder.name}' and its contents will be deleted forever."),
       actions: <Widget>[
         TextButton(
           child: const Text('Cancel'),
