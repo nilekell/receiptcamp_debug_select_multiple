@@ -11,6 +11,11 @@ void showFolderOptions(BuildContext context, FolderViewCubit folderViewCubit, Fo
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
+          leading: const Icon(Icons.folder),
+          title: Text(folder.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),),
+        ),
+        const Divider(thickness: 2,),
+        ListTile(
           leading: const Icon(Icons.edit),
           title: const Text('Rename'),
           onTap: () {
@@ -39,6 +44,7 @@ void showFolderOptions(BuildContext context, FolderViewCubit folderViewCubit, Fo
             showDeleteFolderDialog(bottomSheetContext, folderViewCubit, folder);
           },
         ),
+        const SizedBox(height: 25)
       ],
     ),
   );
