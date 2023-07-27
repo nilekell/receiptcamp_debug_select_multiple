@@ -4,7 +4,8 @@ import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/create_folder_dialog.dart';
 
-void showUploadOptions(BuildContext context, FolderViewCubit folderViewCubit, Folder currentFolder) {
+void showUploadOptions(BuildContext context, FolderViewCubit folderViewCubit,
+    Folder currentFolder) {
   showModalBottomSheet(
     context: context,
     builder: (bottomSheetContext) {
@@ -18,43 +19,89 @@ void showUploadOptions(BuildContext context, FolderViewCubit folderViewCubit, Fo
 
 class UploadOptionsBottomSheet extends StatelessWidget {
   final Folder currentFolder;
+  final double iconSize = 30.0;
+  final Color iconColour = Colors.white;
 
   const UploadOptionsBottomSheet({super.key, required this.currentFolder});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ListTile(
-          leading: const Icon(Icons.photo_library),
-          title: const Text('Choose from gallery'),
-          onTap: () {
-            context.read<FolderViewCubit>().uploadReceipt(currentFolder.id);
-            // closing bottom sheet
-            Navigator.of(context).pop();
-          },
-        ),
-        ListTile(
-          leading: const Icon(Icons.camera),
-          title: const Text('Take a photo'),
-          onTap: () {
-            context.read<FolderViewCubit>().uploadReceiptFromCamera(currentFolder.id);
-            // closing bottom sheet
-            Navigator.of(context).pop();
-          },
-        ),
-        ListTile(
-          leading: const Icon(Icons.folder),
-          title: const Text('New folder'),
-          onTap: () {
-            // closing bottom sheet
-            Navigator.of(context).pop();
-            showCreateFolderDialog(context, context.read<FolderViewCubit>(), currentFolder);
-          },
-        ),
-      ],
+    return Container(
+      // Row background colour
+      color: Colors.blue,
+      child: Row(
+        // row of icons
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                ),
+                child: IconButton(
+                  color: iconColour,
+                    iconSize: iconSize,
+                    splashRadius: 120,
+                    onPressed: () {
+                      context
+                          .read<FolderViewCubit>()
+                          .uploadReceipt(currentFolder.id);
+                      // closing bottom sheet
+                      Navigator.of(context).pop();
+                    },
+                    icon: const Icon(Icons.photo_library)),
+              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 3),
+              ),
+              child: IconButton(
+                  iconSize: iconSize,
+                  color: iconColour,
+                  onPressed: () {
+                    context
+                        .read<FolderViewCubit>()
+                        .uploadReceiptFromCamera(currentFolder.id);
+                    // closing bottom sheet
+                    Navigator.of(context).pop();
+                  },
+                  icon: const Icon(Icons.photo_camera)),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 3),
+              ),
+              child: IconButton(
+                  iconSize: iconSize,
+                  color: iconColour,
+                  onPressed: () {
+                    // closing bottom sheet
+                    Navigator.of(context).pop();
+                    showCreateFolderDialog(context,
+                        context.read<FolderViewCubit>(), currentFolder);
+                  },
+                  icon: const Icon(Icons.create_new_folder)),
+            ),
+          ),
+          const SizedBox(
+            height: 150,
+          )
+        ],
+      ),
     );
   }
 }
-
