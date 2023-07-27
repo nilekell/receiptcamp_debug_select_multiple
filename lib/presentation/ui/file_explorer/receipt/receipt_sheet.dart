@@ -12,6 +12,11 @@ void showReceiptOptions(BuildContext context, FolderViewCubit folderViewCubit, R
     builder: (bottomSheetContext) => Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+         ListTile(
+          leading: const Icon(Icons.receipt),
+          title: Text(receipt.name.split('.').first, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),),
+        ),
+        const Divider(thickness: 2,),
         ListTile(
           leading: const Icon(Icons.edit),
           title: const Text('Rename'),
@@ -56,6 +61,7 @@ void showReceiptOptions(BuildContext context, FolderViewCubit folderViewCubit, R
             FileService.shareReceipt(receipt);
           },
         ),
+        const SizedBox(height: 25)
       ],
     ),
   );
