@@ -26,7 +26,7 @@ class DeleteReceiptDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Delete Forever'),
+      title: const Text('Delete forever?', textAlign: TextAlign.left, style: TextStyle(fontWeight: FontWeight.w500),),
       content: Text('${receipt.name} will be deleted forever.'),
       actions: <Widget>[
         TextButton(
