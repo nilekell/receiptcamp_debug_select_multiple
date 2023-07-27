@@ -61,7 +61,7 @@ class _FolderDialogState extends State<FolderDialog> {
               ),
             ],
           )),
-      title: const Text('New Folder'),
+      title: const Text('New Folder', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w500)),
       actions: <Widget>[
         TextButton(
             child: const Text('Cancel'),
