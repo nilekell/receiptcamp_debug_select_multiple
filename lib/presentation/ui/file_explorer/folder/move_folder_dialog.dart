@@ -92,7 +92,7 @@ class _MoveFolderDialogState extends State<MoveFolderDialog> {
             }),
         TextButton(
           // disable button when a folder hasn't been selected yet OR there are no available folders that can be moved to
-          onPressed: selectedFolder != null && !availableFolders
+          onPressed: selectedFolder != null && availableFolders
               ? () {
             // closing folder dialog
             Navigator.of(context).pop();
