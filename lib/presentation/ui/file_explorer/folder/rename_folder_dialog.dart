@@ -76,7 +76,7 @@ class _RenameFolderDialogState extends State<RenameFolderDialog> {
                   ]),
             ],
           )),
-      title: const Text('Rename Folder'),
+      title: const Text('Rename Folder', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w500),),
       actions: <Widget>[
         TextButton(
             child: const Text('Cancel'),
