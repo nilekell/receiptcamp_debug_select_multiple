@@ -76,7 +76,7 @@ class _RenameReceiptDialogState extends State<RenameReceiptDialog> {
                   ]),
             ],
           )),
-      title: const Text('Rename Receipt'),
+      title: const Text('Rename Receipt', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w500)),
       actions: <Widget>[
         TextButton(
             child: const Text('Cancel'),
