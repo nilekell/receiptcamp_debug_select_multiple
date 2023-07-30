@@ -27,6 +27,8 @@ class MoveReceiptDialog extends StatefulWidget {
 
 class _MoveReceiptDialogState extends State<MoveReceiptDialog> {
   List<Folder> folders = [];
+  // if there are any possible folders that the current folder can be moved to, [availableFolders] = true
+  bool availableFolders = true;
   Folder? selectedFolder;
 
   @override
@@ -41,20 +43,27 @@ class _MoveReceiptDialogState extends State<MoveReceiptDialog> {
       setState(() {
         selectedFolder = folders[0];
       });
+    } else if (folders.isEmpty) {
+      setState(() {
+        availableFolders = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Move To Folder'),
+      title: const Text('Move to...'),
       content: SingleChildScrollView(
         child: Center(
           child: DropdownButton<Folder>(
             value: selectedFolder,
+            isDense: true,
+            isExpanded: true,
+            hint: const Text('Select folder'),
             items: folders.map<DropdownMenuItem<Folder>>((Folder folder) {
               return DropdownMenuItem<Folder>(
-                  value: folder, child: Text(folder.name));
+                  value: folder,child: Text(folder.name));
             }).toList(),
             onChanged: (Folder? value) {
               setState(() {
@@ -71,10 +80,13 @@ class _MoveReceiptDialogState extends State<MoveReceiptDialog> {
               Navigator.of(context).pop();
             }),
         TextButton(
-          onPressed: () {
+          // disable button when a folder hasn't been selected yet OR there are no available folders that can be moved to
+          onPressed: selectedFolder != null && availableFolders
+              ? () {
+            // closing folder dialog
             Navigator.of(context).pop();
             context.read<FolderViewCubit>().moveReceipt(widget.receipt, selectedFolder!.id);
-          },
+          } : null,
           child: const Text('Move'),
         ),
       ],

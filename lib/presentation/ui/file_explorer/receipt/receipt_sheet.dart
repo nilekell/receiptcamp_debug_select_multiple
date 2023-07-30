@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/receipt.dart';
-import 'package:receiptcamp/presentation/ui/file_navigator/receipt/delete_receipt_confirmation_dialog.dart';
-import 'package:receiptcamp/presentation/ui/file_navigator/receipt/move_receipt_dialog.dart';
-import 'package:receiptcamp/presentation/ui/file_navigator/receipt/rename_receipt_dialog.dart';
+import 'package:receiptcamp/presentation/ui/file_explorer/receipt/delete_receipt_confirmation_dialog.dart';
+import 'package:receiptcamp/presentation/ui/file_explorer/receipt/move_receipt_dialog.dart';
+import 'package:receiptcamp/presentation/ui/file_explorer/receipt/rename_receipt_dialog.dart';
 
 void showReceiptOptions(BuildContext context, FolderViewCubit folderViewCubit, Receipt receipt) {
   showModalBottomSheet(
@@ -12,6 +12,11 @@ void showReceiptOptions(BuildContext context, FolderViewCubit folderViewCubit, R
     builder: (bottomSheetContext) => Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+         ListTile(
+          leading: const Icon(Icons.receipt),
+          title: Text(receipt.name.split('.').first, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),),
+        ),
+        const Divider(thickness: 2,),
         ListTile(
           leading: const Icon(Icons.edit),
           title: const Text('Rename'),
@@ -56,6 +61,7 @@ void showReceiptOptions(BuildContext context, FolderViewCubit folderViewCubit, R
             FileService.shareReceipt(receipt);
           },
         ),
+        const SizedBox(height: 25)
       ],
     ),
   );

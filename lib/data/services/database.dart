@@ -1,3 +1,4 @@
+import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/models/folder.dart';
@@ -54,8 +55,8 @@ class DatabaseService {
         // creating an initial folder for all receipts to first be added to when they are created
         await db.execute('''
           INSERT INTO folders (id, name, lastModified, parentId)
-          VALUES('a1','all', ?, 'null')
-        ''', [currentTime]);
+          VALUES(?, ?, ?, 'null')
+        ''', [rootFolderId, rootFolderName,currentTime]);
 
         // create receipts table
         await db.execute('''
@@ -162,7 +163,7 @@ class DatabaseService {
   // Method to insert a Folder object into the database.
   Future<void> insertFolder(Folder folder) async {
     final db = await database;
-    if (folder.name == 'all') {
+    if (folder.name == rootFolderName) {
       throw Exception('folder cannot have same name as default folder');
       // function ends after throw statement
     }

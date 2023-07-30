@@ -1,33 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
-import 'package:receiptcamp/models/folder.dart';
+import 'package:receiptcamp/models/receipt.dart';
 
-Future<void> showDeleteFolderDialog(BuildContext context,
-    FolderViewCubit folderViewCubit, Folder folder) async {
+Future<void> showDeleteReceiptDialog(BuildContext context,
+    FolderViewCubit folderViewCubit, Receipt receipt) async {
   return await showDialog(
     context: context,
-    builder: (deleteFolderDialogContext) {
+    builder: (deleteReceiptDialogContext) {
       return BlocProvider.value(
         value: folderViewCubit,
-        child: DeleteFolderDialog(folder: folder,),
+        child: DeleteReceiptDialog(receipt: receipt)
       );
     },
   );
 }
 
-class DeleteFolderDialog extends StatelessWidget {
-  final Folder folder;
+class DeleteReceiptDialog extends StatelessWidget {
+  final Receipt receipt;
 
-  const DeleteFolderDialog({
-    super.key, required this.folder
+  const DeleteReceiptDialog({
+    super.key, required this.receipt
   });
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Delete Forever'),
-      content: Text('${folder.name} will be deleted forever.'),
+      title: const Text('Delete forever?', textAlign: TextAlign.left, style: TextStyle(fontWeight: FontWeight.w500),),
+      content: Text('${receipt.name} will be deleted forever.'),
       actions: <Widget>[
         TextButton(
           child: const Text('Cancel'),
@@ -38,7 +38,7 @@ class DeleteFolderDialog extends StatelessWidget {
         TextButton(
           child: const Text('Delete'),
           onPressed: () {
-            context.read<FolderViewCubit>().deleteFolder(folder.id);
+            context.read<FolderViewCubit>().deleteReceipt(receipt.id);
             Navigator.of(context).pop();
           },
         ),
@@ -46,4 +46,3 @@ class DeleteFolderDialog extends StatelessWidget {
     );
   }
 }
-
