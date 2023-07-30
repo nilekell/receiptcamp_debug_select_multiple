@@ -5,18 +5,15 @@ import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
 Widget bottomNavigationBar(int state, BuildContext context) {
     return BottomNavigationBar(
       backgroundColor: Colors.blue,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      selectedItemColor: Colors.black,
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.black45,
       items: const [
         BottomNavigationBarItem(
-            backgroundColor: Colors.blue,
             icon: Icon(Icons.home),
-            label: 'Home'),
+            label: ''),
         BottomNavigationBarItem(
-            backgroundColor: Colors.blue,
-            icon: Icon(Icons.folder),
-            label: 'Receipts'),
+            icon: Icon(Icons.receipt_long_outlined),
+            label: ''),
       ],
       currentIndex: state,
       onTap: (value) => context.read<LandingCubit>().updateIndex(value),
