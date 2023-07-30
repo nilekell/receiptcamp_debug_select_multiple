@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
 import 'package:receiptcamp/presentation/ui/search/search.dart';
+import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget{
   const HomeAppBar({super.key});
@@ -13,7 +14,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget{
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.blue,
-      title: const Text("ReceiptCamp",
+      title: const Text(appName,
       style: TextStyle(fontSize: 27),),
       actions: [
         IconButton(

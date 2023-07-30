@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
+import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class NavDrawer extends StatelessWidget {
   const NavDrawer({super.key});
@@ -16,7 +17,7 @@ class NavDrawer extends StatelessWidget {
           ),
           const Padding(
             padding: EdgeInsets.fromLTRB(10, 0, 0, 10),
-            child: Text('ReceiptCamp',
+            child: Text(appName,
             style: TextStyle(fontSize: 25,
             fontWeight: FontWeight.bold),),
           ),
