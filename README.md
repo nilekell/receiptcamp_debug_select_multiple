@@ -1,16 +1,9 @@
-# receiptcamp
+# ReceiptCamp
 
-A new Flutter project.
+An cross-platform mobile app built to allow people to store and search for their personal receipts while preserving their privacy. No financial data ever leaves your device.
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Features
+- Take a photo or upload images of receipts which are saved to local storage
+- Search for receipts by associated words & characters (OCR used to scan images for relevant text)
+- Create folders to collectively organise and manage your receipts.
