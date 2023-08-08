@@ -30,7 +30,7 @@ workflows:
       - flutter_drive.log
     publishing:
       email:
-        receipients:
+        recipients:
           - nileeekellyyy@gmail.com
         notify:
           success: true
