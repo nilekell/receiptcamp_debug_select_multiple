@@ -6,6 +6,13 @@ if (localPropertiesFile.exists()) {
     }
 }
 
+def codemagicProperties = new Properties()
+def codemagicPropertiesFile = rootProject.file('codemagic.properties')
+if (codemagicPropertiesFile.exists()) {
+    codemagicProperties.load(new FileInputStream(codemagicPropertiesFile))
+}
+
+
 def flutterRoot = localProperties.getProperty('flutter.sdk')
 if (flutterRoot == null) {
     throw new FileNotFoundException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
@@ -61,10 +68,10 @@ android {
                 keyAlias System.getenv()["CM_KEY_ALIAS"]
                 keyPassword System.getenv()["CM_KEY_PASSWORD"]
             } else {
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-                storePassword keystoreProperties['storePassword']
+                keyAlias codemagicProperties['keyAlias']
+                keyPassword codemagicProperties['keyPassword']
+                storeFile codemagicProperties['storeFile'] ? file(codemagicProperties['storeFile']) : null
+                storePassword codemagicProperties['storePassword']
             }
         }
     }
