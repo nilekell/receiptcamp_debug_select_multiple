@@ -7,7 +7,7 @@ workflows:
       groups:
         - google_credentials
       vars:
-        PACKAGE_NAME: "io.codemagic.receiptcamp"
+        PACKAGE_NAME: "com.nilekell.receiptcamp.app"
         GOOGLE_PLAY_TRACK: alpha
       android_signing:
         - RECEIPTCAMP_CODEMAGIC_KEYSTORE
