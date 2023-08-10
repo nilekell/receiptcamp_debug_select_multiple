@@ -39,4 +39,83 @@ workflows:
         credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
         track: internal
         submit_as_draft: true
-                  
+  ios-workflow:
+    name: iOS Workflow
+    integrations:
+      app_store_connect: Codemagic
+    max_build_duration: 120
+    environment:
+      vars:
+        APP_STORE_APPLE_ID: 6460006476
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.nilekell.receiptcamp.app
+    scripts:
+      - name: Set up code signing settings on Xcode project
+        script: xcode-project use-profiles
+      - name: Set up code signing settings on Xcode project
+        script: | 
+          xcode-project use-profiles
+      - name: Get Flutter packages
+        script: | 
+          flutter packages pub get
+      - name: Install pods
+        script: | 
+          find . -name "Podfile" -execdir pod install \;
+      - name: Flutter build ipa
+        script: | 
+          BUILD_NUMBER=$(($(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID") + 1))
+          flutter build ipa --release \
+            --build-name=1.0.$BUILD_NUMBER \
+            --build-number=$BUILD_NUMBER
+      artifacts:
+        - build/ios/ipa/*.ipa
+        - /tmp/xcodebuild_logs/*.log
+        - flutter_drive.log
+    publishing:
+      app_store_connect:
+        # Use referenced App Store Connect API key to authenticate binary upload
+        auth: integration 
+
+        # Configuration related to TestFlight (optional)
+
+        # Optional boolean, defaults to false. Whether or not to submit the uploaded
+        # build to TestFlight beta review. Required for distributing to beta groups.
+        # Note: This action is performed during post-processing.
+        submit_to_testflight: true 
+
+        # Optional boolean, defaults to false. Set to true to automatically expire 
+        # previous build in review or waiting for review in Testflight before
+        # submitting a new build to beta review. Expired builds will no longer be available for testers.
+        # Note: This action is performed during post-processing.
+        expire_build_submitted_for_review: true
+
+        # Specify the names of beta tester groups that will get access to the build 
+        # once it has passed beta review.
+        beta_groups: 
+          - group name 1
+          - group name 2
+        
+        # Configuration related to App Store (optional)
+
+        # Optional boolean, defaults to false. Whether or not to submit the uploaded
+        # build to App Store review. Note: This action is performed during post-processing.
+        submit_to_app_store: false
+
+        # Optional boolean, defaults to false. Set to true to cancel the previous 
+        # submission (if applicable) when submitting a new build to App Store review.
+        # This allows automatically submitting a new build for review if a previous submission exists.
+        # Note: This action is performed during post-processing.
+        cancel_previous_submissions: true
+        
+        # Optional, defaults to MANUAL. Supported values: MANUAL, AFTER_APPROVAL or SCHEDULED
+        release_type: MANUAL
+
+        # Optional. Timezone-aware ISO8601 timestamp with hour precision when scheduling
+        # the release. This can be only used when release type is set to SCHEDULED.
+        # It cannot be set to a date in the past.
+        # earliest_release_date: 2021-12-01T14:00:00+00:00 
+        
+        # Optional. The name of the person or entity that owns the exclusive rights
+        # to your app, preceded by the year the rights were obtained.
+        # copyright: 2021 Nevercode Ltdapp_store_connect:
