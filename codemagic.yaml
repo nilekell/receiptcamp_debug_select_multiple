@@ -52,8 +52,6 @@ workflows:
         bundle_identifier: com.nilekell.receiptcamp.app
     scripts:
       - name: Set up code signing settings on Xcode project
-        script: xcode-project use-profiles
-      - name: Set up code signing settings on Xcode project
         script: | 
           xcode-project use-profiles
       - name: Get Flutter packages
@@ -68,10 +66,10 @@ workflows:
           flutter build ipa --release \
             --build-name=1.0.$BUILD_NUMBER \
             --build-number=$BUILD_NUMBER
-      artifacts:
-        - build/ios/ipa/*.ipa
-        - /tmp/xcodebuild_logs/*.log
-        - flutter_drive.log
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
     publishing:
       app_store_connect:
         # Use referenced App Store Connect API key to authenticate binary upload
