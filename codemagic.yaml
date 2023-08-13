@@ -106,7 +106,7 @@ workflows:
         cancel_previous_submissions: false
         
         # Optional, defaults to MANUAL. Supported values: MANUAL, AFTER_APPROVAL or SCHEDULED
-        release_type: MANUAL
+        # release_type: MANUAL
 
         # Optional. Timezone-aware ISO8601 timestamp with hour precision when scheduling
         # the release. This can be only used when release type is set to SCHEDULED.
