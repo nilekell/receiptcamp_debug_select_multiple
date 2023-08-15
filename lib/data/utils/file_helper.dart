@@ -5,7 +5,10 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:archive/archive_io.dart';
+import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
+import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -58,7 +61,7 @@ class FileService {
     }
   }
 
-  static Future<void> deleteImageFromPath(String imagePath) async {
+  static Future<void> deleteFileFromPath(String imagePath) async {
     try {
       File originalImageFile = File(imagePath);
 
@@ -70,7 +73,7 @@ class FileService {
         print('File does not exist: $imagePath');
       }
     } on Exception catch (e) {
-      print('Error in deleteImageFromPath: $e');
+      print('Error in deleteFileFromPath: $e');
     }
   }
 
@@ -145,6 +148,62 @@ class FileService {
       return;
     }
   }
+
+  // share folder outside of app
+  static Future<void> shareFolderAsZip(Folder folder) async {
+    // Fetch the contents of the folder
+    // NOT retrieving contents in subfolders
+    final contents = await DatabaseRepository.instance.getFolderContents(folder.id);
+
+    // Filter out the Folders, so only Receipts left
+    final List<Receipt> receipts = contents.where((item) => item is Receipt).map((item) => (item as Receipt)).toList();
+
+    // Check if there are any files to share
+    if (receipts.isEmpty) {
+      print("No files to share in this folder.");
+      return;
+    }
+
+    // generating list of file objects from receipt image path
+    final receiptFiles = List.generate(receipts.length, (index) => XFile(receipts[index].localPath));
+
+    // create a new archive instance for each receipt image
+    final archive = Archive();
+    for (final file in receiptFiles) {
+      // read our image file as bytes
+      final bytes = await File(file.path).readAsBytes();
+      // create an archive file from bytes
+      final archiveFile = ArchiveFile(file.name, bytes.length, bytes);
+      // add file to archive instance
+      archive.addFile(archiveFile);
+    }
+
+    // create an encoder instance
+    final zipEncoder = ZipEncoder();
+
+    // encode archive
+    final encodedArchive = zipEncoder.encode(archive);
+    if (encodedArchive == null) {
+      print('empty encoded archive');
+      return;
+    }
+
+    // create temporary path to store zip file
+    final uuid = Utility.generateUid();
+    final zipFileName = '${folder.name}-$uuid.zip';
+    final tempZipFileDirectory = await getTemporaryDirectory();
+    final tempZipFilePath = tempZipFileDirectory.path;
+    final tempZipFileFullPath = '$tempZipFilePath/$zipFileName';
+
+    // create a .zip file from the encoded bytes
+    final zipFile = await File(tempZipFileFullPath).writeAsBytes(encodedArchive);
+
+    // Share the files
+    await Share.shareXFiles([XFile(zipFile.path)]);
+
+    // delete zip file from local temp directory
+    await FileService.deleteFileFromPath(zipFile.path);
+}
 
   // download image to camera roll
   static Future<void> saveImageToCameraRoll(Receipt receipt) async {
