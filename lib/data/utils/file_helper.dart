@@ -151,31 +151,59 @@ class FileService {
 
   // share folder outside of app
   static Future<void> shareFolderAsZip(Folder folder) async {
-    // Fetch the contents of the folder
-    // NOT retrieving contents in subfolders
-    final contents = await DatabaseRepository.instance.getFolderContents(folder.id);
+    // creates an archive instance to store the zip file contents
+    final archive = Archive();
 
-    // Filter out the Folders, so only Receipts left
-    final List<Receipt> receipts = contents.where((item) => item is Receipt).map((item) => (item as Receipt)).toList();
+    // This function is designed to recursively add files and folders to a ZIP archive.
+    // The 'path' parameter serves to keep track of the directory structure as the function recursively processes nested folders
+    // It ensures files and folders within the ZIP archive maintain their relative paths, reflecting the original directory structure.
+    Future<void> processFolder(Folder folder, [String? path]) async {
+      final contents = await DatabaseRepository.instance.getFolderContents(folder.id);
 
-    // Check if there are any files to share
-    if (receipts.isEmpty) {
-      print("No files to share in this folder.");
-      return;
+      // Allowing empty subfolders to be shown in the unzipped folder
+      // Check if the folder is empty and a path is provided (i.e., it's not the root folder)
+      if (contents.isEmpty && path != null) {
+        // Add a directory entry to the archive
+        final directoryPath = '$path/';  // Ensured it ends with a '/'
+        // Instead of passing an empty list as content, we pass a list with a single byte (which is ignored for directories)
+        final directoryEntry = ArchiveFile(directoryPath, 0, [0]);
+        archive.addFile(directoryEntry);
+      }
+
+
+      for (var item in contents) {
+        if (item is Receipt) {
+          final file = XFile(item.localPath);
+          // read receipt image file as bytes
+          final bytes = await File(file.path).readAsBytes();
+          // Determine the path for the archive. If a path is provided, prepend it to the file name.
+          // This is where the ternary operator is used: it checks if 'path' is not null, and if so, 
+          // it uses the provided path and appends the file name. Otherwise, it just uses the file name.
+          final archivePath = path != null ? '$path/${file.name}' : file.name;
+          // Create an archive file instance with the determined path, file size, and file bytes.
+          final archiveFile = ArchiveFile(archivePath, bytes.length, bytes);
+          // Add the archive file to the main archive.
+          archive.addFile(archiveFile);
+          // for loop goes to next receipt or folder in current directory
+        } else if (item is Folder) {
+          // Determine the path for the sub-folder. If a path is provided, prepend it to the folder name.
+          // Again, the ternary operator is used here to decide the new path.
+          final newPath = path != null ? '$path/${item.name}' : item.name;
+
+          // Recursively call the 'processFolder' function to process the contents of the sub-folder.
+          // This is the recursive part of the function, allowing it to handle nested folders.
+          await processFolder(item, newPath);
+        }
+      }
     }
 
-    // generating list of file objects from receipt image path
-    final receiptFiles = List.generate(receipts.length, (index) => XFile(receipts[index].localPath));
+    // Start the process by calling the 'processFolder' function with the root folder.
+    await processFolder(folder);
 
-    // create a new archive instance for each receipt image
-    final archive = Archive();
-    for (final file in receiptFiles) {
-      // read our image file as bytes
-      final bytes = await File(file.path).readAsBytes();
-      // create an archive file from bytes
-      final archiveFile = ArchiveFile(file.name, bytes.length, bytes);
-      // add file to archive instance
-      archive.addFile(archiveFile);
+    // Check if there are any files to share
+    if (archive.isEmpty) {
+      print("No files to share in this folder.");
+      return;
     }
 
     // create an encoder instance
@@ -189,21 +217,25 @@ class FileService {
     }
 
     // create temporary path to store zip file
-    final uuid = Utility.generateUid();
-    final zipFileName = '${folder.name}-$uuid.zip';
-    final tempZipFileDirectory = await getTemporaryDirectory();
-    final tempZipFilePath = tempZipFileDirectory.path;
-    final tempZipFileFullPath = '$tempZipFilePath/$zipFileName';
+    String tempZipFileFullPath = await tempZipFilePathGenerator(folder);
 
     // create a .zip file from the encoded bytes
     final zipFile = await File(tempZipFileFullPath).writeAsBytes(encodedArchive);
 
-    // Share the files
+    // Share the zip file
     await Share.shareXFiles([XFile(zipFile.path)]);
 
     // delete zip file from local temp directory
     await FileService.deleteFileFromPath(zipFile.path);
 }
+
+  static Future<String> tempZipFilePathGenerator(Folder folder) async {
+    final zipFileName = '${folder.name}.zip';
+    final tempZipFileDirectory = await getTemporaryDirectory();
+    final tempZipFilePath = tempZipFileDirectory.path;
+    final tempZipFileFullPath = '$tempZipFilePath/$zipFileName';
+    return tempZipFileFullPath;
+  }
 
   // download image to camera roll
   static Future<void> saveImageToCameraRoll(Receipt receipt) async {
