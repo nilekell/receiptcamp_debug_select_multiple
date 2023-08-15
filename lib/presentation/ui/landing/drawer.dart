@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
-class NavDrawer extends StatelessWidget {
-  const NavDrawer({super.key});
+class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +22,12 @@ class NavDrawer extends StatelessWidget {
             fontWeight: FontWeight.bold),),
           ),
           const Divider(height: 4,),
-          ListTile(
+          // commenting out for future usage, currently unnecessary
+          /*ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Settings'),
             onTap: () => {Navigator.of(context).pop()},
-          ),
+          ),*/
           ListTile(
             leading: const Icon(Icons.border_color),
             title: const Text('Feedback'),
