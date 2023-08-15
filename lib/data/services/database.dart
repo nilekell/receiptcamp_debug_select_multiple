@@ -280,7 +280,7 @@ class DatabaseService {
 
       for (var receipt in receipts) {
         // deleting receipt image in local storage
-        await FileService.deleteImageFromPath(receipt['localPath']);
+        await FileService.deleteFileFromPath(receipt['localPath']);
 
         // deleting receipt record in db
         await db
@@ -384,7 +384,7 @@ class DatabaseService {
     await deleteTagsForAReceipt(id);
 
     // deleting receipt image in local storage
-    await FileService.deleteImageFromPath(deletedReceiptPath);
+    await FileService.deleteFileFromPath(deletedReceiptPath);
 
     // deleting receipt record in receipts table
     return await db.delete(
