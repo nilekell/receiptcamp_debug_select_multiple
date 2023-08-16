@@ -22,24 +22,34 @@ class FileService {
 
     // print('${basename(imageFile.path)} has extension $fileExtension');
 
-    // ImagePicker library automatically converts images to .jpg format, so all uploaded into app via camera or library will have
-    // .jpg ending, so below cases '.png' & '.heic' are redundant, but kept in code for future proofing
+    // ImagePicker library automatically converts all images to .jpg, so all uploaded into app via camera or library will have
+    // .jpg ending 
+    // cunning_document_scanner library produces '.png' files
+    // '.heic' case is redundant, but kept in codebase for future proofing
     switch (fileExtension) {
-      case '.jpeg' || '.jpg':
+      case '.jpeg':
         format = CompressFormat.jpeg;
+        break;
+      case '.jpg':
+        format = CompressFormat.jpeg;
+        break;
       case '.png':
         format = CompressFormat.png;
-      case '.heic':
+        break;
+      case '.heic': 
         format = CompressFormat.heic;
+        break;
       default:
         throw Exception(
             'Exception occurred in FileService.compressFile(): Cannot compress file type: $fileExtension');
     }
-
+ 
     try {
+      // for some reason, this method actually slightly increases file size for png images
       var result = await FlutterImageCompress.compressAndGetFile(
         imageFile.absolute.path,
         targetPath,
+        // for jpg/jpeg files only:
         // quality: 88 -> reduced in size by ~50%
         // quality: 1 -> reduced in size by ~95%
         // quality: 30 -> reduced in size by ~95%
@@ -77,11 +87,11 @@ class FileService {
     }
   }
 
-  static Future<String> getLocalImagePath() async {
+  static Future<String> getLocalImagePath(ImageFileType imageFileType) async {
     try {
       Directory imageDirectory = await getApplicationDocumentsDirectory();
       String imageDirectoryPath = imageDirectory.path;
-      final fileName = Utility.generateFileName();
+      final fileName = Utility.generateFileName(imageFileType);
       final localImagePath = '$imageDirectoryPath/$fileName';
 
       return localImagePath;

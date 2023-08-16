@@ -68,25 +68,51 @@ class ReceiptService {
 }
 
   static Future<List<dynamic>> processingReceiptAndTags(XFile receiptImage, String folderId) async {
-  // tag actions
-  final receiptUid = Utility.generateUid();
-  final tagsList = await ReceiptService.extractKeywordsAndGenerateTags(
-      receiptImage.path, receiptUid);
+    // creating receipt primary key
+    final receiptUid = Utility.generateUid();
 
-  // compressing and saving image
-  final localReceiptImagePath = await FileService.getLocalImagePath();
-  final receiptImageFile = await FileService.compressFile(
-      File(receiptImage.path), localReceiptImagePath);
+    // tag processing
+    final tagsList = await ReceiptService.extractKeywordsAndGenerateTags(
+        receiptImage.path, receiptUid);
 
-  // deleting temporary image files
-  await FileService.deleteFileFromPath(receiptImage.path);
+    // receipt processing
 
-  // creating receipt object
-  final receipt = await ReceiptService.createReceiptFromFile(
-      receiptImageFile!, basename(receiptImageFile.path), folderId, receiptUid);
+    // getting file extension with '.' from image path
+    String fileExtension = extension(receiptImage.path);
 
-  return [receipt, tagsList];
+    // identifying file type of receipt image
+    final imageFileType = identifyImageFileTypeFromString(fileExtension);
+    
+    // getting new image path + file name (based on file type) to save receipt to
+    final localReceiptImagePath = await FileService.getLocalImagePath(imageFileType);
+    // compressing and saving image
+    final receiptImageFile = await FileService.compressFile(
+        File(receiptImage.path), localReceiptImagePath);
+
+    // deleting temporary image files
+    await FileService.deleteFileFromPath(receiptImage.path);
+
+    // creating receipt object
+    final receipt = await ReceiptService.createReceiptFromFile(
+        receiptImageFile!, basename(receiptImageFile.path), folderId, receiptUid);
+
+    return [receipt, tagsList];
 }
+
+  static ImageFileType identifyImageFileTypeFromString(String fileExtension) {
+    ImageFileType imageFileType;
+
+    if (fileExtension == '.png') {
+      imageFileType = ImageFileType.png;
+    } else if (fileExtension == '.heic') {
+      imageFileType = ImageFileType.heic;
+    }  else if (fileExtension == '.jpg' || fileExtension == '.jpeg') {
+      imageFileType = ImageFileType.jpg;
+    } else {
+      throw Exception('Utilities.generateFileName(): unexpected file type');
+    }
+    return imageFileType;
+  }
 
 
 
