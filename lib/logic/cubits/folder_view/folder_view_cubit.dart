@@ -206,28 +206,30 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
   uploadReceiptFromDocumentScan(String currentFolderId) async {
     try {
-      final imagesPath = await CunningDocumentScanner.getPictures();
-      if (imagesPath == null) {
+      final scannedImagePaths = await CunningDocumentScanner.getPictures();
+      if (scannedImagePaths == null) {
         return;
       }
 
-      print('imagesPath: $imagesPath');
-      final XFile receiptDocument = XFile(imagesPath[0]);
+      print('scannedImagePaths: $scannedImagePaths');
 
-      final List<dynamic> results =
-          await ReceiptService.processingReceiptAndTags(
-              receiptDocument, currentFolderId);
-      final Receipt receipt = results[0];
-      final List<Tag> tags = results[1];
+      for (final path in scannedImagePaths) {
+        final XFile receiptDocument = XFile(path);
+        final List<dynamic> results =
+            await ReceiptService.processingReceiptAndTags(
+                receiptDocument, currentFolderId);
+        final Receipt receipt = results[0];
+        final List<Tag> tags = results[1];
 
-      await DatabaseRepository.instance.insertTags(tags);
-      await DatabaseRepository.instance.insertReceipt(receipt);
-      print('Image ${receipt.name} saved at ${receipt.localPath}');
+        await DatabaseRepository.instance.insertTags(tags);
+        await DatabaseRepository.instance.insertReceipt(receipt);
+        print('Image ${receipt.name} saved at ${receipt.localPath}');
 
-      emit(FolderViewUploadSuccess(
-          uploadedName: receipt.name, folderId: receipt.parentId));
-      fetchFiles(receipt.parentId);
+        emit(FolderViewUploadSuccess(
+            uploadedName: receipt.name, folderId: receipt.parentId));
+      }
 
+      fetchFiles(currentFolderId);
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
       emit(FolderViewError());
