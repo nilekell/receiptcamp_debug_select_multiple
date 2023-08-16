@@ -79,7 +79,7 @@ class ReceiptService {
       File(receiptImage.path), localReceiptImagePath);
 
   // deleting temporary image files
-  await FileService.deleteImageFromPath(receiptImage.path);
+  await FileService.deleteFileFromPath(receiptImage.path);
 
   // creating receipt object
   final receipt = await ReceiptService.createReceiptFromFile(

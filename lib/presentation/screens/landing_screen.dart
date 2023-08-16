@@ -16,7 +16,7 @@ class LandingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<LandingCubit, int>(
       builder: (context, state) => Scaffold(
-        drawer: const NavDrawer(),
+        drawer: const AppDrawer(),
         appBar: const HomeAppBar(),
         body: _getChildBasedOnTab(state),
         bottomNavigationBar: bottomNavigationBar(state, context),
