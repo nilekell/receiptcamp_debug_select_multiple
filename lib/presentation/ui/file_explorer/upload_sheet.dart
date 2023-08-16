@@ -19,8 +19,9 @@ void showUploadOptions(BuildContext context, FolderViewCubit folderViewCubit,
 
 class UploadOptionsBottomSheet extends StatelessWidget {
   final Folder currentFolder;
-  final double iconSize = 30.0;
+  final double iconSize = 20.0;
   final Color iconColour = Colors.white;
+  final EdgeInsets paddingBetweenIcons = const EdgeInsets.all(10.0);
 
   const UploadOptionsBottomSheet({super.key, required this.currentFolder});
 
@@ -35,7 +36,7 @@ class UploadOptionsBottomSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         children: [
           Padding(
-            padding: const EdgeInsets.all(30.0),
+            padding: paddingBetweenIcons,
             child: Material(
               color: Colors.blue,
               child: InkWell(
@@ -61,7 +62,7 @@ class UploadOptionsBottomSheet extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(30.0),
+            padding: paddingBetweenIcons,
             child: Material(
               color: Colors.blue,
               child: InkWell(
@@ -87,7 +88,7 @@ class UploadOptionsBottomSheet extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(30.0),
+            padding: paddingBetweenIcons,
             child: Material(
               color: Colors.blue,
               child: InkWell(
@@ -107,6 +108,32 @@ class UploadOptionsBottomSheet extends StatelessWidget {
                             context.read<FolderViewCubit>(), currentFolder);
                       },
                       icon: const Icon(Icons.create_new_folder)),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: paddingBetweenIcons,
+            child: Material(
+              color: Colors.blue,
+              child: InkWell(
+                child: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3),
+                  ),
+                  child: IconButton(
+                      iconSize: iconSize,
+                      color: iconColour,
+                      onPressed: () {
+                        // closing bottom sheet
+                        Navigator.of(context).pop();
+                        context
+                            .read<FolderViewCubit>()
+                            .uploadReceiptFromDocumentScan(currentFolder.id);
+                      },
+                      icon: const Icon(Icons.document_scanner)),
                 ),
               ),
             ),
