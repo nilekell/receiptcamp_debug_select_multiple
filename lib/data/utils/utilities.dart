@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+enum ImageFileType {png, heic, jpg, jpeg}
+
 class Utility {
   static int getCurrentTime() {
     try {
@@ -10,7 +12,7 @@ class Utility {
       return unixTimestamp;
     } catch (e) {
       print('Error in getCurrentTime: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -21,7 +23,7 @@ class Utility {
       return formattedDateTime;
     } catch (e) {
       print('Error in formatDateTimeFromUnixTimestamp: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -57,19 +59,30 @@ class Utility {
       return '${(bytes / pow(1024, i)).toStringAsFixed(2)} ${suffixes[i]}';
     } catch (e) {
       print('Error in bytesToSizeString: $e');
-      throw e;
+      rethrow;
     }
   }
 
-  static String generateFileName() {
+  static String generateFileName(ImageFileType fileType) {
+    String fileName = 'RCPT_IMG_';
     try {
       const Uuid uuid = Uuid();
       final String myUuidString = uuid.v4().toString();
-      String fileName = 'RCPT_IMG_$myUuidString.jpg';
+
+      if (fileType == ImageFileType.png) {
+        fileName = '$fileName$myUuidString.png';
+      } else if (fileType == ImageFileType.heic) {
+        fileName = '$fileName$myUuidString.heic';
+      }  else if (fileType == ImageFileType.jpg || fileType == ImageFileType.jpeg) {
+        fileName = '$fileName$myUuidString.jpg';
+      } else {
+        throw Exception('Utilities.generateFileName(): unexpected file type');
+      }
+
       return fileName;
     } catch (e) {
       print('Error in generateFileName: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -79,7 +92,7 @@ class Utility {
       return uid;
     } catch (e) {
       print('Error in generateUid: $e');
-      throw e;
+      rethrow;
     }
   }
 }
