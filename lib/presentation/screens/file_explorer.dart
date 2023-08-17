@@ -275,9 +275,13 @@ class FolderListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       subtitle: Text('Modified $displayDate'),
-      leading: const Icon(
-        Icons.folder,
-        size: 35,
+      leading: const SizedBox(
+        height: 50,
+        width: 50,
+        child: Icon(
+          Icons.folder,
+          size: 45,
+        ),
       ),
       trailing: IconButton(
         icon: const Icon(
@@ -311,12 +315,16 @@ class ReceiptListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        leading: ClipRRect(
-          // square image corners
-          borderRadius: const BorderRadius.all(Radius.zero),
-          child: Image.file(
-            File(receipt.localPath),
-            fit: BoxFit.cover,
+        leading: SizedBox(
+          height: 50,
+          width: 50,
+          child: ClipRRect(
+            // square image corners
+            borderRadius: const BorderRadius.all(Radius.zero),
+            child: Image.file(
+              File(receipt.localPath),
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         subtitle: Text('Created $displayDate'),
