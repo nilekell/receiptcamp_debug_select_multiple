@@ -16,7 +16,7 @@ class TextRecognitionService {
     }
   }
 
-  static Future<List> _scanImageForText(String imagePath) async {
+  static Future<List<String>> _scanImageForText(String imagePath) async {
     // Uses Google ML Kit Vision
     try {
       final inputImage = InputImage.fromFilePath(imagePath);
@@ -25,7 +25,7 @@ class TextRecognitionService {
       final RecognizedText recognizedText =
           await textRecognizer.processImage(inputImage);
       String scannedText = recognizedText.text;
-      List scannedTextList = [];
+      List<String> scannedTextList = [];
       for (TextBlock block in recognizedText.blocks) {
         for (TextLine line in block.lines) {
           for (TextElement element in line.elements) {
@@ -75,6 +75,17 @@ class TextRecognitionService {
       }
     } on Exception catch (e) {
       print('Error in _loadCommonReceiptWords: $e');
+    }
+  }
+
+  static Future<bool> imageHasText(String imagePath) async {
+    try {
+      final scannedTextList =
+          await TextRecognitionService._scanImageForText(imagePath);
+      return scannedTextList.isNotEmpty;
+    } on Exception catch (e) {
+      print('Error in ReceiptService.imageHasText: $e');
+      return false;
     }
   }
 }
