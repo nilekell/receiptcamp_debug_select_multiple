@@ -157,9 +157,11 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
-      final (validImage, invalidImageReason) = await ReceiptService.isValidImage(receiptImage.path);
+      final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(receiptImage.path);
       if (!validImage) {
         emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+        fetchFiles(currentFolderId);
+        return;
       }
 
       final List<dynamic> results =
@@ -190,9 +192,11 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
-      final (validImage, invalidImageReason) = await ReceiptService.isValidImage(receiptPhoto.path);
+      final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(receiptPhoto.path);
       if (!validImage) {
         emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+        fetchFiles(currentFolderId);
+        return;
       }
 
       final List<dynamic> results =
@@ -216,18 +220,27 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
   uploadReceiptFromDocumentScan(String currentFolderId) async {
     try {
+      List<String> validatedImagePaths = [];
+
       final scannedImagePaths = await CunningDocumentScanner.getPictures();
       if (scannedImagePaths == null) {
         return;
       }
 
+      // iterating over scanned images and checking image size and if they contain text
       for (final path in scannedImagePaths) {
-        final (validImage, invalidImageReason) = await ReceiptService.isValidImage(path);
+        final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(path);
         if (!validImage) {
+          // if a single image fails the validation, all images are discarded
           emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
-          // stopping upload process completely
+          fetchFiles(currentFolderId);
           return;
         }
+        // only adding images that pass validations to list 
+        validatedImagePaths.add(path);
+      }
+      // only iterating over validated images and uploading them consecutively
+      for (final path in validatedImagePaths) {
         final XFile receiptDocument = XFile(path);
         final List<dynamic> results =
             await ReceiptService.processingReceiptAndTags(
