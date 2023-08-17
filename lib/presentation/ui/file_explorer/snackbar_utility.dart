@@ -14,13 +14,13 @@ abstract class SnackBarUtility {
       case FolderViewUploadFailure():
         switch (state.validationType) {
           case ValidationError.size:
-            message = 'This image is too large to be uploaded';
+            message = 'Image(s) too large to upload';
             break;
           case ValidationError.text:
-            message = "This image is not recognised as a receipt";
+            message = "Image(s) not recognised as receipt(s)";
             break;
           case ValidationError.both:
-            message = "This image is too large and not recognised as a receipt";
+            message = 'Image(s) too large and not recognised as receipt(s)';
             break;
           case ValidationError.none:
             break;
