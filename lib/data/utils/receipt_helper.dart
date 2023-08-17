@@ -114,6 +114,17 @@ class ReceiptService {
     return imageFileType;
   }
 
+  static Future<bool> isValidImageSize(String imagePath,[int maxSizeInMB = 10]) async {
+    try {
+      final sizeInBytes = await FileService.getFileSize(imagePath, 2);
+      final sizeInMB = sizeInBytes / (1024 * 1024);
+      // returns true when image size is less than or equal to maxSizeInMB & greater than 0 MB
+      return sizeInMB <= maxSizeInMB && sizeInMB > 0;
+    } on Exception catch (e) {
+      print('Error in ReceiptService.isValidImageSize: $e');
+      return false;
+    }
+  }
 
 
   // method to check file name is valid
