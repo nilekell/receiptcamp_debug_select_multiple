@@ -148,12 +148,19 @@ class FolderViewCubit extends Cubit<FolderViewState> {
   }
 
 // upload receipt
-  uploadReceipt(String currentFolderId) async {
+  uploadReceiptFromGallery(String currentFolderId) async {
     try {
       final ImagePicker imagePicker = ImagePicker();
       final XFile? receiptImage =
           await imagePicker.pickImage(source: ImageSource.gallery);
       if (receiptImage == null) {
+        return;
+      }
+
+      final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(receiptImage.path);
+      if (!validImage) {
+        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+        fetchFiles(currentFolderId);
         return;
       }
 
@@ -185,6 +192,13 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
+      final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(receiptPhoto.path);
+      if (!validImage) {
+        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+        fetchFiles(currentFolderId);
+        return;
+      }
+
       final List<dynamic> results =
           await ReceiptService.processingReceiptAndTags(
               receiptPhoto, currentFolderId);
@@ -206,14 +220,27 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
   uploadReceiptFromDocumentScan(String currentFolderId) async {
     try {
+      List<String> validatedImagePaths = [];
+
       final scannedImagePaths = await CunningDocumentScanner.getPictures();
       if (scannedImagePaths == null) {
         return;
       }
 
-      print('scannedImagePaths: $scannedImagePaths');
-
+      // iterating over scanned images and checking image size and if they contain text
       for (final path in scannedImagePaths) {
+        final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(path);
+        if (!validImage) {
+          // if a single image fails the validation, all images are discarded
+          emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+          fetchFiles(currentFolderId);
+          return;
+        }
+        // only adding images that pass validations to list 
+        validatedImagePaths.add(path);
+      }
+      // only iterating over validated images and uploading them consecutively
+      for (final path in validatedImagePaths) {
         final XFile receiptDocument = XFile(path);
         final List<dynamic> results =
             await ReceiptService.processingReceiptAndTags(
