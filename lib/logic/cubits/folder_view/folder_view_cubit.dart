@@ -148,13 +148,18 @@ class FolderViewCubit extends Cubit<FolderViewState> {
   }
 
 // upload receipt
-  uploadReceipt(String currentFolderId) async {
+  uploadReceiptFromGallery(String currentFolderId) async {
     try {
       final ImagePicker imagePicker = ImagePicker();
       final XFile? receiptImage =
           await imagePicker.pickImage(source: ImageSource.gallery);
       if (receiptImage == null) {
         return;
+      }
+
+      final (validImage, invalidImageReason) = await ReceiptService.isValidImage(receiptImage.path);
+      if (!validImage) {
+        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
       }
 
       final List<dynamic> results =
@@ -185,6 +190,11 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
+      final (validImage, invalidImageReason) = await ReceiptService.isValidImage(receiptPhoto.path);
+      if (!validImage) {
+        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+      }
+
       final List<dynamic> results =
           await ReceiptService.processingReceiptAndTags(
               receiptPhoto, currentFolderId);
@@ -211,9 +221,13 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
-      print('scannedImagePaths: $scannedImagePaths');
-
       for (final path in scannedImagePaths) {
+        final (validImage, invalidImageReason) = await ReceiptService.isValidImage(path);
+        if (!validImage) {
+          emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+          // stopping upload process completely
+          return;
+        }
         final XFile receiptDocument = XFile(path);
         final List<dynamic> results =
             await ReceiptService.processingReceiptAndTags(
