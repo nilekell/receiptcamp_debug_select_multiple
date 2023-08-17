@@ -82,7 +82,8 @@ class TextRecognitionService {
     try {
       final scannedTextList =
           await TextRecognitionService._scanImageForText(imagePath);
-      return scannedTextList.isNotEmpty;
+      // most if not all receipts will have greater than 10 text elements (space separated words)
+      return scannedTextList.length > 10;
     } on Exception catch (e) {
       print('Error in ReceiptService.imageHasText: $e');
       return false;
