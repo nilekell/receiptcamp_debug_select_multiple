@@ -52,7 +52,7 @@ class UploadOptionsBottomSheet extends StatelessWidget {
                         onPressed: () {
                           context
                               .read<FolderViewCubit>()
-                              .uploadReceipt(currentFolder.id);
+                              .uploadReceiptFromGallery(currentFolder.id);
                           // closing bottom sheet
                           Navigator.of(context).pop();
                         },
