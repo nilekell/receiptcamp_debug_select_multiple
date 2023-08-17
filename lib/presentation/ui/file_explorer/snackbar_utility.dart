@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:receiptcamp/data/utils/receipt_helper.dart";
 import "package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart";
 
 // utility class that creates and shows snackbars displayed on file explorer screen
@@ -11,7 +12,19 @@ abstract class SnackBarUtility {
         message = "'${state.uploadedName}' added successfully";
         break;
       case FolderViewUploadFailure():
-        message = "Failed to save file object";
+        switch (state.validationType) {
+          case ValidationError.size:
+            message = 'This image is too large to be uploaded';
+            break;
+          case ValidationError.text:
+            message = "This image is not recognised as a receipt";
+            break;
+          case ValidationError.both:
+            message = "This image is too large and not recognised as a receipt";
+            break;
+          case ValidationError.none:
+            break;
+        }
         break;
       case FolderViewRenameSuccess():
         message = "'${state.oldName}' renamed to '${state.newName}'";
