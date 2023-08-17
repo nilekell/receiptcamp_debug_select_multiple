@@ -147,6 +147,18 @@ class FileService {
     }
   }
 
+  static Future<bool> isValidImageSize(String imagePath,[int maxSizeInMB = 10]) async {
+    try {
+      final sizeInBytes = await FileService.getFileSize(imagePath, 2);
+      final sizeInMB = sizeInBytes / (1024 * 1024);
+      // returns true when image size is less than or equal to maxSizeInMB & greater than 0 MB
+      return sizeInMB <= maxSizeInMB && sizeInMB > 0;
+    } on Exception catch (e) {
+      print('Error in ReceiptService.isValidImageSize: $e');
+      return false;
+    }
+  }
+
   // share receipt image
   static Future<void> shareReceipt(Receipt receipt) async {
     try {

@@ -8,6 +8,9 @@ import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/models/tag.dart';
 
+// enum used to describe possible error types when checking image size & text presence before scanning
+enum ValidationError {size, text, both, none}
+
 class ReceiptService {
   // getting singleton db repository instance
   static final DatabaseRepository databaseRepository =
@@ -114,7 +117,24 @@ class ReceiptService {
     return imageFileType;
   }
 
+  static Future isValidImage(String imagePath) async {
+    ValidationError validationError = ValidationError.none;
 
+    try {
+      final validSize = await FileService.isValidImageSize(imagePath);
+      final hasText = await TextRecognitionService.imageHasText(imagePath);
+
+      if (validSize == false) validationError = ValidationError.size;
+      if (hasText == false) validationError = ValidationError.text;
+      if (validSize == false && hasText == false) validationError = ValidationError.both;
+
+      // only returns true when both booleans are true
+      return (validSize && hasText, validationError);
+    } on Exception catch (e) {
+      print('Error in ReceiptService.imageHasText: $e');
+      return [false, validationError];
+    }
+  }
 
   // method to check file name is valid
   static bool validReceiptFileName(String name) {
