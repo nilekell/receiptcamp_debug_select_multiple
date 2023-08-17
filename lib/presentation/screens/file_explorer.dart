@@ -190,6 +190,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
       listener: (context, state) {
         SnackBarUtility.showSnackBar(context, state);
       },
+      buildWhen: (previous, current) => previous is !FolderViewActionState || current is !FolderViewActionState,
       builder: (context, state) {
         switch (state) {
           case FolderViewInitial() || FolderViewLoading():
