@@ -1,4 +1,6 @@
 PODS:
+  - advanced_in_app_review (0.0.1):
+    - Flutter
   - cunning_document_scanner (1.0.0):
     - Flutter
   - Flutter (1.0.0)
@@ -134,6 +136,9 @@ PODS:
     - SDWebImage/Core (~> 5.15)
   - share_plus (0.0.1):
     - Flutter
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - sqflite (0.0.3):
     - Flutter
     - FMDB (>= 2.7.5)
@@ -141,6 +146,7 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
+  - advanced_in_app_review (from `.symlinks/plugins/advanced_in_app_review/ios`)
   - cunning_document_scanner (from `.symlinks/plugins/cunning_document_scanner/ios`)
   - Flutter (from `Flutter`)
   - flutter_image_compress_common (from `.symlinks/plugins/flutter_image_compress_common/ios`)
@@ -156,6 +162,7 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
@@ -185,6 +192,8 @@ SPEC REPOS:
     - SDWebImageWebPCoder
 
 EXTERNAL SOURCES:
+  advanced_in_app_review:
+    :path: ".symlinks/plugins/advanced_in_app_review/ios"
   cunning_document_scanner:
     :path: ".symlinks/plugins/cunning_document_scanner/ios"
   Flutter:
@@ -207,12 +216,15 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   share_plus:
     :path: ".symlinks/plugins/share_plus/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
+  advanced_in_app_review: fe8fd50b8670cb3dbe67e4c26ca643f7aea8dbb8
   cunning_document_scanner: 7cb9bd173f7cc7b11696dde98d01492187fc3a67
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_image_compress_common: ec1d45c362c9d30a3f6a0426c297f47c52007e3e
@@ -246,6 +258,7 @@ SPEC CHECKSUMS:
   SDWebImage: cb032eba469c54e0000e78bcb0a13cdde0a52798
   SDWebImageWebPCoder: 295a6573c512f54ad2dd58098e64e17dcf008499
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
+  shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
   sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a
   url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4
 
