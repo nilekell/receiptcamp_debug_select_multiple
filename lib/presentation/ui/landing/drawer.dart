@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
+import 'package:in_app_review/in_app_review.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -29,9 +30,14 @@ class AppDrawer extends StatelessWidget {
             onTap: () => {Navigator.of(context).pop()},
           ),*/
           ListTile(
-            leading: const Icon(Icons.border_color),
-            title: const Text('Feedback'),
-            onTap: () => {Navigator.of(context).pop()},
+            leading: const Icon(Icons.rate_review),
+            title: const Text('Leave a review'),
+            onTap: () async {
+              final InAppReview inAppReview = InAppReview.instance;
+              if (await inAppReview.isAvailable()) {
+                inAppReview.openStoreListing(appStoreId: appStoreId);
+              }
+            },
           ),
           // temporary buttons for debugging
           kDebugMode ? 
