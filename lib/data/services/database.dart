@@ -202,7 +202,6 @@ class DatabaseService {
 
     // Create a string of placeholders for sqlite query
     String placeholders = exceptionFolderIds.map((_) => '?').join(',');
-    print('placeholders: $placeholders');
 
     // querying for all folders except for those in [exceptionFolderIds]
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
@@ -336,6 +335,17 @@ class DatabaseService {
       throw Exception('Folder with id $folderId not found');
     }
   }
+
+  Future<void> deleteAllFoldersExceptRoot() async {
+  final Database db = await database;
+  
+  // delete all folders except the root folder
+  await db.delete('folders', where: 'id != ?', whereArgs: [rootFolderId]);
+  
+  // delete all receipts and tags because they reference folders that no longer exist
+  await db.delete('receipts');
+  await db.delete('tags');
+}
 
   // Add Receipt operations
 
