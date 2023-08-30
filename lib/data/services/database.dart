@@ -202,7 +202,6 @@ class DatabaseService {
 
     // Create a string of placeholders for sqlite query
     String placeholders = exceptionFolderIds.map((_) => '?').join(',');
-    print('placeholders: $placeholders');
 
     // querying for all folders except for those in [exceptionFolderIds]
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
@@ -337,6 +336,17 @@ class DatabaseService {
     }
   }
 
+  Future<void> deleteAllFoldersExceptRoot() async {
+  final Database db = await database;
+  
+  // delete all folders except the root folder
+  await db.delete('folders', where: 'id != ?', whereArgs: [rootFolderId]);
+  
+  // delete all receipts and tags because they reference folders that no longer exist
+  await db.delete('receipts');
+  await db.delete('tags');
+}
+
   // Add Receipt operations
 
   // Method to insert a Receipt object into the database.
@@ -458,7 +468,7 @@ class DatabaseService {
     final db = await database;
     List<Map<String, dynamic>> maps = await db.query('receipts',
         // retrieving the following columns from the database
-        columns: ['id', 'userID', 'name', 'localPath', 'dateCreated'],
+        columns: ['id', 'name', 'localPath', 'dateCreated', 'lastModified', 'storageSize', 'parentId'],
         // '?'s are replaced with the items in the [whereArgs] field
         where: 'name = ?',
         // [name] is the argument of the function
@@ -515,7 +525,7 @@ class DatabaseService {
     // deleting ALL tags in database NOT SPECIFIC TO USER
     print('total tags deleted: ${await db.delete('tags')}');
     // deleting all folders in database (except root folder) NOT SPECIFIC TO USER
-    print('total folders deleted: ${await db.delete('folders', where: 'id != ?', whereArgs: ['a1'])}');
+    print('total folders deleted: ${await db.delete('folders', where: 'id != ?', whereArgs: [rootFolderId])}');
   }
 
   // Add Tag operations

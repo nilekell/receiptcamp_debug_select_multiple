@@ -53,6 +53,10 @@ class DatabaseRepository {
     return await _databaseService.deleteFolder(folderId);
   }
 
+  Future<void> deleteAllFoldersExceptRoot() async {
+    return await _databaseService.deleteAllFoldersExceptRoot();
+  }
+
   Future<bool> folderExists({String? id, String? name}) async {
     return await _databaseService.folderExists(id: id, name: name);
   }
