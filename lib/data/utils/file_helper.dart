@@ -147,7 +147,7 @@ class FileService {
     }
   }
 
-  static Future<bool> isValidImageSize(String imagePath,[int maxSizeInMB = 10]) async {
+  static Future<bool> isValidImageSize(String imagePath,[int maxSizeInMB = 20]) async {
     try {
       final sizeInBytes = await FileService.getFileSize(imagePath, 2);
       final sizeInMB = sizeInBytes / (1024 * 1024);
