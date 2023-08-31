@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:receiptcamp/data/utils/folder_helper.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 
@@ -35,7 +34,6 @@ class _FolderDialogState extends State<FolderDialog> {
     context.read<FolderViewCubit>();
     isEnabled = textEditingController.text.isNotEmpty;
     textEditingController.addListener(_textPresenceListener);
-    textEditingController.addListener(_validFolderNameListener);
     super.initState();
   }
 
@@ -44,16 +42,6 @@ class _FolderDialogState extends State<FolderDialog> {
       setState(() {
         // disabling/enabling create button when text is empty/present
         isEnabled = textEditingController.text.isNotEmpty;
-      });
-    }
-  }
-
-  void _validFolderNameListener() async {
-    bool isNameValid = FolderHelper.validFolderName(textEditingController.text);
-    if (isEnabled != isNameValid) {
-      setState(() {
-        // disabling/enabling create button when text is a valid/invalid folder name
-        isEnabled = isNameValid;
       });
     }
   }
