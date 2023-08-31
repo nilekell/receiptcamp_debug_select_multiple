@@ -100,6 +100,7 @@ class _FolderDialogState extends State<FolderDialog> {
   @override
   void dispose() {
     textEditingController.removeListener(_textPresenceListener);
+    textEditingController.removeListener(_validFolderNameListener);
     textEditingController.dispose();
     super.dispose();
   }
