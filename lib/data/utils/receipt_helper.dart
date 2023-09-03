@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
@@ -16,7 +17,8 @@ class ReceiptService {
   static final DatabaseRepository databaseRepository =
       DatabaseRepository.instance;
 
-  static List<Tag> _generateTags(List<String> keywords, String receiptId) {
+  @visibleForTesting
+  static List<Tag> generateTags(List<String> keywords, String receiptId) {
     List<Tag> tags = [];
     try {
       for (var keyword in keywords) {
@@ -62,7 +64,7 @@ class ReceiptService {
   try {
     final receiptKeyWords = await TextRecognitionService().extractKeywordsFromPath(imagePath);
     print(receiptKeyWords);
-    tags = _generateTags(receiptKeyWords, receiptId);
+    tags = generateTags(receiptKeyWords, receiptId);
   } on Exception catch (e) {
     print('Error in extractKeywordsAndGenerateTags: $e');
   }
