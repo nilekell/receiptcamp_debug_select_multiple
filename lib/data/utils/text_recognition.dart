@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
@@ -6,8 +7,8 @@ class TextRecognitionService {
 
   Future<List<String>> extractKeywordsFromPath(String imagePath) async {
     try {
-      final scannedTextList = await _scanImageForText(imagePath);
-      final receiptKeyWords = await _extractKeywords(scannedTextList);
+      final scannedTextList = await scanImageForText(imagePath);
+      final receiptKeyWords = await extractKeywords(scannedTextList);
 
       return receiptKeyWords;
     } on Exception catch (e) {
@@ -16,7 +17,8 @@ class TextRecognitionService {
     }
   }
 
-  static Future<List<String>> _scanImageForText(String imagePath) async {
+  @visibleForTesting
+  static Future<List<String>> scanImageForText(String imagePath) async {
     // Uses Google ML Kit Vision
     try {
       final inputImage = InputImage.fromFilePath(imagePath);
@@ -42,7 +44,8 @@ class TextRecognitionService {
     }
   }
 
-  Future<List<String>> _extractKeywords(List scannedOCRText) async {
+  @visibleForTesting
+  static Future<List<String>> extractKeywords(List scannedOCRText) async {
     try {
       String scannedOCRTextList = scannedOCRText.join(' ');
       // Define the regular expression pattern for word characters.
@@ -52,7 +55,7 @@ class TextRecognitionService {
       // Convert the matches to a list of strings.
       final words = matches.map((match) => match.group(0)!).toList();
       // Use the _commonReceiptWords list as stop words.
-      await _loadCommonReceiptWords();
+      await loadCommonReceiptWords();
       // Filter out any stop words and return the remaining words.
       final keywords = words
           .where((word) => !_commonReceiptWords.contains(word.toLowerCase()))
@@ -65,7 +68,8 @@ class TextRecognitionService {
     }
   }
 
-  static Future<void> _loadCommonReceiptWords() async {
+  @visibleForTesting
+  static Future<void> loadCommonReceiptWords() async {
     try {
       if (_commonReceiptWords.isEmpty) {
         String content =
@@ -81,7 +85,7 @@ class TextRecognitionService {
   static Future<bool> imageHasText(String imagePath) async {
     try {
       final scannedTextList =
-          await TextRecognitionService._scanImageForText(imagePath);
+          await TextRecognitionService.scanImageForText(imagePath);
       // most if not all receipts will have greater than 10 text elements (space separated words)
       return scannedTextList.length > 10;
     } on Exception catch (e) {
