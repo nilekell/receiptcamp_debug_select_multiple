@@ -51,7 +51,7 @@ void main() {
     'test/assets/image2.jpeg',
     'test/assets/image3.jpg',
     'test/assets/black_image.jpg',
-    'test/assets/too_large_image.png'
+    'test/assets/too_large_image.jpg'
   ];
 
   group('ReceiptService', () {
