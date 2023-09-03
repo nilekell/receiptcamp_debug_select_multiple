@@ -7,8 +7,8 @@ class TextRecognitionService {
 
   Future<List<String>> extractKeywordsFromPath(String imagePath) async {
     try {
-      final scannedTextList = await scanImageForText(imagePath);
-      final receiptKeyWords = await extractKeywords(scannedTextList);
+      final scannedTextList = await _scanImageForText(imagePath);
+      final receiptKeyWords = await _extractKeywords(scannedTextList);
 
       return receiptKeyWords;
     } on Exception catch (e) {
