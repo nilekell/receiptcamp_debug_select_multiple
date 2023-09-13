@@ -87,7 +87,7 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         title: appName,
         theme: ThemeData(
-          textTheme: GoogleFonts.latoTextTheme(),
+          textTheme: GoogleFonts.rubikTextTheme(),
           primarySwatch: Colors.blue,
         ),
         onGenerateRoute: AppRouter().onGenerateRoute,
