@@ -8,7 +8,6 @@ import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/bloc_observer.dart';
 import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
 import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
-import 'package:receiptcamp/presentation/router/app_router.dart';
 import 'package:receiptcamp/presentation/screens/landing_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'presentation/ui/ui_constants.dart';
@@ -90,7 +89,6 @@ class _MyAppState extends State<MyApp> {
           textTheme: GoogleFonts.rubikTextTheme(),
           primarySwatch: Colors.blue,
         ),
-        onGenerateRoute: AppRouter().onGenerateRoute,
         home: const LandingScreen(),
       ),
     );
