@@ -8,7 +8,7 @@ class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
   final TextStyle tileTextStyle = const TextStyle(color: Colors.white, fontSize: 18);
-  final double tileIconSize = 45;
+  final double tileIconSize = 38;
   final Color tileIconColour = Colors.white;
 
   @override
