@@ -158,11 +158,20 @@ class BackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-        onPressed: () {
-          context.read<FileSystemCubit>().navigateBack(previousFolderId);
-        },
-        icon: const Icon(Icons.arrow_back));
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 12,
+      ),
+      child: IconButton(
+          onPressed: () {
+            context.read<FileSystemCubit>().navigateBack(previousFolderId);
+          },
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Color(primaryDarkBlue),
+            size: 30,
+          )),
+    );
   }
 }
 
