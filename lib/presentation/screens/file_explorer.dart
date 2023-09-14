@@ -353,13 +353,24 @@ class UploadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('UploadButton built with folder: ${currentFolder.name}');
     return FloatingActionButton.large(
       onPressed: () {
         showUploadOptions(
             context, context.read<FolderViewCubit>(), currentFolder);
       },
-      child: const Icon(Icons.add),
+      child: Stack(alignment: Alignment.center, children: [
+        Container(
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            image: DecorationImage(
+                image: AssetImage('assets/circle_gradient.png')),
+          ),
+        ),
+        const Icon(
+          Icons.add,
+          size: 70,
+        )
+      ]),
     );
   }
 }
