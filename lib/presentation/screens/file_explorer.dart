@@ -272,30 +272,46 @@ class FolderListTile extends StatelessWidget {
             Utility.formatDateTimeFromUnixTimestamp(folder.lastModified)),
         super(key: key);
 
+  final TextStyle displayNameStyle =
+      const TextStyle(fontSize: 20, fontWeight: FontWeight.w500);
+  final TextStyle displayDateStyle =
+      const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
+
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      subtitle: Text('Modified $displayDate'),
-      leading: const SizedBox(
-        height: 50,
-        width: 50,
-        child: Icon(
+    return Padding(
+      padding: const EdgeInsets.only(left: 5),
+      child: ListTile(
+        subtitle: Text(
+          'Modified $displayDate',
+          style: displayDateStyle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        leading: const Icon(
           Icons.folder,
-          size: 45,
+          size: 50,
         ),
-      ),
-      trailing: IconButton(
-        icon: const Icon(
-          Icons.more_horiz,
+        trailing: IconButton(
+          icon: const Icon(
+            Icons.more_vert,
+            color: Colors.black,
+            size: 30,
+          ),
+          onPressed: () {
+            showFolderOptions(context, context.read<FolderViewCubit>(), folder);
+          },
         ),
-        onPressed: () {
-          showFolderOptions(context, context.read<FolderViewCubit>(), folder);
+        onTap: () {
+          context.read<FileSystemCubit>().selectFolder(folder.id);
         },
+        title: Text(
+          displayName,
+          style: displayNameStyle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
-      onTap: () {
-        context.read<FileSystemCubit>().selectFolder(folder.id);
-      },
-      title: Text(displayName),
     );
   }
 }
