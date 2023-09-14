@@ -306,43 +306,60 @@ class ReceiptListTile extends StatelessWidget {
   final String displayDate;
 
   ReceiptListTile({Key? key, required this.receipt})
+      // displayName is the file name without the file extension and is cut off when the receipt name
+      // is > 25 chars or would require 2 lines to be shown completely
       : displayName = receipt.name.length > 25
-            ? "${receipt.name.substring(0, 25)}..."
-            : receipt.name,
+            ? "${receipt.name.substring(0, 25)}...".split('.').first
+            : receipt.name.split('.').first,
         displayDate = Utility.formatDisplayDateFromDateTime(
             Utility.formatDateTimeFromUnixTimestamp(receipt.lastModified)),
         super(key: key);
 
+  final TextStyle displayNameStyle =
+      const TextStyle(fontSize: 20, fontWeight: FontWeight.w500);
+  final TextStyle displayDateStyle =
+      const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
+
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-        leading: SizedBox(
-          height: 50,
-          width: 50,
-          child: ClipRRect(
-            // square image corners
-            borderRadius: const BorderRadius.all(Radius.zero),
-            child: Image.file(
-              File(receipt.localPath),
-              fit: BoxFit.cover,
+    return Padding(
+        padding: const EdgeInsets.only(left: 10),
+        child: ListTile(
+            leading: SizedBox(
+              height: 50,
+              width: 50,
+              child: ClipRRect(
+                // square image corners
+                borderRadius: const BorderRadius.all(Radius.zero),
+                child: Image.file(
+                  File(receipt.localPath),
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
-          ),
-        ),
-        subtitle: Text('Created $displayDate'),
-        trailing: IconButton(
-          icon: const Icon(
-            Icons.more_horiz,
-          ),
-          onPressed: () {
-            showReceiptOptions(
-                context, context.read<FolderViewCubit>(), receipt);
-          },
-        ),
-        onTap: () {
-          final imageProvider = Image.file(File(receipt.localPath)).image;
-          showImageViewer(context, imageProvider);
-        },
-        title: Text(displayName));
+            subtitle: Text(
+              'Created $displayDate',
+              style: displayDateStyle,
+            ),
+            trailing: IconButton(
+              icon: const Icon(
+                Icons.more_vert,
+                color: Colors.black,
+                size: 30,
+              ),
+              onPressed: () {
+                showReceiptOptions(
+                    context, context.read<FolderViewCubit>(), receipt);
+              },
+            ),
+            onTap: () {
+              final imageProvider = Image.file(File(receipt.localPath)).image;
+              showImageViewer(context, imageProvider);
+            },
+            title: Text(displayName,
+                style: displayNameStyle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis)));
   }
 }
 
