@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
 import 'package:receiptcamp/presentation/ui/search/search.dart';
-import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   const HomeAppBar({super.key});
@@ -13,21 +12,27 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      flexibleSpace: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(primaryDarkBlue),
-              Color(primaryLightBlue),
-            ],
-            stops: [0.0, 0.75],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+      elevation: 0,
+      backgroundColor: Colors.transparent,
+      flexibleSpace: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return SizedBox(
+            width: constraints.maxWidth,
+            height: constraints.maxHeight,
+            child: Transform.scale(
+              scale: 1.5, // Adjust the scale as needed
+              child: Image.asset(
+                'assets/top_gradient.png',
+                fit:
+                    BoxFit.fill, // Make sure the image covers the entire space
+              ),
+            ),
+          );
+        },
       ),
       title: const Row(
-        mainAxisSize: MainAxisSize.min, // centers title by reducing width of row
+        mainAxisSize:
+            MainAxisSize.min, // centers title by reducing width of row
         children: <Widget>[
           Text(
             'Receipt',
