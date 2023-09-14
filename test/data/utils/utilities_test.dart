@@ -52,8 +52,13 @@ void main() {
     test('generateFileName returns a valid file name', () {
       for (ImageFileType fileType in ImageFileType.values) {
         String fileName = Utility.generateFileName(fileType);
+        String numsInFileName = fileName.split('_').last.split('.').first;
         expect(fileName, isNotNull);
         expect(fileName, isA<String>());
+        // checks that the generated number in the file name is 4 characters long
+        expect(numsInFileName, hasLength(4));
+        // checks that each character in the generated file name is an integer
+        numsInFileName.split('').forEach((element) => expect(int.parse(element), isA<int>() ));
 
         // Check the file extension based on the fileType
         switch (fileType) {

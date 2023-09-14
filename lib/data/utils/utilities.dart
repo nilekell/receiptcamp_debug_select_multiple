@@ -64,17 +64,17 @@ class Utility {
   }
 
   static String generateFileName(ImageFileType fileType) {
-    String fileName = 'RCPT_IMG_';
+    String fileName = 'RCPT_';
     try {
-      const Uuid uuid = Uuid();
-      final String myUuidString = uuid.v4().toString();
+      // randomInt is >= 1000 and < 10,000.
+      final int randomInt = Random().nextInt(9000) + 1000;
 
       if (fileType == ImageFileType.png) {
-        fileName = '$fileName$myUuidString.png';
+        fileName = '$fileName$randomInt.png';
       } else if (fileType == ImageFileType.heic) {
-        fileName = '$fileName$myUuidString.heic';
+        fileName = '$fileName$randomInt.heic';
       }  else if (fileType == ImageFileType.jpg || fileType == ImageFileType.jpeg) {
-        fileName = '$fileName$myUuidString.jpg';
+        fileName = '$fileName$randomInt.jpg';
       } else {
         throw Exception('Utilities.generateFileName(): unexpected file type');
       }
