@@ -5,20 +5,63 @@ import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/delete_folder_confirmation_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/move_folder_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/rename_folder_dialog.dart';
-void showFolderOptions(BuildContext context, FolderViewCubit folderViewCubit, Folder folder) {
+import 'package:receiptcamp/presentation/ui/ui_constants.dart';
+
+void showFolderOptions(
+    BuildContext context, FolderViewCubit folderViewCubit, Folder folder) {
+  const Color secondaryColour = Colors.white;
+  const TextStyle textStyle = TextStyle(fontSize: 16, color: secondaryColour);
+  const double iconScale = 0.7;
+  const double iconPadding = 8.0;
+
   showModalBottomSheet(
+    backgroundColor: const Color(primaryDeepBlue),
     context: context,
     builder: (bottomSheetContext) => Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ListTile(
-          leading: const Icon(Icons.folder),
-          title: Text(folder.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),),
+        const SizedBox(
+          height: 5,
         ),
-        const Divider(thickness: 2,),
         ListTile(
-          leading: const Icon(Icons.edit),
-          title: const Text('Rename'),
+          leading: Transform.scale(
+            scale: 0.9,
+            child: Image.asset(
+              'assets/folder.png',
+              color: secondaryColour,
+              colorBlendMode: BlendMode.srcIn,
+            ),
+          ),
+          title: Text(
+            folder.name,
+            style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: secondaryColour),
+          ),
+        ),
+        const Divider(
+          thickness: 1,
+          endIndent: 20,
+          indent: 20,
+          color: secondaryColour,
+        ),
+        ListTile(
+          leading: Padding(
+            padding: const EdgeInsets.only(left: iconPadding),
+            child: Transform.scale(
+              scale: iconScale,
+              child: Image.asset(
+                'assets/pencil.png',
+                color: secondaryColour,
+                colorBlendMode: BlendMode.srcIn,
+              ),
+            ),
+          ),
+          title: const Text(
+            'Rename',
+            style: textStyle,
+          ),
           onTap: () {
             // closing bottom sheet
             Navigator.of(bottomSheetContext).pop();
@@ -27,8 +70,20 @@ void showFolderOptions(BuildContext context, FolderViewCubit folderViewCubit, Fo
           },
         ),
         ListTile(
-          leading: const Icon(Icons.drive_file_move),
-          title: const Text('Move'),
+          leading: Padding(
+              padding: const EdgeInsets.only(left: iconPadding),
+              child: Transform.scale(
+                scale: 0.8,
+                child: Image.asset(
+                  'assets/folder_move.png',
+                  color: secondaryColour,
+                  colorBlendMode: BlendMode.srcIn,
+                ),
+              )),
+          title: const Text(
+            'Move',
+            style: textStyle,
+          ),
           onTap: () {
             // closing bottom sheet
             Navigator.of(bottomSheetContext).pop();
@@ -37,8 +92,20 @@ void showFolderOptions(BuildContext context, FolderViewCubit folderViewCubit, Fo
           },
         ),
         ListTile(
-          leading: const Icon(Icons.delete),
-          title: const Text('Delete'),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: iconPadding),
+            child: Transform.scale(
+                scale: iconScale,
+                child: Image.asset(
+                  'assets/bin.png',
+                  color: secondaryColour,
+                  colorBlendMode: BlendMode.srcIn,
+                )),
+          ),
+          title: const Text(
+            'Delete',
+            style: textStyle,
+          ),
           onTap: () {
             Navigator.of(bottomSheetContext).pop();
             // opening deleting folder dialog
@@ -46,15 +113,27 @@ void showFolderOptions(BuildContext context, FolderViewCubit folderViewCubit, Fo
           },
         ),
         ListTile(
-          leading: const Icon(Icons.share),
-          title: const Text('Share'),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: iconPadding),
+            child: Transform.scale(
+                scale: iconScale,
+                child: Image.asset(
+                  'assets/share.png',
+                  color: secondaryColour,
+                  colorBlendMode: BlendMode.srcIn,
+                )),
+          ),
+          title: const Text(
+            'Share',
+            style: textStyle,
+          ),
           onTap: () {
             Navigator.of(bottomSheetContext).pop();
             // opening deleting folder dialog
             FileService.shareFolderAsZip(folder);
           },
         ),
-        const SizedBox(height: 25)
+        const SizedBox(height: 50)
       ],
     ),
   );
