@@ -86,6 +86,11 @@ flutter:
     - assets/bottom_gradient.png
     - assets/top_gradient.png
     - assets/circle_receipt.png
+    - assets/images.png
+    - assets/download.png
+    - assets/share.png
+    - assets/camera.png
+
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
