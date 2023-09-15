@@ -1,2 +1,2 @@
-const rootFolderName = 'All Receipt';
+const rootFolderName = 'All Receipts';
 const rootFolderId = 'a1';
