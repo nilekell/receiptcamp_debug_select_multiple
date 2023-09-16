@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -32,28 +33,28 @@ class _HomeState extends State<Home> {
         case HomeErrorState():
           return const Text('Error showing receipts');
         case HomeEmptyReceiptsState():
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  SizedBox(
-                      height: 20), // provide some space between image and text
-                  Text(
-                    "You haven't saved any receipts yet :(",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    "To start saving receipts, navigate to folders and press the upload button",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          );
+          return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 300),
+                // provide some space between image and text
+                Text(
+                  "No recent receipts",
+                  style: TextStyle(
+                      color: Color(primaryGrey),
+                      fontSize: 25,
+                      fontWeight: FontWeight.w400),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  "To see recents, add receipts to ReceiptCamp",
+                  style: TextStyle(
+                      color: Color(primaryGrey),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w100),
+                  textAlign: TextAlign.center,
+                ),
+              ]);
         case HomeLoadedSuccessState():
           return Column(
             children: [
@@ -136,7 +137,8 @@ class HomeReceiptTile extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
               child: Text(
                 displayName,
-                style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    fontSize: 18.0, fontWeight: FontWeight.bold),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
