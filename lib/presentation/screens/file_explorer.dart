@@ -12,6 +12,7 @@ import 'package:receiptcamp/presentation/ui/file_explorer/receipt/receipt_sheet.
 import 'package:receiptcamp/presentation/ui/file_explorer/snackbar_utility.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/upload_sheet.dart';
 import 'package:easy_image_viewer/easy_image_viewer.dart';
+import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class FileExplorer extends StatefulWidget {
   const FileExplorer({super.key});
@@ -33,11 +34,13 @@ class _FileExplorerState extends State<FileExplorer> {
   }
 
   _scrollListener() {
-    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+    if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.reverse) {
       // Hide the upload button when user scroll down
       if (_showUploadButton) setState(() => _showUploadButton = false);
-    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
-      // Show the upload button when user scroll up or stop scrolling
+    } else if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.forward) {
+      // Show the upload button when user scroll up
       if (!_showUploadButton) setState(() => _showUploadButton = true);
     }
   }
@@ -65,6 +68,7 @@ class _FileExplorerState extends State<FileExplorer> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 10),
                 state.folder.id != 'a1'
                     ? FolderName(
                         name: state.folder.name,
@@ -72,7 +76,11 @@ class _FileExplorerState extends State<FileExplorer> {
                     : const FolderName(
                         name: 'All Receipts',
                       ),
-                const Divider(thickness: 2),
+                const Divider(
+                  thickness: 1,
+                  indent: 25,
+                  endIndent: 25,
+                ),
                 state.folder.id != 'a1'
                     ? BackButton(
                         previousFolderId: state.folder.parentId,
@@ -83,28 +91,29 @@ class _FileExplorerState extends State<FileExplorer> {
                   child: Stack(
                     children: [
                       BlocListener<FileSystemCubit, FileSystemCubitState>(
-                      listener: (context, state) {
-                        switch (state) {
-                          case FileSystemCubitFolderInformationSuccess():
-                            print(
-                                'RefreshableFolderView: fetchFiles for ${state.folder.name}');
-                            context
-                                .read<FolderViewCubit>()
-                                .fetchFiles(state.folder.id);
-                          default:
-                            print(
-                                'RefreshableFolderViewState: ${state.toString()}');
-                        }
-                      },
-                      child: RefreshableFolderView(scrollController: _scrollController),
-                    ),
-                  if (_showUploadButton) 
-                    Positioned(
-                      right: 28,
-                      bottom: 28,
-                      child: UploadButton(currentFolder: state.folder),
-                    )
-                  ],
+                        listener: (context, state) {
+                          switch (state) {
+                            case FileSystemCubitFolderInformationSuccess():
+                              print(
+                                  'RefreshableFolderView: fetchFiles for ${state.folder.name}');
+                              context
+                                  .read<FolderViewCubit>()
+                                  .fetchFiles(state.folder.id);
+                            default:
+                              print(
+                                  'RefreshableFolderViewState: ${state.toString()}');
+                          }
+                        },
+                        child: RefreshableFolderView(
+                            scrollController: _scrollController),
+                      ),
+                      if (_showUploadButton)
+                        Positioned(
+                          right: 28,
+                          bottom: 28,
+                          child: UploadButton(currentFolder: state.folder),
+                        )
+                    ],
                   ),
                 ),
               ],
@@ -113,7 +122,11 @@ class _FileExplorerState extends State<FileExplorer> {
             print(
                 'FileSystemCubitError with state: ${state.runtimeType.toString()}');
             return const Center(
-              child: Text('Error State'),
+              child: Text(
+                'Uh oh, an error occurred. Please switch tabs and/or report the error.',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                textAlign: TextAlign.center,
+              ),
             );
           default:
             print(
@@ -135,13 +148,13 @@ class FolderName extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.fromLTRB(25, 15, 0, 10),
       child: Text(
         name,
         style: const TextStyle(
-          fontSize: 34.0,
-          fontWeight: FontWeight.bold,
-        ),
+            fontSize: 30.0,
+            fontWeight: FontWeight.w600,
+            color: Color(primaryGrey)),
       ),
     );
   }
@@ -199,7 +212,9 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
       listener: (context, state) {
         SnackBarUtility.showSnackBar(context, state);
       },
-      buildWhen: (previous, current) => previous is !FolderViewActionState || current is !FolderViewActionState,
+      buildWhen: (previous, current) =>
+          previous is! FolderViewActionState ||
+          current is! FolderViewActionState,
       builder: (context, state) {
         switch (state) {
           case FolderViewInitial() || FolderViewLoading():
@@ -219,7 +234,8 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
               },
               child: state.files.isNotEmpty
                   ? ListView.builder(
-                    controller: widget.scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      controller: widget.scrollController,
                       itemCount: state.files.length,
                       itemBuilder: (context, index) {
                         var item = state.files[index];
@@ -236,27 +252,51 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                         }
                       },
                     )
-                  : const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          SizedBox(height: 20),
-                          Text(
-                            "To add receipts, tap the upload button below",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w500),
-                            textAlign: TextAlign.center,
+                  : ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              const SizedBox(
+                                height: 45,
+                              ),
+                              Transform.scale(
+                                scale: 1,
+                                child: Image.asset('assets/logo.png'),
+                              ),
+                              const SizedBox(
+                                height: 12,
+                              ),
+                              const Text(
+                                'To add receipts, tap',
+                                style: TextStyle(
+                                    color: Color(primaryGrey),
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.w100),
+                                textAlign: TextAlign.center,
+                              ),
+                              const Text(
+                                'the + button below',
+                                style: TextStyle(
+                                    color: Color(primaryGrey),
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.w100),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ]),
             );
           case FolderViewError():
             print(
                 'FolderViewCubitError with state: ${state.runtimeType.toString()}');
             return const Center(
-              child: Text('Error State'),
+              child: Text(
+                'Uh oh, an error occurred. Please switch tabs and/or report the error',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                textAlign: TextAlign.center,
+              ),
             );
           default:
             print(
@@ -282,14 +322,14 @@ class FolderListTile extends StatelessWidget {
         super(key: key);
 
   final TextStyle displayNameStyle =
-      const TextStyle(fontSize: 20, fontWeight: FontWeight.w500);
+      const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
   final TextStyle displayDateStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 5),
+      padding: const EdgeInsets.only(left: 10),
       child: ListTile(
         subtitle: Text(
           'Modified $displayDate',
@@ -304,7 +344,7 @@ class FolderListTile extends StatelessWidget {
         trailing: IconButton(
           icon: const Icon(
             Icons.more_vert,
-            color: Colors.black,
+            color: Color(primaryGrey),
             size: 30,
           ),
           onPressed: () {
@@ -341,7 +381,7 @@ class ReceiptListTile extends StatelessWidget {
         super(key: key);
 
   final TextStyle displayNameStyle =
-      const TextStyle(fontSize: 20, fontWeight: FontWeight.w500);
+      const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
   final TextStyle displayDateStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
@@ -369,7 +409,7 @@ class ReceiptListTile extends StatelessWidget {
             trailing: IconButton(
               icon: const Icon(
                 Icons.more_vert,
-                color: Colors.black,
+                color: Color(primaryGrey),
                 size: 30,
               ),
               onPressed: () {
