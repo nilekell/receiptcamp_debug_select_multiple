@@ -5,11 +5,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class CustomSearchDelegate extends SearchDelegate {
   final SearchBloc searchBloc;
 
   CustomSearchDelegate({required this.searchBloc}) : super();
+
+  final startSearchingText = const Text(
+    'Start searching with any words on a receipt',
+    style: TextStyle(color: Color(primaryGrey), fontSize: 17),
+  );
+  final noResultsText = const Text(
+    "Sorry, we couldn't find any results",
+    style: TextStyle(color: Color(primaryGrey), fontSize: 17),
+  );
+  final errorText =
+      const Text('Sorry, an unexpected error occured, please try again');
+
+  // @override
+  // String get searchFieldLabel => 'Search';
+
+  @override
+  ThemeData appBarTheme(BuildContext context) {
+    return ThemeData(
+      appBarTheme: const AppBarTheme(backgroundColor: Color(primaryDarkBlue)),
+      inputDecorationTheme: const InputDecorationTheme(
+        hintStyle: TextStyle(color: Colors.white),
+        border: InputBorder.none, // This gets rid of the underline
+      ),
+      textTheme: const TextTheme(
+        titleLarge: TextStyle(
+          color: Colors.white,
+          fontSize: 16.0,
+        ),
+    ));
+  }
 
   // first overridden method to build ui that appears after search field
   @override
@@ -28,13 +59,15 @@ class CustomSearchDelegate extends SearchDelegate {
 
   // second overridden method to build ui that appears before search field
   @override
-  Widget? buildLeading(BuildContext context) {
+  Widget buildLeading(BuildContext context) {
     return IconButton(
+      icon: AnimatedIcon(
+        icon: AnimatedIcons.menu_arrow,
+        progress: transitionAnimation,
+      ),
       onPressed: () {
-        // closing search delegate
         close(context, null);
       },
-      icon: const Icon(Icons.arrow_back),
     );
   }
 
@@ -50,10 +83,9 @@ class CustomSearchDelegate extends SearchDelegate {
           case SearchStateLoading():
             return const Center(child: CircularProgressIndicator());
           case SearchStateNoQuery():
-            return const Center(child: Text('Start searching for any words on a receipt'));
+            return Center(child: startSearchingText);
           case SearchStateEmpty():
-            return const Center(
-                child: Text("Sorry, we couldn't find any results"));
+            return Center(child: noResultsText);
           case SearchStateSuccess():
             return Scrollbar(
                 child: ListView.builder(
@@ -63,9 +95,7 @@ class CustomSearchDelegate extends SearchDelegate {
                       return ReceiptSearchTile(receipt: receipt);
                     }));
           case SearchStateError():
-            return const Center(
-                child: Text(
-                    'Sorry, an unexpected error occured, please try again'));
+            return Center(child: errorText);
           default:
             return Container();
         }
@@ -87,10 +117,9 @@ class CustomSearchDelegate extends SearchDelegate {
           case SearchStateLoading():
             return const Center(child: CircularProgressIndicator());
           case SearchStateNoQuery():
-            return const Center(child: Text('Start searching for any words on a receipt'));
+            return Center(child: startSearchingText);
           case SearchStateEmpty():
-            return const Center(
-                child: Text("Sorry, we couldn't find any results"));
+            return Center(child: noResultsText);
           case SearchStateSuccess():
             return Scrollbar(
                 child: ListView.builder(
@@ -100,9 +129,7 @@ class CustomSearchDelegate extends SearchDelegate {
                       return ReceiptSearchTile(receipt: receipt);
                     }));
           case SearchStateError():
-            return const Center(
-                child: Text(
-                    'Sorry, an unexpected error occured, please try again'));
+            return Center(child: errorText);
           default:
             return Container();
         }
@@ -119,7 +146,13 @@ class ReceiptSearchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        leading: const Icon(Icons.receipt),
+        leading: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          child: Transform.scale(
+            scale: 1.4,
+            child: Image.asset('assets/receipt.png', colorBlendMode: BlendMode.srcIn, color: const Color(primaryGrey).withOpacity(0.5),),
+          ),
+        ),
         onTap: () {
           final imageProvider = Image.file(File(receipt.localPath)).image;
           showImageViewer(context, imageProvider);

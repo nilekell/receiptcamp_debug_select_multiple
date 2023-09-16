@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -32,31 +33,30 @@ class _HomeState extends State<Home> {
         case HomeErrorState():
           return const Text('Error showing receipts');
         case HomeEmptyReceiptsState():
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  SizedBox(
-                      height: 20), // provide some space between image and text
-                  Text(
-                    "You haven't saved any receipts yet :(",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    "To start saving receipts, navigate to folders and press the upload button",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          );
+          return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 300),
+                // provide some space between image and text
+                Text(
+                  "No recent receipts",
+                  style: TextStyle(
+                      color: Color(primaryGrey),
+                      fontSize: 25,
+                      fontWeight: FontWeight.w400),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  "To see recents, add receipts to ReceiptCamp",
+                  style: TextStyle(
+                      color: Color(primaryGrey),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w100),
+                  textAlign: TextAlign.center,
+                ),
+              ]);
         case HomeLoadedSuccessState():
           return Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: RefreshIndicator(
@@ -67,27 +67,33 @@ class _HomeState extends State<Home> {
                       itemCount: state.receipts.length,
                       itemBuilder: (context, index) {
                         final receipt = state.receipts[index];
-                        final formattedDateTime =
-                            Utility.formatDateTimeFromUnixTimestamp(
-                                receipt.dateCreated);
-                        final displayDate =
-                            Utility.formatDisplayDateFromDateTime(
-                                formattedDateTime);
-                        String displayName = receipt.name.length > 15
-                            ? "${receipt.name.substring(0, 15)}..."
-                            : receipt.name;
                         return GestureDetector(
                           onTap: () {
                             final imageProvider =
                                 Image.file(File(receipt.localPath)).image;
                             showImageViewer(context, imageProvider);
                           },
-                          child: Container(
-                            color: Colors.white,
-                            height: MediaQuery.of(context).size.height / 3,
-                            padding: const EdgeInsets.all(
-                                4.0), // padding between each card
-                            child: HomeReceiptTile(displayName: displayName, receipt: receipt, displayDate: displayDate),
+                          child: Column(
+                            children: [
+                              Container(
+                                color: Colors.white,
+                                height: MediaQuery.of(context).size.height / 3,
+                                padding: const EdgeInsets.all(
+                                    4.0), // padding between each card
+                                child: HomeReceiptTile(
+                                  receipt: receipt,
+                                ),
+                              ),
+                              if (index !=
+                                  state.receipts.length -
+                                      1) // Check to not add a divider after the last item
+                                Divider(
+                                    thickness: 1,
+                                    indent: 16,
+                                    endIndent: 16,
+                                    color: Colors.grey[
+                                        400]), // Divider between HomeReceiptTile
+                            ],
                           ),
                         );
                       },
@@ -104,12 +110,15 @@ class _HomeState extends State<Home> {
 }
 
 class HomeReceiptTile extends StatelessWidget {
-  const HomeReceiptTile({
-    super.key,
-    required this.displayName,
-    required this.receipt,
-    required this.displayDate,
-  });
+  HomeReceiptTile({Key? key, required this.receipt})
+      // displayName is the file name without the file extension and is cut off when the receipt name
+      // is > 25 chars or would require 2 lines to be shown completely
+      : displayName = receipt.name.length > 25
+            ? "${receipt.name.substring(0, 25)}...".split('.').first
+            : receipt.name.split('.').first,
+        displayDate = Utility.formatDisplayDateFromDateTime(
+            Utility.formatDateTimeFromUnixTimestamp(receipt.lastModified)),
+        super(key: key);
 
   final String displayName;
   final Receipt receipt;
@@ -117,46 +126,42 @@ class HomeReceiptTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 8.0,
-      shape: RoundedRectangleBorder(
-        // Card's rounded edges
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Text(
-              displayName,
-              style: const TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Expanded(
-            child: ClipRRect(
-              // round the image corners
-              borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(15.0)),
-              child: Image.file(
-                File(receipt.localPath),
-                fit: BoxFit.cover,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        color: Colors.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
+              child: Text(
+                displayName,
+                style: const TextStyle(
+                    fontSize: 18.0, fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Text(
-              'Created on $displayDate',
-              style: const TextStyle(
-                  fontSize: 14.0, color: Colors.grey),
+            Expanded(
+              child: ClipRRect(
+                // Round the top corners of the image
+                borderRadius: BorderRadius.circular(25.0),
+                child: Image.file(
+                  File(receipt.localPath),
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
+              child: Text(
+                'Created on $displayDate',
+                style: const TextStyle(fontSize: 16.0, color: Colors.grey),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

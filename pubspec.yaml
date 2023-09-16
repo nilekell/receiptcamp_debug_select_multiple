@@ -79,6 +79,26 @@ flutter:
   assets:
     - assets/common_receipt_words.txt
 
+    - assets/logo.png
+
+    - assets/folder.png
+    - assets/folder_plus.png
+    - assets/folder_move.png
+
+    - assets/pencil.png
+    - assets/receipt.png
+    - assets/bin.png
+    - assets/images.png
+    - assets/download.png
+    - assets/share.png
+    - assets/scan.png
+    - assets/camera.png
+    
+    - assets/circle_gradient.png
+    - assets/bottom_gradient.png
+    - assets/top_gradient.png
+
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

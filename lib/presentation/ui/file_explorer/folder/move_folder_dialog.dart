@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
+import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 Future<void> showMoveFolderDialog(BuildContext context,
     FolderViewCubit folderViewCubit, Folder thisFolder) async {
@@ -41,8 +42,8 @@ class _MoveFolderDialogState extends State<MoveFolderDialog> {
   Future<void> loadFolders() async {
     // getting all folders except for the folder to be moved, its parent folder, and  any of its child folders and subfolders
     // this ensure we don't show any folders that are illogical to move to in the dropdown menu
-    folders = await DatabaseRepository.instance
-        .getFoldersThatCanBeMovedTo(widget.thisFolder.id, widget.thisFolder.parentId);
+    folders = await DatabaseRepository.instance.getFoldersThatCanBeMovedTo(
+        widget.thisFolder.id, widget.thisFolder.parentId);
     if (folders.isNotEmpty) {
       setState(() {
         selectedFolder = folders[0];
@@ -54,24 +55,43 @@ class _MoveFolderDialogState extends State<MoveFolderDialog> {
     }
   }
 
+  final actionTextStyle = const TextStyle(color: Colors.white, fontSize: 18);
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Move to...'),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(40.0))),
+      backgroundColor: const Color(primaryDarkBlue),
+      title: const Text(
+        'Move to...',
+        textAlign: TextAlign.left,
+        style: TextStyle(color: Colors.white),
+      ),
       // single child scroll view prevents dropdown menu overflow
       content: SingleChildScrollView(
         child: Center(
           child: DropdownButton<Folder>(
             value: selectedFolder,
-            hint: const Text('Select folder'),
+            hint: const Text(
+              'Select folder',
+              style: TextStyle(color: Colors.white),
+            ),
             iconSize: 35,
+            iconEnabledColor: Colors.white,
+            dropdownColor: const Color(primaryDeepBlue),
             isDense: true,
             isExpanded: true,
-            underline: Container(height: 1, color: Colors.blue,),
+            underline: Container(
+              height: 1,
+              color: Colors.white,
+            ),
             // mapping the list of folders to a list of DropdownMenuItem widgets
             items: folders.map<DropdownMenuItem<Folder>>((Folder folder) {
               return DropdownMenuItem<Folder>(
-                  value: folder, child: Text(folder.name));
+                  value: folder,
+                  child: Text(folder.name,
+                      style: const TextStyle(color: Colors.white)));
             }).toList(), // converting the Iterable returned from .map() back to a list
             // onChanged is called when the user selects a new option from the dropdown menu
             onChanged: (Folder? value) {
@@ -85,7 +105,10 @@ class _MoveFolderDialogState extends State<MoveFolderDialog> {
       ),
       actions: <Widget>[
         TextButton(
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: actionTextStyle,
+            ),
             onPressed: () {
               // closing folder dialog
               Navigator.of(context).pop();
@@ -94,11 +117,19 @@ class _MoveFolderDialogState extends State<MoveFolderDialog> {
           // disable button when a folder hasn't been selected yet OR there are no available folders that can be moved to
           onPressed: selectedFolder != null && availableFolders
               ? () {
-            // closing folder dialog
-            Navigator.of(context).pop();
-            context.read<FolderViewCubit>().moveFolder(widget.thisFolder, selectedFolder!.id);
-          } : null,
-          child: const Text('Move'),
+                  // closing folder dialog
+                  Navigator.of(context).pop();
+                  context
+                      .read<FolderViewCubit>()
+                      .moveFolder(widget.thisFolder, selectedFolder!.id);
+                }
+              : null,
+          child: Text(
+            'Move',
+            style: availableFolders
+                ? actionTextStyle
+                : actionTextStyle.copyWith(color: const Color(0xFFBDBDBD)),
+          ),
         ),
       ],
     );

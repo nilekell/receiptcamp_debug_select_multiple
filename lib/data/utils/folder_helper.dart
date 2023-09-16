@@ -9,7 +9,7 @@ class FolderHelper {
   // characters (lowercase or uppercase), digits, underscores, and hyphens.
   static bool validFolderName(String name) {
     try {
-      final RegExp regex = RegExp(r'^[a-zA-Z0-9_-]+$');
+      final RegExp regex = RegExp(r'^[a-zA-Z0-9 _-]+$');
       return name.isNotEmpty && regex.hasMatch(name);
     } on Exception catch (e) {
       print('Error in validFolderName: $e');
