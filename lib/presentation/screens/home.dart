@@ -71,7 +71,7 @@ class _HomeState extends State<Home> {
                           onTap: () {
                             final imageProvider =
                                 Image.file(File(receipt.localPath)).image;
-                            showImageViewer(context, imageProvider);
+                            showImageViewer(context, imageProvider, swipeDismissible: true, doubleTapZoomable: true);
                           },
                           child: Column(
                             children: [
