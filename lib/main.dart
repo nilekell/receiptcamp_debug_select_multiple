@@ -18,6 +18,9 @@ void main() async {
   Bloc.observer = AppBlocObserver();
   WidgetsFlutterBinding.ensureInitialized();
   await DatabaseRepository.instance.init();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   // timeDilation = 8;
   runApp(MultiBlocProvider(
     providers: [
