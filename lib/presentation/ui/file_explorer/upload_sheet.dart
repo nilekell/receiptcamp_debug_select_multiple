@@ -21,7 +21,7 @@ void showUploadOptions(BuildContext context, FolderViewCubit folderViewCubit,
 class UploadOptionsBottomSheet extends StatelessWidget {
   final Folder currentFolder;
   final EdgeInsets paddingBetweenIcons =
-      const EdgeInsets.symmetric(horizontal: 25.0);
+      const EdgeInsets.symmetric(horizontal: 20.0);
   final Color backgroundColour = const Color(primaryDarkBlue);
 
   const UploadOptionsBottomSheet({super.key, required this.currentFolder});
@@ -40,6 +40,7 @@ class UploadOptionsBottomSheet extends StatelessWidget {
             child: UploadOption(
                 currentFolderId: currentFolder.id,
                 onPressed: () {
+                  Navigator.of(context).pop();
                   context
                       .read<FolderViewCubit>()
                       .uploadReceiptFromGallery(currentFolder.id);
@@ -51,6 +52,7 @@ class UploadOptionsBottomSheet extends StatelessWidget {
             child: UploadOption(
                 currentFolderId: currentFolder.id,
                 onPressed: () {
+                  Navigator.of(context).pop();
                   context
                       .read<FolderViewCubit>()
                       .uploadReceiptFromCamera(currentFolder.id);
@@ -62,6 +64,7 @@ class UploadOptionsBottomSheet extends StatelessWidget {
             child: UploadOption(
                 currentFolderId: currentFolder.id,
                 onPressed: () {
+                  Navigator.of(context).pop();
                   showCreateFolderDialog(
                       context, context.read<FolderViewCubit>(), currentFolder);
                 },
@@ -72,6 +75,7 @@ class UploadOptionsBottomSheet extends StatelessWidget {
             child: UploadOption(
                 currentFolderId: currentFolder.id,
                 onPressed: () {
+                  Navigator.of(context).pop();
                   context
                       .read<FolderViewCubit>()
                       .uploadReceiptFromDocumentScan(currentFolder.id);
@@ -108,10 +112,7 @@ class UploadOption extends StatelessWidget {
       child: IconButton(
           iconSize: iconSize,
           color: iconColour,
-          onPressed: () {
-            onPressed;
-            Navigator.of(context).pop();
-          },
+          onPressed: onPressed,
           icon: Image.asset(
             assetPath,
             colorBlendMode: BlendMode.srcIn,
