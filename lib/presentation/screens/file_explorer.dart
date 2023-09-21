@@ -234,6 +234,8 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
               },
               child: state.files.isNotEmpty
                   ? ListView.builder(
+                    // key preserves scroll position when switching tabs
+                    key: const PageStorageKey<String>('ExplorerKey'),
                       physics: const AlwaysScrollableScrollPhysics(),
                       controller: widget.scrollController,
                       itemCount: state.files.length,

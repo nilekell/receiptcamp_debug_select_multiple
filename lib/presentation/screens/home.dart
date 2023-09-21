@@ -64,6 +64,8 @@ class _HomeState extends State<Home> {
                       context.read<HomeBloc>().add(HomeInitialEvent());
                     },
                     child: ListView.builder(
+                      // key preserves scroll position when switching tabs
+                      key: const PageStorageKey<String>('HomeKey'),
                       itemCount: state.receipts.length,
                       itemBuilder: (context, index) {
                         final receipt = state.receipts[index];
