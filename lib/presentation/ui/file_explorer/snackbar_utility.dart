@@ -45,6 +45,9 @@ abstract class SnackBarUtility {
       case FolderViewDeleteFailure():
         message = "Failed to delete '${state.deletedName}'";
         break;
+      case FolderViewShareFailure():
+        message = "Failed to share '${state.folderName}' - folder is empty ";
+        break;
       default:
         print('Unknown state in showSnackBar: ${state.runtimeType}');
         return;

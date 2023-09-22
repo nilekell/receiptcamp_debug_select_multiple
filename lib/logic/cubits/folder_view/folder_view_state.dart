@@ -102,12 +102,13 @@ final class FolderViewShareSuccess extends FolderViewActionState {
 }
 
 final class FolderViewShareFailure extends FolderViewActionState {
-  const FolderViewShareFailure({required this.receiptName, required super.folderId});
+  final String errorMessage;
+  final String folderName;
 
-  final String receiptName;
+  const FolderViewShareFailure({required super.folderId, required this.errorMessage, required this.folderName});
 
   @override
-  List<Object> get props => [receiptName];
+  List<Object> get props => [errorMessage];
 }
 
 final class FolderViewUploadSuccess extends FolderViewActionState {

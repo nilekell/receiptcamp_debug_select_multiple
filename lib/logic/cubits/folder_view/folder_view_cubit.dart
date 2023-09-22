@@ -3,6 +3,7 @@ import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 import 'package:equatable/equatable.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
+import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/data/utils/receipt_helper.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/models/folder.dart';
@@ -274,6 +275,16 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       print(e.toString());
       emit(FolderViewRenameFailure(
           oldName: receipt.name, newName: newName, folderId: receipt.parentId));
+    }
+  }
+
+  // share folder
+  shareFolder(Folder folder) async {
+    try {
+      await FileService.shareFolderAsZip(folder);
+    } on Exception catch (e) {
+      emit(FolderViewShareFailure(errorMessage: e.toString(), folderId: folder.id, folderName: folder.name));
+      fetchFiles(folder.parentId);
     }
   }
 }
