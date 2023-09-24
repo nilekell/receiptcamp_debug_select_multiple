@@ -69,7 +69,7 @@ class _FileExplorerState extends State<FileExplorer> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                state.folder.id != 'a1'
+                state.folder.id != rootFolderId
                     ? FolderName(
                         name: state.folder.name,
                       )
@@ -81,7 +81,7 @@ class _FileExplorerState extends State<FileExplorer> {
                   indent: 25,
                   endIndent: 25,
                 ),
-                state.folder.id != 'a1'
+                state.folder.id != rootFolderId
                     ? BackButton(
                         previousFolderId: state.folder.parentId,
                         currentFolderId: state.folder.id,
@@ -201,7 +201,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
   @override
   void initState() {
     print('RefreshableFolderView instantiated');
-    context.read<FolderViewCubit>().initFolderView('a1');
+    context.read<FolderViewCubit>().initFolderView(rootFolderId);
     super.initState();
   }
 
