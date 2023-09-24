@@ -224,8 +224,7 @@ class FileService {
 
     // Check if there are any files to share
     if (archive.isEmpty) {
-      print("No files to share in this folder.");
-      return;
+      throw Exception('Cannot share archive: No files to share in this folder');
     }
 
     // create an encoder instance

@@ -20,112 +20,104 @@ void showUploadOptions(BuildContext context, FolderViewCubit folderViewCubit,
 
 class UploadOptionsBottomSheet extends StatelessWidget {
   final Folder currentFolder;
-  final double iconSize = 45.0;
-  final Color iconColour = Colors.white;
-  final EdgeInsets paddingBetweenIcons = const EdgeInsets.all(10.0);
+  final EdgeInsets paddingBetweenIcons =
+      const EdgeInsets.symmetric(horizontal: 20.0);
+  final Color backgroundColour = const Color(primaryDarkBlue);
 
   const UploadOptionsBottomSheet({super.key, required this.currentFolder});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(color: Color(primaryDarkBlue)), // background colour
+      decoration: BoxDecoration(color: backgroundColour), // background colour
       child: Row(
-        // row of icons
+        // row of icon upload options
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         children: [
           Padding(
             padding: paddingBetweenIcons,
-            child: InkWell(
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                child: IconButton(
-                    iconSize: iconSize,
-                    onPressed: () {
-                      context
-                          .read<FolderViewCubit>()
-                          .uploadReceiptFromGallery(currentFolder.id);
-                      Navigator.of(context).pop();
-                    },
-                    icon: Image.asset(
-                      'assets/images.png',
-                      colorBlendMode: BlendMode.srcIn,
-                      color: iconColour,
-                    )),
-              ),
-            ),
+            child: UploadOption(
+                currentFolderId: currentFolder.id,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  context
+                      .read<FolderViewCubit>()
+                      .uploadReceiptFromGallery(currentFolder.id);
+                },
+                assetPath: 'assets/images.png'),
           ),
           Padding(
             padding: paddingBetweenIcons,
-            child: InkWell(
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                child: IconButton(
-                    iconSize: iconSize,
-                    color: iconColour,
-                    onPressed: () {
-                      context
-                          .read<FolderViewCubit>()
-                          .uploadReceiptFromCamera(currentFolder.id);
-                      Navigator.of(context).pop();
-                    },
-                    icon: Image.asset(
-                      'assets/camera.png',
-                      colorBlendMode: BlendMode.srcIn,
-                      color: iconColour,
-                    )),
-              ),
-            ),
+            child: UploadOption(
+                currentFolderId: currentFolder.id,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  context
+                      .read<FolderViewCubit>()
+                      .uploadReceiptFromCamera(currentFolder.id);
+                },
+                assetPath: 'assets/camera.png'),
           ),
           Padding(
             padding: paddingBetweenIcons,
-            child: InkWell(
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                child: IconButton(
-                    iconSize: iconSize,
-                    color: iconColour,
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      showCreateFolderDialog(context,
-                          context.read<FolderViewCubit>(), currentFolder);
-                    },
-                    icon: Image.asset(
-                      'assets/folder_plus.png',
-                      colorBlendMode: BlendMode.srcIn,
-                      color: iconColour,
-                    )),
-              ),
-            ),
+            child: UploadOption(
+                currentFolderId: currentFolder.id,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  showCreateFolderDialog(
+                      context, context.read<FolderViewCubit>(), currentFolder);
+                },
+                assetPath: 'assets/folder_plus.png'),
           ),
           Padding(
             padding: paddingBetweenIcons,
-            child: InkWell(
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                child: IconButton(
-                    iconSize: iconSize,
-                    color: iconColour,
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      context
-                          .read<FolderViewCubit>()
-                          .uploadReceiptFromDocumentScan(currentFolder.id);
-                    },
-                    icon: Image.asset(
-                      'assets/scan.png',
-                      colorBlendMode: BlendMode.srcIn,
-                      color: iconColour,
-                    )),
-              ),
-            ),
+            child: UploadOption(
+                currentFolderId: currentFolder.id,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  context
+                      .read<FolderViewCubit>()
+                      .uploadReceiptFromDocumentScan(currentFolder.id);
+                },
+                assetPath: 'assets/scan.png'),
           ),
           const SizedBox(
             height: 170,
           )
         ],
       ),
+    );
+  }
+}
+
+class UploadOption extends StatelessWidget {
+  const UploadOption({
+    Key? key,
+    required this.currentFolderId,
+    required this.onPressed,
+    required this.assetPath,
+  }) : super(key: key);
+
+  final String currentFolderId;
+  final VoidCallback onPressed;
+  final String assetPath;
+
+  final double iconSize = 20.0;
+  final Color iconColour = Colors.white;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      child: IconButton(
+          iconSize: iconSize,
+          color: iconColour,
+          onPressed: onPressed,
+          icon: Image.asset(
+            assetPath,
+            colorBlendMode: BlendMode.srcIn,
+            color: iconColour,
+          )),
     );
   }
 }

@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
 import 'package:receiptcamp/presentation/ui/search/search.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const HomeAppBar({super.key});
+  HomeAppBar({super.key});
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  // aligning title text in row depending on platform
+  final titleMainAxisSize =
+      Platform.isAndroid ? MainAxisSize.max : MainAxisSize.min;
 
   @override
   Widget build(BuildContext context) {
@@ -23,17 +28,16 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               scale: 1.5, // Adjust the scale as needed
               child: Image.asset(
                 'assets/top_gradient.png',
-                fit:
-                    BoxFit.fill, // Make sure the image covers the entire space
+                fit: BoxFit.fill, // Make sure the image covers the entire space
               ),
             ),
           );
         },
       ),
-      title: const Row(
-        mainAxisSize:
-            MainAxisSize.min, // centers title by reducing width of row
-        children: <Widget>[
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: titleMainAxisSize,
+        children: const <Widget>[
           Text(
             'Receipt',
             style: TextStyle(

@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:receiptcamp/data/utils/receipt_helper.dart";
 import "package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart";
+import "package:receiptcamp/presentation/ui/ui_constants.dart";
 
 // utility class that creates and shows snackbars displayed on file explorer screen
 abstract class SnackBarUtility {
@@ -44,12 +45,17 @@ abstract class SnackBarUtility {
       case FolderViewDeleteFailure():
         message = "Failed to delete '${state.deletedName}'";
         break;
+      case FolderViewShareFailure():
+        message = "Failed to share '${state.folderName}' - folder is empty ";
+        break;
       default:
         print('Unknown state in showSnackBar: ${state.runtimeType}');
         return;
     }
 
     final SnackBar appSnackBar = SnackBar(
+      backgroundColor: const Color(primaryDeepBlue),
+      behavior: SnackBarBehavior.floating,
       content: Text(message),
       duration: const Duration(milliseconds: 2000),
     );

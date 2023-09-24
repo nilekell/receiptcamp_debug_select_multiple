@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/delete_folder_confirmation_dialog.dart';
@@ -130,7 +129,7 @@ void showFolderOptions(
           onTap: () {
             Navigator.of(bottomSheetContext).pop();
             // opening deleting folder dialog
-            FileService.shareFolderAsZip(folder);
+            folderViewCubit.shareFolder(folder);
           },
         ),
         const SizedBox(height: 50)

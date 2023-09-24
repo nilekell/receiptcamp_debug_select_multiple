@@ -155,7 +155,7 @@ class ReceiptSearchTile extends StatelessWidget {
         ),
         onTap: () {
           final imageProvider = Image.file(File(receipt.localPath)).image;
-          showImageViewer(context, imageProvider);
+          showImageViewer(context, imageProvider, swipeDismissible: true, doubleTapZoomable: true);
         },
         title: Text(receipt.name.split('.').first));
   }
