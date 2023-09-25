@@ -89,6 +89,15 @@ class AppDrawer extends StatelessWidget {
                     DatabaseRepository.instance.printAllTags();
                   },
                 )
+              : Container(),
+          kDebugMode
+              ? ListTile(
+                  leading: const Icon(Icons.print),
+                  title: const Text('Print all folders'),
+                  onTap: () {
+                    DatabaseRepository.instance.printAllFolders();
+                  },
+                )
               : Container()
         ],
       ),

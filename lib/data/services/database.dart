@@ -420,6 +420,26 @@ class DatabaseService {
     }
   }
 
+  Future<void> printAllFolders() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('folders');
+    print('num of folders: ${maps.length}');
+    print('All folders in database:');
+    for (var folderMap in maps) {
+      final folder = Folder(
+          id: folderMap['id'],
+          name: folderMap['name'],
+          lastModified: folderMap['lastModified'],
+          parentId: folderMap['parentId'],);
+
+      print('id: ${folder.id.toString()}');
+      print('name: ${folder.name.toString()}');
+      print('lastModified: ${folder.lastModified.toString()}');
+      print('parentId: ${folder.parentId.toString()}');
+      print('//--------------//');
+    }
+  }
+
   // Method to get all Receipt objects from the database.
   Future<List<Receipt>> getReceipts() async {
     final db = await database;
@@ -456,9 +476,9 @@ class DatabaseService {
       print('name: ${receipt.name.toString()}');
       print('fileName: ${receipt.fileName.toString()}');
       print('dateCreated: ${receipt.dateCreated.toString()}');
-      print('dateCreated: ${receipt.dateCreated.toString()}');
       print('lastModified: ${receipt.lastModified.toString()}');
       print('storageSize: ${receipt.storageSize.toString()}');
+      print('parentId: ${receipt.parentId.toString()}');
       print('//--------------//');
     }
   }
