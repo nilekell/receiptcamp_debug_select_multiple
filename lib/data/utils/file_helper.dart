@@ -90,8 +90,8 @@ class FileService {
   static String generateFileName(ImageFileType fileType) {
     String fileName = 'RCPT_';
     try {
-      // randomInt is >= 1000 and < 10,000.
-      final int randomInt = Random().nextInt(9000) + 1000;
+      // randomInt is >= 10000 and < 100,000.
+      final int randomInt = Random().nextInt(90000) + 10000;
 
       if (fileType == ImageFileType.png) {
         fileName = '$fileName$randomInt.png';

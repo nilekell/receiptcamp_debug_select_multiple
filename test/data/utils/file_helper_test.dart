@@ -156,7 +156,7 @@ void main() {
         expect(fileName, isNotNull);
         expect(fileName, isA<String>());
         // checks that the generated number in the file name is 4 characters long
-        expect(numsInFileName, hasLength(4));
+        expect(numsInFileName, hasLength(5));
         // checks that each character in the generated file name is an integer
         numsInFileName.split('').forEach((element) => expect(int.parse(element), isA<int>() ));
 
