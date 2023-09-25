@@ -253,7 +253,7 @@ void main() {
         final receipt = Receipt(
             id: receiptId,
             name: 'testReceipt',
-            localPath: 'testPath',
+            fileName: 'testName',
             dateCreated: Utility.getCurrentTime(),
             lastModified: Utility.getCurrentTime(),
             storageSize: 100,
@@ -269,7 +269,7 @@ void main() {
         final receipt = Receipt(
             id: receiptId,
             name: 'testReceiptById',
-            localPath: 'testPath',
+            fileName: 'testName',
             dateCreated: Utility.getCurrentTime(),
             lastModified: Utility.getCurrentTime(),
             storageSize: 100,
@@ -288,7 +288,7 @@ void main() {
         await dbService.insertReceipt(Receipt(
             id: receipt1Id,
             name: 'receipt1',
-            localPath: 'testPath1',
+            fileName: 'testName1',
             dateCreated: Utility.getCurrentTime(),
             lastModified: Utility.getCurrentTime(),
             storageSize: 100,
@@ -296,7 +296,7 @@ void main() {
         await dbService.insertReceipt(Receipt(
             id: receipt2Id,
             name: 'receipt2',
-            localPath: 'testPath2',
+            fileName: 'testName2',
             dateCreated: Utility.getCurrentTime(),
             lastModified: Utility.getCurrentTime(),
             storageSize: 100,
@@ -317,7 +317,7 @@ void main() {
         final receipt = Receipt(
             id: receiptId,
             name: 'testReceipt',
-            localPath: 'testPath',
+            fileName: 'testName',
             dateCreated: receiptDateCreated,
             lastModified: receiptDateCreated,
             storageSize: 100,
@@ -327,7 +327,7 @@ void main() {
         final changedReceipt = Receipt(
             id: receiptId,
             name: 'updatedReceipt',
-            localPath: 'testPath',
+            fileName: 'testName',
             dateCreated: receiptDateCreated,
             lastModified: changedReceiptLastModified,
             storageSize: 100,
@@ -338,7 +338,7 @@ void main() {
         expect(updatedReceipt.id, receiptId);
         expect(updatedReceipt.name, 'updatedReceipt');
         expect(updatedReceipt.dateCreated, receiptDateCreated);
-        expect(updatedReceipt.localPath, 'testPath');
+        expect(updatedReceipt.fileName, 'testName');
         expect(updatedReceipt.lastModified, changedReceiptLastModified);
         expect(updatedReceipt.storageSize, 100);
         expect(updatedReceipt.parentId, rootFolderId);
@@ -349,7 +349,7 @@ void main() {
         final receipt = Receipt(
             id: receiptId,
             name: 'testReceipt',
-            localPath: 'testPath',
+            fileName: 'testName',
             dateCreated: Utility.getCurrentTime(),
             lastModified: Utility.getCurrentTime(),
             storageSize: 100,
@@ -375,7 +375,7 @@ void main() {
         final receipt = Receipt(
             id: receiptId,
             name: 'testMoveReceipt',
-            localPath: 'testPath',
+            fileName: 'testName',
             dateCreated: Utility.getCurrentTime(),
             lastModified: Utility.getCurrentTime(),
             storageSize: 100,
@@ -392,7 +392,7 @@ void main() {
         final receipt = Receipt(
             id: receiptId,
             name: 'testRenameReceipt',
-            localPath: 'testPath',
+            fileName: 'testName',
             dateCreated: Utility.getCurrentTime(),
             lastModified: Utility.getCurrentTime(),
             storageSize: 100,
@@ -417,7 +417,7 @@ void main() {
           final receipt = Receipt(
             id: 'testId$i',
             name: 'testName$i',
-            localPath: 'testPath$i',
+            fileName: 'testName$i',
             dateCreated: i < 8
                 ? Utility.getCurrentTime()
                 : 1000, // set old timestamp for last two receipts
@@ -455,7 +455,7 @@ void main() {
         final receipt = Receipt(
             id: receiptId,
             name: 'testGetByNameReceipt',
-            localPath: 'testPath',
+            fileName: 'testName',
             dateCreated: Utility.getCurrentTime(),
             lastModified: Utility.getCurrentTime(),
             storageSize: 100,
@@ -481,7 +481,7 @@ void main() {
         await dbService.insertReceipt(Receipt(
             id: receiptId,
             name: 'testTagReceipt',
-            localPath: 'testPath',
+            fileName: 'testName',
             dateCreated: receiptDateCreated,
             lastModified: receiptDateCreated,
             storageSize: 100,
@@ -508,7 +508,7 @@ void main() {
         await dbService.insertReceipt(Receipt(
             id: receiptId,
             name: 'testTagReceipt',
-            localPath: 'testPath',
+            fileName: 'testName',
             dateCreated: receiptDateCreated,
             lastModified: receiptDateCreated,
             storageSize: 100,
@@ -534,7 +534,7 @@ void main() {
         await dbService.insertReceipt(Receipt(
             id: receiptId,
             name: 'testTagReceipt',
-            localPath: 'testPath',
+            fileName: 'testName',
             dateCreated: receiptDateCreated,
             lastModified: receiptDateCreated,
             storageSize: 100,
@@ -567,7 +567,7 @@ void main() {
         await dbService.insertReceipt(Receipt(
             id: receiptId1,
             name: 'testReceipt1',
-            localPath: 'testPath1',
+            fileName: 'testName1',
             dateCreated: Utility.getCurrentTime(),
             lastModified: Utility.getCurrentTime(),
             storageSize: 100,
@@ -575,7 +575,7 @@ void main() {
         await dbService.insertReceipt(Receipt(
             id: receiptId2,
             name: 'testReceipt2',
-            localPath: 'testPath2',
+            fileName: 'testName2',
             dateCreated: Utility.getCurrentTime(),
             lastModified: Utility.getCurrentTime(),
             storageSize: 100,
@@ -602,7 +602,7 @@ void main() {
         await dbService.insertReceipt(Receipt(
             id: receiptId1,
             name: 'testReceipt1',
-            localPath: 'testPath1',
+            fileName: 'testName1',
             dateCreated: Utility.getCurrentTime(),
             lastModified: Utility.getCurrentTime(),
             storageSize: 100,
@@ -610,7 +610,7 @@ void main() {
         await dbService.insertReceipt(Receipt(
             id: receiptId2,
             name: 'testReceipt2',
-            localPath: 'testPath2',
+            fileName: 'testName2',
             dateCreated: Utility.getCurrentTime(),
             lastModified: Utility.getCurrentTime(),
             storageSize: 100,

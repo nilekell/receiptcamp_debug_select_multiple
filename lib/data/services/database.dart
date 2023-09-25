@@ -33,7 +33,6 @@ class DatabaseService {
     final dbPath = await getDatabasesPath();
     // Create the path in the available directory to store our database.
     final path = '$dbPath/receipts.db';
-
     return await openDatabase(
       // creating database found at new path
       path,
@@ -63,7 +62,7 @@ class DatabaseService {
           CREATE TABLE receipts (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
-            localPath TEXT NOT NULL,
+            fileName TEXT NOT NULL,
             dateCreated INTEGER NOT NULL,
             lastModified INTEGER NOT NULL,
             storageSize INTEGER NOT NULL,
@@ -118,7 +117,7 @@ class DatabaseService {
       return Receipt(
           id: receipts[i]['id'],
           name: receipts[i]['name'],
-          localPath: receipts[i]['localPath'],
+          fileName: receipts[i]['fileName'],
           dateCreated: receipts[i]['dateCreated'],
           lastModified: receipts[i]['lastModified'],
           storageSize: receipts[i]['storageSize'],
@@ -278,8 +277,9 @@ class DatabaseService {
       }
 
       for (var receipt in receipts) {
+        final receiptPath = Receipt.fromMap(receipt).localPath;
         // deleting receipt image in local storage
-        await FileService.deleteFileFromPath(receipt['localPath']);
+        await FileService.deleteFileFromPath(receiptPath);
 
         // deleting receipt record in db
         await db
@@ -428,7 +428,7 @@ class DatabaseService {
       return Receipt(
           id: maps[i]['id'],
           name: maps[i]['name'],
-          localPath: maps[i]['localPath'],
+          fileName: maps[i]['fileName'],
           dateCreated: maps[i]['dateCreated'],
           lastModified: maps[i]['lastModified'],
           storageSize: maps[i]['storageSize'],
@@ -442,11 +442,11 @@ class DatabaseService {
     final List<Map<String, dynamic>> maps = await db.query('receipts');
     print('num of receipts: ${maps.length}');
     print('All receipts in database:');
-    maps.forEach((receiptMap) {
+    for (var receiptMap in maps) {
       final receipt = Receipt(
           id: receiptMap['id'],
           name: receiptMap['name'],
-          localPath: receiptMap['localPath'],
+          fileName: receiptMap['fileName'],
           dateCreated: receiptMap['dateCreated'],
           lastModified: receiptMap['lastModified'],
           storageSize: receiptMap['storageSize'],
@@ -454,13 +454,13 @@ class DatabaseService {
 
       print('id: ${receipt.id.toString()}');
       print('name: ${receipt.name.toString()}');
-      print('localPath: ${receipt.localPath.toString()}');
+      print('fileName: ${receipt.fileName.toString()}');
       print('dateCreated: ${receipt.dateCreated.toString()}');
       print('dateCreated: ${receipt.dateCreated.toString()}');
       print('lastModified: ${receipt.lastModified.toString()}');
       print('storageSize: ${receipt.storageSize.toString()}');
       print('//--------------//');
-    });
+    }
   }
 
   // Method to get Receipt objects by name from the database
@@ -468,7 +468,7 @@ class DatabaseService {
     final db = await database;
     List<Map<String, dynamic>> maps = await db.query('receipts',
         // retrieving the following columns from the database
-        columns: ['id', 'name', 'localPath', 'dateCreated', 'lastModified', 'storageSize', 'parentId'],
+        columns: ['id', 'name', 'fileName', 'dateCreated', 'lastModified', 'storageSize', 'parentId'],
         // '?'s are replaced with the items in the [whereArgs] field
         where: 'name = ?',
         // [name] is the argument of the function
@@ -477,7 +477,7 @@ class DatabaseService {
       return Receipt(
           id: maps[i]['id'],
           name: maps[i]['name'],
-          localPath: maps[i]['localPath'],
+          fileName: maps[i]['fileName'],
           dateCreated: maps[i]['dateCreated'],
           lastModified: maps[i]['lastModified'],
           storageSize: maps[i]['storageSize'],
@@ -507,7 +507,7 @@ class DatabaseService {
       return Receipt(
           id: maps[i]['id'],
           name: maps[i]['name'],
-          localPath: maps[i]['localPath'],
+          fileName: maps[i]['fileName'],
           dateCreated: maps[i]['dateCreated'],
           lastModified: maps[i]['lastModified'],
           storageSize: maps[i]['storageSize'],
@@ -578,7 +578,7 @@ class DatabaseService {
     final List<Map<String, dynamic>> maps = await db
         // query will return receipts that have tags that match any part of the user's search query
         .rawQuery('''
-        SELECT receipts.id, receipts.name, receipts.localPath, receipts.dateCreated, receipts.lastModified, receipts.storageSize, receipts.parentId
+        SELECT receipts.id, receipts.name, receipts.fileName, receipts.dateCreated, receipts.lastModified, receipts.storageSize, receipts.parentId
         FROM receipts
         INNER JOIN tags ON receipts.id = tags.receiptId
         WHERE tags.tag LIKE '%' || ? || '%'
@@ -591,7 +591,7 @@ class DatabaseService {
       return Receipt(
           id: maps[i]['id'],
           name: maps[i]['name'],
-          localPath: maps[i]['localPath'],
+          fileName: maps[i]['fileName'],
           dateCreated: maps[i]['dateCreated'],
           lastModified: maps[i]['lastModified'],
           storageSize: maps[i]['storageSize'],
@@ -609,7 +609,7 @@ class DatabaseService {
         // the '%' is a wildcard that matches any sequence of characters before or after the specifed string
         // the '||' is a operator used to concatenate the '%' and '?' to form the full search pattern
         .rawQuery('''
-        SELECT receipts.id, receipts.name, receipts.localPath, receipts.dateCreated, receipts.lastModified, receipts.storageSize, receipts.parentId
+        SELECT receipts.id, receipts.name, receipts.fileName, receipts.dateCreated, receipts.lastModified, receipts.storageSize, receipts.parentId
         FROM receipts
         INNER JOIN tags ON receipts.id = tags.receiptId
         WHERE tags.tag LIKE '%' || ? || '%'
@@ -621,7 +621,7 @@ class DatabaseService {
       return Receipt(
           id: maps[i]['id'],
           name: maps[i]['name'],
-          localPath: maps[i]['localPath'],
+          fileName: maps[i]['fileName'],
           dateCreated: maps[i]['dateCreated'],
           lastModified: maps[i]['lastModified'],
           storageSize: maps[i]['storageSize'],
