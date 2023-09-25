@@ -63,29 +63,6 @@ class Utility {
     }
   }
 
-  static String generateFileName(ImageFileType fileType) {
-    String fileName = 'RCPT_';
-    try {
-      // randomInt is >= 1000 and < 10,000.
-      final int randomInt = Random().nextInt(9000) + 1000;
-
-      if (fileType == ImageFileType.png) {
-        fileName = '$fileName$randomInt.png';
-      } else if (fileType == ImageFileType.heic) {
-        fileName = '$fileName$randomInt.heic';
-      }  else if (fileType == ImageFileType.jpg || fileType == ImageFileType.jpeg) {
-        fileName = '$fileName$randomInt.jpg';
-      } else {
-        throw Exception('Utilities.generateFileName(): unexpected file type');
-      }
-
-      return fileName;
-    } catch (e) {
-      print('Error in generateFileName: $e');
-      rethrow;
-    }
-  }
-
   static String generateUid() {
     try {
       String uid = const Uuid().v4().toString();

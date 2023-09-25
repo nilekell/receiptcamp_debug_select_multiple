@@ -49,33 +49,6 @@ void main() {
       expect(sizeString, matches(RegExp(r'^\d+(\.\d{2})? (B|KB|MB|GB)$')));
     });
 
-    test('generateFileName returns a valid file name', () {
-      for (ImageFileType fileType in ImageFileType.values) {
-        String fileName = Utility.generateFileName(fileType);
-        String numsInFileName = fileName.split('_').last.split('.').first;
-        expect(fileName, isNotNull);
-        expect(fileName, isA<String>());
-        // checks that the generated number in the file name is 4 characters long
-        expect(numsInFileName, hasLength(4));
-        // checks that each character in the generated file name is an integer
-        numsInFileName.split('').forEach((element) => expect(int.parse(element), isA<int>() ));
-
-        // Check the file extension based on the fileType
-        switch (fileType) {
-          case ImageFileType.png:
-            expect(fileName, endsWith('.png'));
-            break;
-          case ImageFileType.heic:
-            expect(fileName, endsWith('.heic'));
-            break;
-          case ImageFileType.jpg:
-          case ImageFileType.jpeg:
-            expect(fileName, endsWith('.jpg'));
-            break;
-        }
-      }
-    });
-
     test('generateUid returns a valid uid', () {
       String uid = Utility.generateUid();
       expect(uid, isNotNull);
