@@ -92,6 +92,7 @@ flutter:
     - assets/images.png
     - assets/download.png
     - assets/share.png
+    - assets/export_as_pdf.png
     - assets/scan.png
     - assets/camera.png
     
