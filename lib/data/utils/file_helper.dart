@@ -6,11 +6,14 @@ import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:archive/archive_io.dart';
+import 'package:pdf/pdf.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:image/image.dart' as img;
 
 class FileService {
   static Future<File?> compressFile(File imageFile, String targetPath) async {
@@ -23,7 +26,7 @@ class FileService {
     // print('${basename(imageFile.path)} has extension $fileExtension');
 
     // ImagePicker library automatically converts all images to .jpg, so all uploaded into app via camera or library will have
-    // .jpg ending 
+    // .jpg ending
     // cunning_document_scanner library produces '.png' files
     // '.heic' case is redundant, but kept in codebase for future proofing
     switch (fileExtension) {
@@ -36,14 +39,14 @@ class FileService {
       case '.png':
         format = CompressFormat.png;
         break;
-      case '.heic': 
+      case '.heic':
         format = CompressFormat.heic;
         break;
       default:
         throw Exception(
             'Exception occurred in FileService.compressFile(): Cannot compress file type: $fileExtension');
     }
- 
+
     try {
       // for some reason, this method actually slightly increases file size for png images
       var result = await FlutterImageCompress.compressAndGetFile(
@@ -97,7 +100,8 @@ class FileService {
         fileName = '$fileName$randomInt.png';
       } else if (fileType == ImageFileType.heic) {
         fileName = '$fileName$randomInt.heic';
-      }  else if (fileType == ImageFileType.jpg || fileType == ImageFileType.jpeg) {
+      } else if (fileType == ImageFileType.jpg ||
+          fileType == ImageFileType.jpeg) {
         fileName = '$fileName$randomInt.jpg';
       } else {
         throw Exception('Utilities.generateFileName(): unexpected file type');
@@ -170,7 +174,8 @@ class FileService {
     }
   }
 
-  static Future<bool> isValidImageSize(String imagePath,[int maxSizeInMB = 20]) async {
+  static Future<bool> isValidImageSize(String imagePath,
+      [int maxSizeInMB = 20]) async {
     try {
       final sizeInBytes = await FileService.getFileSize(imagePath, 2);
       final sizeInMB = sizeInBytes / (1024 * 1024);
@@ -194,6 +199,50 @@ class FileService {
     }
   }
 
+  static Future<File> receiptToPdf(Receipt receipt) async {
+    // creating a base pdf document
+    try {
+      final pw.Document pdf = pw.Document();
+
+      // creating an image from file
+      final File imageFile = File(receipt.localPath);
+      final img.Image image = img.decodeImage(await imageFile.readAsBytes())!;
+      // Creating a custom page format with the dimensions of the image
+      final PdfPageFormat pageFormat =
+          PdfPageFormat(image.width.toDouble(), image.height.toDouble());
+      // creating a memory image by reading the image file as bytes, which creates an image that can be added to the PDF
+      final pdfImage = pw.MemoryImage(imageFile.readAsBytesSync());
+
+      pdf.addPage(pw.Page(
+          pageFormat: pageFormat,
+          build: ((context) {
+            return pw.Image(pdfImage);
+          })));
+
+      final tempDir = (await getTemporaryDirectory()).path;
+      final pdfFile = File('$tempDir/${receipt.name}.pdf');
+
+      return pdfFile.writeAsBytes(await pdf.save());
+    } on Exception catch (e) {
+      print(e.toString());
+      rethrow;
+    }
+  }
+
+  static Future<void> shareReceiptAsPdf(Receipt receipt) async {
+    try {
+      final receiptPdf = await receiptToPdf(receipt);
+
+      await Share.shareXFiles([XFile(receiptPdf.path)], subject: receipt.name);
+
+      // delete pdf file from local temp directory
+      await FileService.deleteFileFromPath(receiptPdf.path);
+    } on Exception catch (e) {
+      print(e.toString());
+      rethrow;
+    }
+  }
+
   // share folder outside of app
   static Future<void> shareFolderAsZip(Folder folder) async {
     // creates an archive instance to store the zip file contents
@@ -203,18 +252,18 @@ class FileService {
     // The 'path' parameter serves to keep track of the directory structure as the function recursively processes nested folders
     // It ensures files and folders within the ZIP archive maintain their relative paths, reflecting the original directory structure.
     Future<void> processFolder(Folder folder, [String? path]) async {
-      final contents = await DatabaseRepository.instance.getFolderContents(folder.id);
+      final contents =
+          await DatabaseRepository.instance.getFolderContents(folder.id);
 
       // Allowing empty subfolders to be shown in the unzipped folder
       // Check if the folder is empty and a path is provided (i.e., it's not the root folder)
       if (contents.isEmpty && path != null) {
         // Add a directory entry to the archive
-        final directoryPath = '$path/';  // Ensured it ends with a '/'
+        final directoryPath = '$path/'; // Ensured it ends with a '/'
         // Instead of passing an empty list as content, we pass a list with a single byte (which is ignored for directories)
         final directoryEntry = ArchiveFile(directoryPath, 0, [0]);
         archive.addFile(directoryEntry);
       }
-
 
       for (var item in contents) {
         if (item is Receipt) {
@@ -222,7 +271,7 @@ class FileService {
           // read receipt image file as bytes
           final bytes = await File(file.path).readAsBytes();
           // Determine the path for the archive. If a path is provided, prepend it to the file name.
-          // This is where the ternary operator is used: it checks if 'path' is not null, and if so, 
+          // This is where the ternary operator is used: it checks if 'path' is not null, and if so,
           // it uses the provided path and appends the file name. Otherwise, it just uses the file name.
           final archivePath = path != null ? '$path/${file.name}' : file.name;
           // Create an archive file instance with the determined path, file size, and file bytes.
@@ -264,14 +313,15 @@ class FileService {
     String tempZipFileFullPath = await tempZipFilePathGenerator(folder);
 
     // create a .zip file from the encoded bytes
-    final zipFile = await File(tempZipFileFullPath).writeAsBytes(encodedArchive);
+    final zipFile =
+        await File(tempZipFileFullPath).writeAsBytes(encodedArchive);
 
     // Share the zip file
     await Share.shareXFiles([XFile(zipFile.path)]);
 
     // delete zip file from local temp directory
     await FileService.deleteFileFromPath(zipFile.path);
-}
+  }
 
   static Future<String> tempZipFilePathGenerator(Folder folder) async {
     final zipFileName = '${folder.name}.zip';
