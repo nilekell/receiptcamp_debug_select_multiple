@@ -163,8 +163,35 @@ void showReceiptOptions(
               FileService.shareReceipt(receipt);
             },
           ),
-        const SizedBox(height: 50)
-      ],
+          ListTile(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: iconPadding),
+              child: Transform.translate(
+                offset: const Offset(-8, 0),
+                child: Transform.scale(
+                    scale: 0.75,
+                    child: Image.asset(
+                      'assets/export_as_pdf.png',
+                      color: secondaryColour,
+                      colorBlendMode: BlendMode.srcIn,
+                    )),
+              ),
+            ),
+            title: Transform.translate(
+              offset: const Offset(-15, 0),
+              child: const Text(
+                'Export as PDF',
+                style: textStyle,
+              ),
+            ),
+            onTap: () {
+              Navigator.of(bottomSheetContext).pop();
+              FileService.shareReceiptAsPdf(receipt);
+            },
+          ),
+          const SizedBox(height: 50)
+        ],
+      ),
     ),
   );
 }
