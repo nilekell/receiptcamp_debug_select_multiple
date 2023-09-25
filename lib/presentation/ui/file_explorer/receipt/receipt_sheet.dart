@@ -16,6 +16,9 @@ void showReceiptOptions(
 
   showModalBottomSheet(
     backgroundColor: const Color(primaryDeepBlue),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20.0),
+    ),
     context: context,
     builder: (bottomSheetContext) => Column(
       mainAxisSize: MainAxisSize.min,
