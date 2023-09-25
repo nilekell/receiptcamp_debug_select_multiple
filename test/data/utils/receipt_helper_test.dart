@@ -43,7 +43,7 @@ class MockReceiptService extends Mock {
   }
 }
 
-void main() {
+void main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   const imagePaths = [
@@ -98,7 +98,8 @@ void main() {
       for (final imagePath in imagePaths) {
         final receiptFile = File(imagePath);
         final fileName = basename(receiptFile.path);
-        const folderId = rootFolderName;
+        final noExtensionName = fileName.split('.').first;
+        const folderId = rootFolderId;
         final receiptUid = Utility.generateUid();
 
         final path = receiptFile.path;
@@ -110,8 +111,8 @@ void main() {
         // Creating receipt object to be stored in local db
         Receipt receipt = Receipt(
             id: receiptUid,
-            name: fileName,
-            localPath: path,
+            name: noExtensionName,
+            fileName: fileName,
             dateCreated: currentTime,
             lastModified: currentTime,
             storageSize: compressedfileSize,
@@ -121,8 +122,7 @@ void main() {
         expect(receipt, isA<Receipt>());
         expect(receipt, isNotNull);
         expect(receipt.id, receiptUid);
-        expect(receipt.name, fileName);
-        expect(receipt.localPath, receiptFile.path);
+        expect(receipt.name, noExtensionName);
         expect(receipt.parentId, folderId);
       }
     });
