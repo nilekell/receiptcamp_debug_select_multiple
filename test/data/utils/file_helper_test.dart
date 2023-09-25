@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as p hide equals;
 import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/services/database.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
@@ -149,6 +149,33 @@ void main() {
       }
     });
 
+    test('generateFileName returns a valid file name', () {
+      for (ImageFileType fileType in ImageFileType.values) {
+        String fileName = FileService.generateFileName(fileType);
+        String numsInFileName = fileName.split('_').last.split('.').first;
+        expect(fileName, isNotNull);
+        expect(fileName, isA<String>());
+        // checks that the generated number in the file name is 4 characters long
+        expect(numsInFileName, hasLength(5));
+        // checks that each character in the generated file name is an integer
+        numsInFileName.split('').forEach((element) => expect(int.parse(element), isA<int>() ));
+
+        // Check the file extension based on the fileType
+        switch (fileType) {
+          case ImageFileType.png:
+            expect(fileName, endsWith('.png'));
+            break;
+          case ImageFileType.heic:
+            expect(fileName, endsWith('.heic'));
+            break;
+          case ImageFileType.jpg:
+          case ImageFileType.jpeg:
+            expect(fileName, endsWith('.jpg'));
+            break;
+        }
+      }
+    });
+
     test('getLocalImagePath returns valid local image path', () async {
       // iterate over ImageFileType.values
       for (final imageFileType in ImageFileType.values) {
@@ -279,7 +306,7 @@ void main() {
       final receipt1 = Receipt(
           id: receipt1Id,
           name: 'testReceipt1',
-          localPath: imagePaths[0],
+          fileName: p.basename(imagePaths[0]),
           dateCreated: Utility.getCurrentTime(),
           lastModified: Utility.getCurrentTime(),
           storageSize: 100,
@@ -290,7 +317,7 @@ void main() {
       final receipt2 = Receipt(
           id: receipt2Id,
           name: 'testReceipt2',
-          localPath: imagePaths[1],
+          fileName: p.basename(imagePaths[1]),
           dateCreated: Utility.getCurrentTime(),
           lastModified: Utility.getCurrentTime(),
           storageSize: 100,

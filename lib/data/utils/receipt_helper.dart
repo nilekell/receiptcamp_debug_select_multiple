@@ -47,8 +47,8 @@ class ReceiptService {
     // Creating receipt object to be stored in local db
     Receipt thisReceipt = Receipt(
         id: receiptUid,
-        name: fileName,
-        localPath: path,
+        name: fileName.split('.').first,
+        fileName: fileName,
         dateCreated: currentTime,
         lastModified: currentTime,
         storageSize: compressedfileSize,

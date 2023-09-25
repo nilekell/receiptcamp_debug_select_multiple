@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/models/folder.dart';
 
@@ -12,7 +13,7 @@ class FileSystemCubit extends Cubit<FileSystemCubitState> {
   // method to display root folder information when the bottom navigation tab switches to file explorer
   initializeFileSystemCubit() async {
     emit(FileSystemCubitInitial());
-    fetchFolderInformation('a1');
+    fetchFolderInformation(rootFolderId);
   }
 
   // method to fetch displayed folder information, which is required for FolderName, BackButton, FolderView, UploadButton

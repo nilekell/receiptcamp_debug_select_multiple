@@ -87,11 +87,34 @@ class FileService {
     }
   }
 
+  static String generateFileName(ImageFileType fileType) {
+    String fileName = 'RCPT_';
+    try {
+      // randomInt is >= 10000 and < 100,000.
+      final int randomInt = Random().nextInt(90000) + 10000;
+
+      if (fileType == ImageFileType.png) {
+        fileName = '$fileName$randomInt.png';
+      } else if (fileType == ImageFileType.heic) {
+        fileName = '$fileName$randomInt.heic';
+      }  else if (fileType == ImageFileType.jpg || fileType == ImageFileType.jpeg) {
+        fileName = '$fileName$randomInt.jpg';
+      } else {
+        throw Exception('Utilities.generateFileName(): unexpected file type');
+      }
+
+      return fileName;
+    } catch (e) {
+      print('Error in generateFileName: $e');
+      rethrow;
+    }
+  }
+
   static Future<String> getLocalImagePath(ImageFileType imageFileType) async {
     try {
       Directory imageDirectory = await getApplicationDocumentsDirectory();
       String imageDirectoryPath = imageDirectory.path;
-      final fileName = Utility.generateFileName(imageFileType);
+      final fileName = generateFileName(imageFileType);
       final localImagePath = '$imageDirectoryPath/$fileName';
 
       return localImagePath;
