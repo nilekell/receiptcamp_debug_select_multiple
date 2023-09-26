@@ -14,6 +14,9 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(topRight: Radius.circular(40.0)),
+      ),
       backgroundColor: const Color(primaryLightBlue),
       child: ListView(
         padding: EdgeInsets.zero,

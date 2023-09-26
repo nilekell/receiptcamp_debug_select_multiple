@@ -44,8 +44,10 @@ dependencies:
   archive: ^3.3.7
   sqflite: ^2.2.6
   uuid: ^3.0.7
+  image: ^4.1.3
   flutter_image_compress: ^2.0.3
   share_plus: ^6.3.2
+  pdf: ^3.10.4
   gallery_saver: ^2.3.2
   in_app_review: ^2.0.6
   advanced_in_app_review: ^1.1.3
@@ -91,6 +93,7 @@ flutter:
     - assets/images.png
     - assets/download.png
     - assets/share.png
+    - assets/export_as_pdf.png
     - assets/scan.png
     - assets/camera.png
     

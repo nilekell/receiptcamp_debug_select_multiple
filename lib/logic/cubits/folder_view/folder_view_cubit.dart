@@ -279,10 +279,11 @@ class FolderViewCubit extends Cubit<FolderViewState> {
   }
 
   // share folder
-  shareFolder(Folder folder) async {
+  shareFolder(Folder folder, bool withPdfs) async {
     try {
-      await FileService.shareFolderAsZip(folder);
+      await FileService.shareFolderAsZip(folder, withPdfs);
     } on Exception catch (e) {
+      print(e.toString());
       emit(FolderViewShareFailure(errorMessage: e.toString(), folderId: folder.id, folderName: folder.name));
       fetchFiles(folder.parentId);
     }

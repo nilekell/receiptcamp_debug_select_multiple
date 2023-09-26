@@ -1,4 +1,9 @@
 import 'dart:io';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
+import 'package:image/image.dart' as img;
 import 'package:archive/archive_io.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -51,12 +56,12 @@ class MockFileServiceCompress extends Mock {
 
 class MockFileServiceShareFolderAsZip extends Mock {
   // share folder outside of app
-  static Future<File?> shareFolderAsZip(Folder folder) async {
+  static Future<File?> shareFolderAsZip(Folder folder, bool withPdfs) async {
     final dbService = DatabaseService.instance;
 
     final archive = Archive();
 
-    Future<void> processFolder(Folder folder, [String? path]) async {
+    Future<void> processFolder(Folder folder, bool withPdfs, [String? path]) async {
       final contents = await dbService.getFolderContents(folder.id);
 
       if (contents.isEmpty && path != null) {
@@ -67,19 +72,29 @@ class MockFileServiceShareFolderAsZip extends Mock {
 
       for (var item in contents) {
         if (item is Receipt) {
-          final file = XFile(item.localPath);
+          XFile file = XFile.fromData(Uint8List(0));
+          if (withPdfs == true) {
+            final pdfImage = await MockReceiptToPdf.receiptToPdf('test/assets/${item.fileName}');
+            file = XFile(pdfImage.path);
+          } else {
+            file = XFile('test/assets/${item.fileName}');
+          }
           final bytes = await File(file.path).readAsBytes();
           final archivePath = path != null ? '$path/${file.name}' : file.name;
           final archiveFile = ArchiveFile(archivePath, bytes.length, bytes);
           archive.addFile(archiveFile);
+
+          if (withPdfs == true) {
+            await File(file.path).delete();
+          }
         } else if (item is Folder) {
           final newPath = path != null ? '$path/${item.name}' : item.name;
-          await processFolder(item, newPath);
+          await processFolder(item, withPdfs, newPath);
         }
       }
     }
 
-    await processFolder(folder);
+    await processFolder(folder, withPdfs);
 
     if (archive.isEmpty) {
       return null;
@@ -100,6 +115,38 @@ class MockFileServiceShareFolderAsZip extends Mock {
     return zipFile;
   }
 }
+
+class MockReceiptToPdf extends Mock {
+  static Future<File> receiptToPdf(String imagePath) async {
+    // creating a base pdf document
+    try {
+      final pw.Document pdf = pw.Document();
+
+      // creating an image from file
+      final File imageFile = File(imagePath);
+      final img.Image image = img.decodeImage(await imageFile.readAsBytes())!;
+      // Creating a custom page format with the dimensions of the image
+      final PdfPageFormat pageFormat =
+          PdfPageFormat(image.width.toDouble(), image.height.toDouble());
+      // creating a memory image by reading the image file as bytes, which creates an image that can be added to the PDF
+      final pdfImage = pw.MemoryImage(imageFile.readAsBytesSync());
+
+      pdf.addPage(pw.Page(
+          pageFormat: pageFormat,
+          build: ((context) {
+            return pw.Image(pdfImage);
+          })));
+
+      final tempDir = (await getTemporaryDirectory()).path;
+      final pdfFile = File('$tempDir/${basename(imagePath).split('.').first}.pdf');
+
+      return pdfFile.writeAsBytes(await pdf.save());
+    } on Exception catch (e) {
+      print(e.toString());
+      rethrow;
+    }
+  }
+  }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -145,7 +192,7 @@ void main() {
         }
         expect(actualFileSize, isNotNull);
         expect(actualFileSize, isA<int>());
-        expect(actualFileSize, equals(expectedFileSize));
+        expect(actualFileSize, expectedFileSize);
       }
     });
 
@@ -238,7 +285,7 @@ void main() {
         final fileName = FileService.getFileNameFromFile(imageFile);
         expect(fileName, isNotNull);
         expect(fileName, isA<String>());
-        expect(fileName, equals(p.basename(imagePath)));
+        expect(fileName, p.basename(imagePath));
       }
     });
 
@@ -270,8 +317,20 @@ void main() {
     test('shareReceipt', () {},
         skip: 'Unimplemented - manual testing required in the future');
 
+    test('shareReceiptAsPdf', () {},
+        skip: 'Unimplemented - manual testing required in the future');
+
     test('saveImageToCameraRoll', () {},
         skip: 'Unimplemented - manual testing required in the future');
+
+    test('receiptToPdf', () async {
+      final pdfFile = await MockReceiptToPdf.receiptToPdf(imagePaths[0]);
+      expect(pdfFile, isA<File>());
+      expect(pdfFile, isNotNull);
+      expect(pdfFile.path, endsWith('.pdf'));
+
+      pdfFile.delete();
+    });
 
     test(
         'shareFolderAsZip returns a zip file which preserves folder structure and files',
@@ -323,9 +382,10 @@ void main() {
           storageSize: 100,
           parentId: folder2Id);
       await dbService.insertReceipt(receipt2);
-      // call test method
+
+      // testing for zip file with original images
       final zipFile =
-          await MockFileServiceShareFolderAsZip.shareFolderAsZip(folder1);
+          await MockFileServiceShareFolderAsZip.shareFolderAsZip(folder1, false);
       // expect statements
       expect(zipFile, isNotNull);
       expect(zipFile, isA<File>());
@@ -333,15 +393,30 @@ void main() {
       final bytes = await zipFile!.readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
       // checking folder and file structure is preserved
-
       final receipt1Exists = archive.any((file) => file.name == 'image1.png');
       final receipt2Exists = archive.any((file) => file.name == 'testSubFolder/image2.jpeg');
 
       expect(receipt1Exists, isTrue);
       expect(receipt2Exists, isTrue);
 
+      // testing for zip file with pdfs
+      final pdfZipFile =
+          await MockFileServiceShareFolderAsZip.shareFolderAsZip(folder1, true);
+      expect(zipFile, isNotNull);
+      expect(zipFile, isA<File>());
+
+      final pdfBytes = await pdfZipFile!.readAsBytes();
+      final pdfAarchive = ZipDecoder().decodeBytes(pdfBytes);
+
+      final pdfReceipt1Exists = pdfAarchive.any((file) => file.name == 'image1.pdf');
+      final pdfRreceipt2Exists = pdfAarchive.any((file) => file.name == 'testSubFolder/image2.pdf');
+
+      expect(pdfReceipt1Exists, isTrue);
+      expect(pdfRreceipt2Exists, isTrue);
+
       // cleaning up
       zipFile.delete();
+      pdfZipFile.delete();
       
     });
   });
