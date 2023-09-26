@@ -70,24 +70,30 @@ class _FileExplorerState extends State<FileExplorer> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                state.folder.id != rootFolderId
-                    ? FolderName(
-                        name: state.folder.name,
-                      )
-                    : const FolderName(
-                        name: 'All Receipts',
-                      ),
+                Row(
+                  children: [
+                    BackButton(
+                      previousFolderId: state.folder.parentId,
+                      currentFolderId: state.folder.id,
+                      visible: state.folder.id != rootFolderId,
+                    ),
+                    const SizedBox(width: 10,),
+                    state.folder.id != rootFolderId
+                        ? FolderName(
+                            name: state.folder.name,
+                          )
+                        : const FolderName(
+                            name: 'All Receipts',
+                          ),
+                  ],
+                ),
+                const SizedBox(height: 4,),
                 const Divider(
-                  thickness: 1,
+                  thickness: 2,
+                  height: 1,
                   indent: 25,
                   endIndent: 25,
                 ),
-                state.folder.id != rootFolderId
-                    ? BackButton(
-                        previousFolderId: state.folder.parentId,
-                        currentFolderId: state.folder.id,
-                      )
-                    : Container(),
                 Expanded(
                   child: Stack(
                     children: [
@@ -148,12 +154,12 @@ class FolderName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(25, 15, 0, 10),
+    return Transform.translate(
+      offset: const Offset(5, 5),
       child: Text(
         name,
         style: const TextStyle(
-            fontSize: 30.0,
+            fontSize: 26.0,
             fontWeight: FontWeight.w600,
             color: Color(primaryGrey)),
       ),
@@ -164,27 +170,33 @@ class FolderName extends StatelessWidget {
 class BackButton extends StatelessWidget {
   final String previousFolderId;
   final String currentFolderId;
+  final bool visible;
 
   const BackButton(
       {super.key,
       required this.previousFolderId,
-      required this.currentFolderId});
+      required this.currentFolderId,
+      required this.visible});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 12,
+    return Visibility(
+      maintainSize: true,
+      maintainAnimation: true,
+      maintainState: true,
+      visible: visible,
+      child: Transform.translate(
+        offset: const Offset(10, 6),
+        child: IconButton(
+            onPressed: () {
+              context.read<FileSystemCubit>().navigateBack(previousFolderId);
+            },
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Color(primaryDarkBlue),
+              size: 26.0,
+            )),
       ),
-      child: IconButton(
-          onPressed: () {
-            context.read<FileSystemCubit>().navigateBack(previousFolderId);
-          },
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Color(primaryDarkBlue),
-            size: 30,
-          )),
     );
   }
 }
@@ -235,8 +247,8 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
               },
               child: state.files.isNotEmpty
                   ? ListView.builder(
-                    // key preserves scroll position when switching tabs
-                    key: const PageStorageKey<String>('ExplorerKey'),
+                      // key preserves scroll position when switching tabs
+                      key: const PageStorageKey<String>('ExplorerKey'),
                       physics: const AlwaysScrollableScrollPhysics(),
                       controller: widget.scrollController,
                       itemCount: state.files.length,
@@ -324,8 +336,8 @@ class FolderListTile extends StatelessWidget {
             Utility.formatDateTimeFromUnixTimestamp(folder.lastModified)),
         super(key: key);
 
-  final TextStyle displayNameStyle =
-      const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
+  final TextStyle displayNameStyle = const TextStyle(
+      fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
   final TextStyle displayDateStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
@@ -383,8 +395,8 @@ class ReceiptListTile extends StatelessWidget {
             Utility.formatDateTimeFromUnixTimestamp(receipt.lastModified)),
         super(key: key);
 
-  final TextStyle displayNameStyle =
-      const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
+  final TextStyle displayNameStyle = const TextStyle(
+      fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
   final TextStyle displayDateStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
@@ -422,7 +434,8 @@ class ReceiptListTile extends StatelessWidget {
             ),
             onTap: () {
               final imageProvider = Image.file(File(receipt.localPath)).image;
-              showImageViewer(context, imageProvider, swipeDismissible: true, doubleTapZoomable: true);
+              showImageViewer(context, imageProvider,
+                  swipeDismissible: true, doubleTapZoomable: true);
             },
             title: Text(displayName,
                 style: displayNameStyle,
