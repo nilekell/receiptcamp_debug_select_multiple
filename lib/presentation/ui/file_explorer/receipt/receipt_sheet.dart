@@ -17,8 +17,8 @@ void showReceiptOptions(
   showModalBottomSheet(
     isScrollControlled: true,
     backgroundColor: const Color(primaryDeepBlue),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20.0),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(topRight: Radius.circular(40.0)),
     ),
     context: context,
     builder: (bottomSheetContext) => DraggableScrollableSheet(
@@ -31,7 +31,7 @@ void showReceiptOptions(
         controller: scrollController,
         children: [
           const SizedBox(
-            height: 5,
+            height: 15,
           ),
           ListTile(
             leading: Transform.scale(
@@ -123,26 +123,26 @@ void showReceiptOptions(
                   bottomSheetContext, folderViewCubit, receipt);
             },
           ),
-          ListTile(
-            leading: Padding(
-              padding: const EdgeInsets.only(left: iconPadding),
-              child: Transform.scale(
-                  scale: iconScale,
-                  child: Image.asset(
-                    'assets/download.png',
-                    color: secondaryColour,
-                    colorBlendMode: BlendMode.srcIn,
-                  )),
-            ),
-            title: const Text(
-              'Download',
-              style: textStyle,
-            ),
-            onTap: () {
-              Navigator.of(bottomSheetContext).pop();
-              FileService.saveImageToCameraRoll(receipt);
-            },
-          ),
+          // ListTile(
+          //   leading: Padding(
+          //     padding: const EdgeInsets.only(left: iconPadding),
+          //     child: Transform.scale(
+          //         scale: iconScale,
+          //         child: Image.asset(
+          //           'assets/download.png',
+          //           color: secondaryColour,
+          //           colorBlendMode: BlendMode.srcIn,
+          //         )),
+          //   ),
+          //   title: const Text(
+          //     'Download',
+          //     style: textStyle,
+          //   ),
+          //   onTap: () {
+          //     Navigator.of(bottomSheetContext).pop();
+          //     FileService.saveImageToCameraRoll(receipt);
+          //   },
+          // ),
           ListTile(
             leading: Padding(
               padding: const EdgeInsets.only(left: iconPadding),
