@@ -67,7 +67,7 @@ class MockFileServiceShareFolderAsZip extends Mock {
 
       for (var item in contents) {
         if (item is Receipt) {
-          final file = XFile(item.localPath);
+          final file = XFile('test/assets/${item.fileName}');
           final bytes = await File(file.path).readAsBytes();
           final archivePath = path != null ? '$path/${file.name}' : file.name;
           final archiveFile = ArchiveFile(archivePath, bytes.length, bytes);
