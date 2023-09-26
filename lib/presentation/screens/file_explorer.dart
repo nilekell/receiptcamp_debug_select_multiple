@@ -77,6 +77,7 @@ class _FileExplorerState extends State<FileExplorer> {
                       currentFolderId: state.folder.id,
                       visible: state.folder.id != rootFolderId,
                     ),
+                    const SizedBox(width: 10,),
                     state.folder.id != rootFolderId
                         ? FolderName(
                             name: state.folder.name,
@@ -153,12 +154,12 @@ class FolderName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(25, 15, 0, 10),
+    return Transform.translate(
+      offset: const Offset(5, 5),
       child: Text(
         name,
         style: const TextStyle(
-            fontSize: 30.0,
+            fontSize: 26.0,
             fontWeight: FontWeight.w600,
             color: Color(primaryGrey)),
       ),
