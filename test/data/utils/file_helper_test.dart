@@ -56,12 +56,12 @@ class MockFileServiceCompress extends Mock {
 
 class MockFileServiceShareFolderAsZip extends Mock {
   // share folder outside of app
-  static Future<File?> shareFolderAsZip(Folder folder) async {
+  static Future<File?> shareFolderAsZip(Folder folder, bool withPdfs) async {
     final dbService = DatabaseService.instance;
 
     final archive = Archive();
 
-    Future<void> processFolder(Folder folder, [String? path]) async {
+    Future<void> processFolder(Folder folder, bool withPdfs, [String? path]) async {
       final contents = await dbService.getFolderContents(folder.id);
 
       if (contents.isEmpty && path != null) {
@@ -72,19 +72,29 @@ class MockFileServiceShareFolderAsZip extends Mock {
 
       for (var item in contents) {
         if (item is Receipt) {
-          final file = XFile('test/assets/${item.fileName}');
+          XFile file = XFile.fromData(Uint8List(0));
+          if (withPdfs == true) {
+            final pdfImage = await MockReceiptToPdf.receiptToPdf('test/assets/${item.fileName}');
+            file = XFile(pdfImage.path);
+          } else {
+            file = XFile('test/assets/${item.fileName}');
+          }
           final bytes = await File(file.path).readAsBytes();
           final archivePath = path != null ? '$path/${file.name}' : file.name;
           final archiveFile = ArchiveFile(archivePath, bytes.length, bytes);
           archive.addFile(archiveFile);
+
+          if (withPdfs == true) {
+            await File(file.path).delete();
+          }
         } else if (item is Folder) {
           final newPath = path != null ? '$path/${item.name}' : item.name;
-          await processFolder(item, newPath);
+          await processFolder(item, withPdfs, newPath);
         }
       }
     }
 
-    await processFolder(folder);
+    await processFolder(folder, withPdfs);
 
     if (archive.isEmpty) {
       return null;
@@ -372,9 +382,10 @@ void main() {
           storageSize: 100,
           parentId: folder2Id);
       await dbService.insertReceipt(receipt2);
-      // call test method
+
+      // testing for zip file with original images
       final zipFile =
-          await MockFileServiceShareFolderAsZip.shareFolderAsZip(folder1);
+          await MockFileServiceShareFolderAsZip.shareFolderAsZip(folder1, false);
       // expect statements
       expect(zipFile, isNotNull);
       expect(zipFile, isA<File>());
@@ -382,15 +393,30 @@ void main() {
       final bytes = await zipFile!.readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
       // checking folder and file structure is preserved
-
       final receipt1Exists = archive.any((file) => file.name == 'image1.png');
       final receipt2Exists = archive.any((file) => file.name == 'testSubFolder/image2.jpeg');
 
       expect(receipt1Exists, isTrue);
       expect(receipt2Exists, isTrue);
 
+      // testing for zip file with pdfs
+      final pdfZipFile =
+          await MockFileServiceShareFolderAsZip.shareFolderAsZip(folder1, true);
+      expect(zipFile, isNotNull);
+      expect(zipFile, isA<File>());
+
+      final pdfBytes = await pdfZipFile!.readAsBytes();
+      final pdfAarchive = ZipDecoder().decodeBytes(pdfBytes);
+
+      final pdfReceipt1Exists = pdfAarchive.any((file) => file.name == 'image1.pdf');
+      final pdfRreceipt2Exists = pdfAarchive.any((file) => file.name == 'testSubFolder/image2.pdf');
+
+      expect(pdfReceipt1Exists, isTrue);
+      expect(pdfRreceipt2Exists, isTrue);
+
       // cleaning up
       zipFile.delete();
+      pdfZipFile.delete();
       
     });
   });

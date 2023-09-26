@@ -244,14 +244,15 @@ class FileService {
   }
 
   // share folder outside of app
-  static Future<void> shareFolderAsZip(Folder folder) async {
+  static Future<void> shareFolderAsZip(Folder folder, bool withPdfs) async {
     // creates an archive instance to store the zip file contents
     final archive = Archive();
 
     // This function is designed to recursively add files and folders to a ZIP archive.
     // The 'path' parameter serves to keep track of the directory structure as the function recursively processes nested folders
     // It ensures files and folders within the ZIP archive maintain their relative paths, reflecting the original directory structure.
-    Future<void> processFolder(Folder folder, [String? path]) async {
+    // the withPdfs paramater is used to determine whether the zip folder will contains all receipt images converted to pdf or not
+    Future<void> processFolder(Folder folder, bool withPdfs, [String? path]) async {
       final contents =
           await DatabaseRepository.instance.getFolderContents(folder.id);
 
@@ -267,7 +268,17 @@ class FileService {
 
       for (var item in contents) {
         if (item is Receipt) {
-          final file = XFile(item.localPath);
+          // initialising en empty XFile
+          XFile file = XFile.fromData(Uint8List(0));
+          if (withPdfs == true) {
+            // converting receipt image file to pdf
+            final pdfImage = await receiptToPdf(item);
+            // constructing XFile from pdf
+            file = XFile(pdfImage.path);
+          } else {
+            // just constructing XFile from receipt image file
+            file = XFile(item.localPath);
+          }
           // read receipt image file as bytes
           final bytes = await File(file.path).readAsBytes();
           // Determine the path for the archive. If a path is provided, prepend it to the file name.
@@ -278,6 +289,12 @@ class FileService {
           final archiveFile = ArchiveFile(archivePath, bytes.length, bytes);
           // Add the archive file to the main archive.
           archive.addFile(archiveFile);
+
+          // original files are not deleted as their path references the file stored in application documents directory
+          // deleting pdf file from temporary app storage once it as added to zip file archive
+          if (withPdfs == true) {
+            await File(file.path).delete();
+          }
           // for loop goes to next receipt or folder in current directory
         } else if (item is Folder) {
           // Determine the path for the sub-folder. If a path is provided, prepend it to the folder name.
@@ -286,13 +303,13 @@ class FileService {
 
           // Recursively call the 'processFolder' function to process the contents of the sub-folder.
           // This is the recursive part of the function, allowing it to handle nested folders.
-          await processFolder(item, newPath);
+          await processFolder(item, withPdfs, newPath);
         }
       }
     }
 
     // Start the process by calling the 'processFolder' function with the root folder.
-    await processFolder(folder);
+    await processFolder(folder, withPdfs);
 
     // Check if there are any files to share
     if (archive.isEmpty) {
