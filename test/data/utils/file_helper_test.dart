@@ -238,7 +238,7 @@ void main() {
         final fileName = FileService.getFileNameFromFile(imageFile);
         expect(fileName, isNotNull);
         expect(fileName, isA<String>());
-        expect(fileName, equals(p.basename(imagePath)));
+        expect(fileName, p.basename(imagePath));
       }
     });
 
