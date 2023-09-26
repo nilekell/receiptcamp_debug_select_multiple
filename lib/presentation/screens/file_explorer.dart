@@ -70,13 +70,20 @@ class _FileExplorerState extends State<FileExplorer> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                state.folder.id != rootFolderId
-                    ? FolderName(
-                        name: state.folder.name,
-                      )
-                    : const FolderName(
-                        name: 'All Receipts',
-                      ),
+                Row(
+                  children: [
+                    BackButton(
+                      previousFolderId: state.folder.parentId,
+                      currentFolderId: state.folder.id,
+                      visible: state.folder.id != rootFolderId,
+                    ),
+                    state.folder.id != rootFolderId
+                        ? FolderName(
+                            name: state.folder.name,
+                          )
+                        : const FolderName(
+                            name: 'All Receipts',
+                          ),
                 const Divider(
                   thickness: 2,
                   height: 1,
@@ -165,23 +172,28 @@ class FolderName extends StatelessWidget {
 class BackButton extends StatelessWidget {
   final String previousFolderId;
   final String currentFolderId;
+  final bool visible;
 
   const BackButton(
       {super.key,
       required this.previousFolderId,
-      required this.currentFolderId});
+      required this.currentFolderId,
+      required this.visible});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 12,
-      ),
-      child: IconButton(
-          onPressed: () {
-            context.read<FileSystemCubit>().navigateBack(previousFolderId);
-          },
-          icon: const Icon(
+    return Visibility(
+      maintainSize: true,
+      maintainAnimation: true,
+      maintainState: true,
+      visible: visible,
+      child: Transform.translate(
+        offset: const Offset(10, 6),
+        child: IconButton(
+            onPressed: () {
+              context.read<FileSystemCubit>().navigateBack(previousFolderId);
+            },
+            icon: const Icon(
             Icons.arrow_back,
             color: Color(primaryDarkBlue),
             size: 30,
