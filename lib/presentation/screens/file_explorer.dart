@@ -93,12 +93,6 @@ class _FileExplorerState extends State<FileExplorer> {
                   indent: 25,
                   endIndent: 25,
                 ),
-                state.folder.id != rootFolderId
-                    ? BackButton(
-                        previousFolderId: state.folder.parentId,
-                        currentFolderId: state.folder.id,
-                      )
-                    : Container(),
                 Expanded(
                   child: Stack(
                     children: [
@@ -251,8 +245,8 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
               },
               child: state.files.isNotEmpty
                   ? ListView.builder(
-                    // key preserves scroll position when switching tabs
-                    key: const PageStorageKey<String>('ExplorerKey'),
+                      // key preserves scroll position when switching tabs
+                      key: const PageStorageKey<String>('ExplorerKey'),
                       physics: const AlwaysScrollableScrollPhysics(),
                       controller: widget.scrollController,
                       itemCount: state.files.length,
@@ -340,8 +334,8 @@ class FolderListTile extends StatelessWidget {
             Utility.formatDateTimeFromUnixTimestamp(folder.lastModified)),
         super(key: key);
 
-  final TextStyle displayNameStyle =
-      const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
+  final TextStyle displayNameStyle = const TextStyle(
+      fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
   final TextStyle displayDateStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
@@ -399,8 +393,8 @@ class ReceiptListTile extends StatelessWidget {
             Utility.formatDateTimeFromUnixTimestamp(receipt.lastModified)),
         super(key: key);
 
-  final TextStyle displayNameStyle =
-      const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
+  final TextStyle displayNameStyle = const TextStyle(
+      fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
   final TextStyle displayDateStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
@@ -438,7 +432,8 @@ class ReceiptListTile extends StatelessWidget {
             ),
             onTap: () {
               final imageProvider = Image.file(File(receipt.localPath)).image;
-              showImageViewer(context, imageProvider, swipeDismissible: true, doubleTapZoomable: true);
+              showImageViewer(context, imageProvider,
+                  swipeDismissible: true, doubleTapZoomable: true);
             },
             title: Text(displayName,
                 style: displayNameStyle,
