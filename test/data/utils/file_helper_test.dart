@@ -1,4 +1,9 @@
 import 'dart:io';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
+import 'package:image/image.dart' as img;
 import 'package:archive/archive_io.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -100,6 +105,38 @@ class MockFileServiceShareFolderAsZip extends Mock {
     return zipFile;
   }
 }
+
+class MockReceiptToPdf extends Mock {
+  static Future<File> receiptToPdf(String imagePath) async {
+    // creating a base pdf document
+    try {
+      final pw.Document pdf = pw.Document();
+
+      // creating an image from file
+      final File imageFile = File(imagePath);
+      final img.Image image = img.decodeImage(await imageFile.readAsBytes())!;
+      // Creating a custom page format with the dimensions of the image
+      final PdfPageFormat pageFormat =
+          PdfPageFormat(image.width.toDouble(), image.height.toDouble());
+      // creating a memory image by reading the image file as bytes, which creates an image that can be added to the PDF
+      final pdfImage = pw.MemoryImage(imageFile.readAsBytesSync());
+
+      pdf.addPage(pw.Page(
+          pageFormat: pageFormat,
+          build: ((context) {
+            return pw.Image(pdfImage);
+          })));
+
+      final tempDir = (await getTemporaryDirectory()).path;
+      final pdfFile = File('$tempDir/${basename(imagePath).split('.').first}.pdf');
+
+      return pdfFile.writeAsBytes(await pdf.save());
+    } on Exception catch (e) {
+      print(e.toString());
+      rethrow;
+    }
+  }
+  }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -270,8 +307,20 @@ void main() {
     test('shareReceipt', () {},
         skip: 'Unimplemented - manual testing required in the future');
 
+    test('shareReceiptAsPdf', () {},
+        skip: 'Unimplemented - manual testing required in the future');
+
     test('saveImageToCameraRoll', () {},
         skip: 'Unimplemented - manual testing required in the future');
+
+    test('receiptToPdf', () async {
+      final pdfFile = await MockReceiptToPdf.receiptToPdf(imagePaths[0]);
+      expect(pdfFile, isA<File>());
+      expect(pdfFile, isNotNull);
+      expect(pdfFile.path, endsWith('.pdf'));
+
+      pdfFile.delete();
+    });
 
     test(
         'shareFolderAsZip returns a zip file which preserves folder structure and files',
