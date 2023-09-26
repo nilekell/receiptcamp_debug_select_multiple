@@ -191,10 +191,11 @@ class BackButton extends StatelessWidget {
               context.read<FileSystemCubit>().navigateBack(previousFolderId);
             },
             icon: const Icon(
-            Icons.arrow_back,
-            color: Color(primaryDarkBlue),
-            size: 30,
-          )),
+              Icons.arrow_back_ios_new,
+              color: Color(primaryDarkBlue),
+              size: 26.0,
+            )),
+      ),
     );
   }
 }
