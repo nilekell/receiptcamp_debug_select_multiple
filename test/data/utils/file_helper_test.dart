@@ -145,7 +145,7 @@ void main() {
         }
         expect(actualFileSize, isNotNull);
         expect(actualFileSize, isA<int>());
-        expect(actualFileSize, equals(expectedFileSize));
+        expect(actualFileSize, expectedFileSize);
       }
     });
 
