@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/delete_folder_confirmation_dialog.dart';
@@ -16,8 +17,8 @@ void showFolderOptions(
   showModalBottomSheet(
     isScrollControlled: true,
     backgroundColor: const Color(primaryDeepBlue),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20.0),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(topRight: Radius.circular(40.0)),
     ),
     context: context,
     builder: (bottomSheetContext) => DraggableScrollableSheet(
@@ -30,7 +31,7 @@ void showFolderOptions(
         controller: scrollController,
         children: [
           const SizedBox(
-            height: 5,
+            height: 15,
           ),
           ListTile(
             leading: Transform.scale(
@@ -139,7 +140,33 @@ void showFolderOptions(
             onTap: () {
               Navigator.of(bottomSheetContext).pop();
               // opening deleting folder dialog
-              folderViewCubit.shareFolder(folder);
+              folderViewCubit.shareFolder(folder, false);
+            },
+          ),
+          ListTile(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: iconPadding),
+              child: Transform.translate(
+                offset: const Offset(-8, 0),
+                child: Transform.scale(
+                    scale: 0.75,
+                    child: Image.asset(
+                      'assets/export_as_pdf.png',
+                      color: secondaryColour,
+                      colorBlendMode: BlendMode.srcIn,
+                    )),
+              ),
+            ),
+            title: Transform.translate(
+              offset: const Offset(-15, 0),
+              child: const Text(
+                'Export as PDF',
+                style: textStyle,
+              ),
+            ),
+            onTap: () {
+              Navigator.of(bottomSheetContext).pop();
+              FileService.shareFolderAsZip(folder, true);
             },
           ),
           const SizedBox(height: 50)
