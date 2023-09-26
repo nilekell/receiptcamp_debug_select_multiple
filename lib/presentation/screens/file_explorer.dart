@@ -78,7 +78,8 @@ class _FileExplorerState extends State<FileExplorer> {
                         name: 'All Receipts',
                       ),
                 const Divider(
-                  thickness: 1,
+                  thickness: 2,
+                  height: 1,
                   indent: 25,
                   endIndent: 25,
                 ),
