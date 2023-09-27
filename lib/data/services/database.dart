@@ -336,6 +336,34 @@ class DatabaseService {
     }
   }
 
+  /* Unused method, but kept for potential future use
+  note: this method has no unit test but would be required if used in future)
+  Future<bool> folderIsEmpty(String folderId) async {
+    final db = await database;
+    final countReceiptsResult = await db.rawQuery('''
+    SELECT COUNT (*)
+    FROM receipts
+    WHERE parentId = ?
+    ''', [folderId]);
+
+    final countFolderResult = await db.rawQuery('''
+    SELECT COUNT (*)
+    FROM folders
+    WHERE parentId = ?
+    ''', [folderId]);
+
+    // Using Sqflite.firstIntValue to extract the count of receipts and folders from the query results.
+    int numReceipts = Sqflite.firstIntValue(countReceiptsResult) ?? 0;
+    print('numReceipts: $numReceipts');
+    int numFolders = Sqflite.firstIntValue(countFolderResult) ?? 0;
+    print('numFolders: $numFolders');
+
+    final int total = numReceipts + numFolders;
+
+    return total < 1;
+  }
+  */
+
   Future<void> deleteAllFoldersExceptRoot() async {
   final Database db = await database;
   
