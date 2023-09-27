@@ -49,6 +49,12 @@ class DatabaseRepository {
     return await _databaseService.getFolderById(folderId);
   }
 
+  /* Unused method, but kept for potential future use
+  Future<bool> folderIsEmpty(String folderId) async {
+    return await _databaseService.folderIsEmpty(folderId);
+  }
+  */
+
   Future<void> deleteFolder(String folderId) async {
     return await _databaseService.deleteFolder(folderId);
   }
