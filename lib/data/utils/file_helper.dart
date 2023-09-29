@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path/path.dart';
@@ -16,6 +17,9 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:image/image.dart' as img;
 
 class FileService {
+
+  static const iPadSharePositionOrigin = Rect.fromLTWH(0, 0, 100, 100);
+
   static Future<File?> compressFile(File imageFile, String targetPath) async {
     CompressFormat format;
     final fileExtension = extension(imageFile.path);
@@ -192,7 +196,7 @@ class FileService {
     try {
       // shows platform share sheet
       await Share.shareXFiles([XFile(receipt.localPath)],
-          subject: receipt.name);
+          subject: receipt.name, sharePositionOrigin: const Rect.fromLTWH(0, 0, 100, 100));
     } on Exception catch (e) {
       print('Error in shareReceipt: $e');
       return;
@@ -233,7 +237,7 @@ class FileService {
     try {
       final receiptPdf = await receiptToPdf(receipt);
 
-      await Share.shareXFiles([XFile(receiptPdf.path)], subject: receipt.name);
+      await Share.shareXFiles([XFile(receiptPdf.path)], subject: receipt.name, sharePositionOrigin: iPadSharePositionOrigin);
 
       // delete pdf file from local temp directory
       await FileService.deleteFileFromPath(receiptPdf.path);
@@ -334,7 +338,7 @@ class FileService {
         await File(tempZipFileFullPath).writeAsBytes(encodedArchive);
 
     // Share the zip file
-    await Share.shareXFiles([XFile(zipFile.path)]);
+    await Share.shareXFiles([XFile(zipFile.path)], subject: folder.name,sharePositionOrigin: iPadSharePositionOrigin);
 
     // delete zip file from local temp directory
     await FileService.deleteFileFromPath(zipFile.path);
