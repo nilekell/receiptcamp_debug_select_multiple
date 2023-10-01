@@ -163,11 +163,11 @@ class FolderName extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Transform.translate(
-      offset: const Offset(5, 5),
+      offset: const Offset(0, 5),
       child: Text(
-        name,
+        displayName,
         style: const TextStyle(
-            fontSize: 26.0,
+            fontSize: 20.0,
             fontWeight: FontWeight.w600,
             color: Color(primaryGrey)),
       ),
