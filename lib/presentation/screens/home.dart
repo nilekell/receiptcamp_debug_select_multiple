@@ -115,8 +115,8 @@ class HomeReceiptTile extends StatelessWidget {
   HomeReceiptTile({Key? key, required this.receipt})
       // displayName is the file name without the file extension and is cut off when the receipt name
       // is > 25 chars or would require 2 lines to be shown completely
-      : displayName = receipt.name.length > 25
-            ? "${receipt.name.substring(0, 25)}...".split('.').first
+      : displayName = receipt.name.length > 30
+            ? "${receipt.name.substring(0, 30)}...".split('.').first
             : receipt.name.split('.').first,
         displayDate = Utility.formatDisplayDateFromDateTime(
             Utility.formatDateTimeFromUnixTimestamp(receipt.lastModified)),
