@@ -69,25 +69,29 @@ class _FileExplorerState extends State<FileExplorer> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 10),
-                Row(
+                const SizedBox(height: 5),
+                Stack(
+                  alignment: Alignment.center,
                   children: [
-                    BackButton(
-                      previousFolderId: state.folder.parentId,
-                      currentFolderId: state.folder.id,
-                      visible: state.folder.id != rootFolderId,
+                    Row(
+                      children: [
+                        BackButton(
+                          previousFolderId: state.folder.parentId,
+                          currentFolderId: state.folder.id,
+                          visible: state.folder.id != rootFolderId,
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 10,),
-                    state.folder.id != rootFolderId
-                        ? FolderName(
-                            name: state.folder.name,
-                          )
-                        : const FolderName(
-                            name: 'All Receipts',
-                          ),
+                    FolderName(
+                      name: state.folder.id != rootFolderId
+                          ? state.folder.name
+                          : 'Expenses',
+                    ),
                   ],
                 ),
-                const SizedBox(height: 4,),
+                const SizedBox(
+                  height: 4,
+                ),
                 const Divider(
                   thickness: 2,
                   height: 1,
@@ -147,19 +151,23 @@ class _FileExplorerState extends State<FileExplorer> {
 
 class FolderName extends StatelessWidget {
   final String name;
-  const FolderName({
+  FolderName({
     super.key,
     required this.name,
-  });
+  }) : displayName = name.length > 20
+            ? "${name.substring(0, 20)}...".split('.').first
+            : name.split('.').first;
+
+  final String displayName;
 
   @override
   Widget build(BuildContext context) {
     return Transform.translate(
-      offset: const Offset(5, 5),
+      offset: const Offset(0, 5),
       child: Text(
-        name,
+        displayName,
         style: const TextStyle(
-            fontSize: 26.0,
+            fontSize: 20.0,
             fontWeight: FontWeight.w600,
             color: Color(primaryGrey)),
       ),
