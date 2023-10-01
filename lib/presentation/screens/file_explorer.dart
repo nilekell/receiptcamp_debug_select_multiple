@@ -151,10 +151,14 @@ class _FileExplorerState extends State<FileExplorer> {
 
 class FolderName extends StatelessWidget {
   final String name;
-  const FolderName({
+  FolderName({
     super.key,
     required this.name,
-  });
+  }) : displayName = name.length > 20
+            ? "${name.substring(0, 20)}...".split('.').first
+            : name.split('.').first;
+
+  final String displayName;
 
   @override
   Widget build(BuildContext context) {
