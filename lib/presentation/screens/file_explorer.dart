@@ -69,25 +69,29 @@ class _FileExplorerState extends State<FileExplorer> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 10),
-                Row(
+                const SizedBox(height: 5),
+                Stack(
+                  alignment: Alignment.center,
                   children: [
-                    BackButton(
-                      previousFolderId: state.folder.parentId,
-                      currentFolderId: state.folder.id,
-                      visible: state.folder.id != rootFolderId,
+                    Row(
+                      children: [
+                        BackButton(
+                          previousFolderId: state.folder.parentId,
+                          currentFolderId: state.folder.id,
+                          visible: state.folder.id != rootFolderId,
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 10,),
-                    state.folder.id != rootFolderId
-                        ? FolderName(
-                            name: state.folder.name,
-                          )
-                        : const FolderName(
-                            name: 'All Receipts',
-                          ),
+                    FolderName(
+                      name: state.folder.id != rootFolderId
+                          ? state.folder.name
+                          : 'Expenses',
+                    ),
                   ],
                 ),
-                const SizedBox(height: 4,),
+                const SizedBox(
+                  height: 4,
+                ),
                 const Divider(
                   thickness: 2,
                   height: 1,
