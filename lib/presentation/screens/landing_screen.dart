@@ -8,6 +8,7 @@ import 'package:receiptcamp/presentation/screens/home.dart';
 import 'package:receiptcamp/presentation/ui/landing/app_bar.dart';
 import 'package:receiptcamp/presentation/ui/landing/drawer.dart';
 import 'package:receiptcamp/presentation/ui/landing/nav_bar.dart';
+import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
@@ -25,7 +26,7 @@ class _LandingScreenState extends State<LandingScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 100),
+      duration: fadeDuration,
     );
   }
 
