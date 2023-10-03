@@ -151,11 +151,18 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
 // upload receipt
   uploadReceiptFromGallery(String currentFolderId) async {
-     if (PermissionsService.instance.hasPhotosAccess == false) {
-      emit(FolderViewPermissionsFailure(folderId: currentFolderId, permissionResult: PermissionsService.instance.photosResult));
-      fetchFiles(currentFolderId);
-      return;
-     }
+    // Requesting photos permission if not granted
+    if (!PermissionsService.instance.hasPhotosAccess) {
+      await PermissionsService.instance.requestPhotosPermission();
+      // if user denies camera permissions, show failure snackbar
+      if (!PermissionsService.instance.hasPhotosAccess) {
+        emit(FolderViewPermissionsFailure(
+            folderId: currentFolderId,
+            permissionResult: PermissionsService.instance.photosResult));
+        fetchFiles(currentFolderId);
+        return;
+      }
+    }
      
     try {
       final ImagePicker imagePicker = ImagePicker();
@@ -192,11 +199,17 @@ class FolderViewCubit extends Cubit<FolderViewState> {
   }
 
   uploadReceiptFromCamera(String currentFolderId) async {
-     if (PermissionsService.instance.hasCameraAccess == false) {
-      emit(FolderViewPermissionsFailure(folderId: currentFolderId, permissionResult: PermissionsService.instance.cameraResult));
-      fetchFiles(currentFolderId);
-      return;
-     }
+    // Requesting camera permission if not granted
+    if (!PermissionsService.instance.hasCameraAccess) {
+      await PermissionsService.instance.requestCameraPermission();
+      if (!PermissionsService.instance.hasCameraAccess) {
+        emit(FolderViewPermissionsFailure(
+            folderId: currentFolderId,
+            permissionResult: PermissionsService.instance.cameraResult));
+        fetchFiles(currentFolderId);
+        return;
+      }
+    }
 
     try {
       final ImagePicker imagePicker = ImagePicker();
@@ -233,10 +246,16 @@ class FolderViewCubit extends Cubit<FolderViewState> {
   }
 
   uploadReceiptFromDocumentScan(String currentFolderId) async {
-    if (PermissionsService.instance.hasCameraAccess == false) {
-      emit(FolderViewPermissionsFailure(folderId: currentFolderId, permissionResult: PermissionsService.instance.cameraResult));
-      fetchFiles(currentFolderId);
-      return;
+    // Requesting camera permission if not granted
+    if (!PermissionsService.instance.hasCameraAccess) {
+      await PermissionsService.instance.requestCameraPermission();
+      if (!PermissionsService.instance.hasCameraAccess) {
+        emit(FolderViewPermissionsFailure(
+            folderId: currentFolderId,
+            permissionResult: PermissionsService.instance.cameraResult));
+        fetchFiles(currentFolderId);
+        return;
+      }
     }
 
     try {

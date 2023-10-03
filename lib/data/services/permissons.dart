@@ -19,12 +19,7 @@ class PermissionsService {
   PermissionFailedResult cameraResult = PermissionFailedResult.unknown;
   PermissionFailedResult photosResult = PermissionFailedResult.unknown;
 
-  Future<void> init() async {
-    await _requestCameraPermission();
-    await _requestPhotosPermission();
-  }
-
-  Future<void> _requestCameraPermission() async {
+  Future<void> requestCameraPermission() async {
     if (hasCameraAccess) return;
 
     try {
@@ -60,7 +55,7 @@ class PermissionsService {
     }
   }
 
-  Future<void> _requestPhotosPermission() async {
+  Future<void> requestPhotosPermission() async {
     if (hasPhotosAccess) return;
 
     try {
