@@ -1,12 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/ui/image_view/image_sheet.dart';
 
-// defining a cusotm route class to animate transition to ImageViewScreen
+// defining a custom route class to animate transition to ImageViewScreen
 class SlidingImageTransitionRoute extends PageRouteBuilder {
   final Receipt receipt;
 
@@ -78,11 +77,11 @@ class ImageViewScreen extends StatefulWidget {
 }
 
 class _ImageViewScreenState extends State<ImageViewScreen> {
-  bool _isAppBarVisible = false;
+  bool _isAppBarInitiallyVisible = true;
 
   void _toggleAppBar() {
     setState(() {
-      _isAppBarVisible = !_isAppBarVisible;
+      _isAppBarInitiallyVisible = !_isAppBarInitiallyVisible;
     });
   }
 
@@ -109,8 +108,8 @@ class _ImageViewScreenState extends State<ImageViewScreen> {
             ),
           ),
         ),
-        PhotoViewAppBar(
-          isAppBarVisible: _isAppBarVisible,
+        ImageViewAppBar(
+          isAppBarVisible: _isAppBarInitiallyVisible,
           receipt: widget.receipt,
         ),
       ]),
@@ -118,8 +117,8 @@ class _ImageViewScreenState extends State<ImageViewScreen> {
   }
 }
 
-class PhotoViewAppBar extends StatelessWidget {
-  const PhotoViewAppBar(
+class ImageViewAppBar extends StatelessWidget {
+  const ImageViewAppBar(
       {super.key, required bool isAppBarVisible, required this.receipt})
       : _isAppBarVisible = isAppBarVisible;
 
@@ -134,28 +133,41 @@ class PhotoViewAppBar extends StatelessWidget {
       right: 0,
       duration: const Duration(milliseconds: 200),
       child: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.black.withOpacity(0.5),
-          title: Padding(
-            padding: const EdgeInsets.only(top: 18.0),
-            child: Text(
-              receipt.name,
-              style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold),
-            ),
+        elevation: 0,
+        backgroundColor: Colors.black.withOpacity(0.5),
+        title: Padding(
+          padding: const EdgeInsets.only(top: 18.0),
+          child: Text(
+            receipt.name,
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold),
           ),
-          leading: IconButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: const Padding(
-                padding: EdgeInsets.only(top: 16.0),
-                child: Icon(
-                  Icons.arrow_back_ios_new,
-                  color: Colors.white,
-                  size: 26.0,
-                ),
-              ))),
+        ),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: const Padding(
+              padding: EdgeInsets.only(top: 16.0),
+              child: Icon(
+                Icons.arrow_back_ios_new,
+                color: Colors.white,
+                size: 26.0,
+              ),
+            )),
+        actions: [
+          IconButton(
+            onPressed: () {
+              showImageOptions(context, receipt);
+            },
+            icon: const Icon(
+              Icons.more_horiz,
+              color: Colors.white,
+              size: 26.0,
+            ),
+          )
+        ],
+      ),
     );
   }
 }
