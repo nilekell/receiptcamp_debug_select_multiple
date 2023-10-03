@@ -1,11 +1,11 @@
 // ignore_for_file: avoid_types_as_parameter_names, non_constant_identifier_names
 import 'dart:io';
-import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/screens/image_view.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class Home extends StatefulWidget {
@@ -71,9 +71,36 @@ class _HomeState extends State<Home> {
                         final receipt = state.receipts[index];
                         return GestureDetector(
                           onTap: () {
-                            final imageProvider =
-                                Image.file(File(receipt.localPath)).image;
-                            showImageViewer(context, imageProvider, swipeDismissible: true, doubleTapZoomable: true);
+                            Navigator.of(context).push(
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) {
+                                  final imageProvider =
+                                      Image.file(File(receipt.localPath)).image;
+                                  return ImageViewScreen(
+                                      imageProvider: imageProvider,
+                                      receipt: receipt);
+                                },
+                                transitionsBuilder: (context, animation,
+                                    secondaryAnimation, child) {
+                                  const begin = Offset(0.0, 1.0);
+                                  const end = Offset.zero;
+                                  const curve = Curves.easeInOut;
+
+                                  var tween = Tween(begin: begin, end: end)
+                                      .chain(CurveTween(curve: curve));
+                                  var offsetAnimation = animation.drive(tween);
+
+                                  return SlideTransition(
+                                    position: offsetAnimation,
+                                    child: child,
+                                  );
+                                },
+                                transitionDuration: const Duration(
+                                    milliseconds:
+                                        300), // Adjust duration to your preference
+                              ),
+                            );
                           },
                           child: Column(
                             children: [
