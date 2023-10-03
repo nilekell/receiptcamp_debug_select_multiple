@@ -231,7 +231,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
     return BlocConsumer<FolderViewCubit, FolderViewState>(
       listenWhen: (previous, current) => current is FolderViewActionState,
       listener: (context, state) {
-        SnackBarUtility.showSnackBar(context, state);
+        SnackBarUtility.showSnackBar(context, state as FolderViewActionState);
       },
       buildWhen: (previous, current) =>
           previous is! FolderViewActionState ||
