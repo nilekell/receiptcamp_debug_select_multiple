@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/ui/image_view/image_sheet.dart';
@@ -79,6 +80,20 @@ class ImageViewScreen extends StatefulWidget {
 class _ImageViewScreenState extends State<ImageViewScreen> {
   bool _isAppBarInitiallyVisible = true;
 
+  @override
+  void initState() {
+    super.initState();
+    // hiding top and bottom platform overlays when screen is displayed
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+  }
+
+  @override
+  void dispose() {
+    // re-showing top and bottom platform overlays when screen is closed
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+    super.dispose();
+  }
+
   void _toggleAppBar() {
     setState(() {
       _isAppBarInitiallyVisible = !_isAppBarInitiallyVisible;
@@ -147,10 +162,10 @@ class ImageViewAppBar extends StatelessWidget {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            icon: const Padding(
-              padding: EdgeInsets.only(top: 16.0),
-              child: Icon(
-                Icons.arrow_back_ios_new,
+            icon: Transform.translate(
+              offset: const Offset(8.0, 12.0),
+              child: const Icon(
+                Icons.close,
                 color: Colors.white,
                 size: 26.0,
               ),
@@ -160,11 +175,14 @@ class ImageViewAppBar extends StatelessWidget {
             onPressed: () {
               showImageOptions(context, receipt);
             },
-            icon: const Icon(
-              Icons.more_horiz,
-              color: Colors.white,
-              size: 26.0,
-            ),
+            icon: Transform.translate(
+              offset: const Offset(-8.0, 12.0),
+              child: const Icon(
+                Icons.more_horiz_sharp,
+                color: Colors.white,
+                size: 26.0,
+              ),
+            )
           )
         ],
       ),
