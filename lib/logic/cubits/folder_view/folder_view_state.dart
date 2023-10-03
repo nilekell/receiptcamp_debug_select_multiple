@@ -125,3 +125,9 @@ final class FolderViewUploadFailure extends FolderViewActionState {
 
   const FolderViewUploadFailure({required super.folderId, required this.validationType});
 }
+
+final class FolderViewPermissionsFailure extends FolderViewActionState {
+  final PermissionFailedResult permissionResult;
+
+  const FolderViewPermissionsFailure({required super.folderId, required this.permissionResult});
+}

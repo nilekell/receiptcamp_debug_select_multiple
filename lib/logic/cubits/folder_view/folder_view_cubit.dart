@@ -3,6 +3,7 @@ import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 import 'package:equatable/equatable.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
+import 'package:receiptcamp/data/services/permissons.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/data/utils/receipt_helper.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
@@ -150,6 +151,19 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
 // upload receipt
   uploadReceiptFromGallery(String currentFolderId) async {
+    // Requesting photos permission if not granted
+    if (!PermissionsService.instance.hasPhotosAccess) {
+      await PermissionsService.instance.requestPhotosPermission();
+      // if user denies camera permissions, show failure snackbar
+      if (!PermissionsService.instance.hasPhotosAccess) {
+        emit(FolderViewPermissionsFailure(
+            folderId: currentFolderId,
+            permissionResult: PermissionsService.instance.photosResult));
+        fetchFiles(currentFolderId);
+        return;
+      }
+    }
+     
     try {
       final ImagePicker imagePicker = ImagePicker();
       final XFile? receiptImage =
@@ -185,6 +199,18 @@ class FolderViewCubit extends Cubit<FolderViewState> {
   }
 
   uploadReceiptFromCamera(String currentFolderId) async {
+    // Requesting camera permission if not granted
+    if (!PermissionsService.instance.hasCameraAccess) {
+      await PermissionsService.instance.requestCameraPermission();
+      if (!PermissionsService.instance.hasCameraAccess) {
+        emit(FolderViewPermissionsFailure(
+            folderId: currentFolderId,
+            permissionResult: PermissionsService.instance.cameraResult));
+        fetchFiles(currentFolderId);
+        return;
+      }
+    }
+
     try {
       final ImagePicker imagePicker = ImagePicker();
       final XFile? receiptPhoto =
@@ -220,6 +246,18 @@ class FolderViewCubit extends Cubit<FolderViewState> {
   }
 
   uploadReceiptFromDocumentScan(String currentFolderId) async {
+    // Requesting camera permission if not granted
+    if (!PermissionsService.instance.hasCameraAccess) {
+      await PermissionsService.instance.requestCameraPermission();
+      if (!PermissionsService.instance.hasCameraAccess) {
+        emit(FolderViewPermissionsFailure(
+            folderId: currentFolderId,
+            permissionResult: PermissionsService.instance.cameraResult));
+        fetchFiles(currentFolderId);
+        return;
+      }
+    }
+
     try {
       List<String> validatedImagePaths = [];
 
