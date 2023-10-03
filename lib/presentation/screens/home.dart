@@ -72,34 +72,7 @@ class _HomeState extends State<Home> {
                         return GestureDetector(
                           onTap: () {
                             Navigator.of(context).push(
-                              PageRouteBuilder(
-                                pageBuilder:
-                                    (context, animation, secondaryAnimation) {
-                                  final imageProvider =
-                                      Image.file(File(receipt.localPath)).image;
-                                  return ImageViewScreen(
-                                      imageProvider: imageProvider,
-                                      receipt: receipt);
-                                },
-                                transitionsBuilder: (context, animation,
-                                    secondaryAnimation, child) {
-                                  const begin = Offset(0.0, 1.0);
-                                  const end = Offset.zero;
-                                  const curve = Curves.easeInOut;
-
-                                  var tween = Tween(begin: begin, end: end)
-                                      .chain(CurveTween(curve: curve));
-                                  var offsetAnimation = animation.drive(tween);
-
-                                  return SlideTransition(
-                                    position: offsetAnimation,
-                                    child: child,
-                                  );
-                                },
-                                transitionDuration: const Duration(
-                                    milliseconds:
-                                        300), // Adjust duration to your preference
-                              ),
+                              SlidingImageTransitionRoute(receipt: receipt)
                             );
                           },
                           child: Column(
