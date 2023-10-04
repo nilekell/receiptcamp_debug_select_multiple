@@ -7,6 +7,7 @@ import 'package:receiptcamp/data/services/permissons.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/data/utils/receipt_helper.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
+import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/models/tag.dart';
@@ -16,7 +17,9 @@ part 'folder_view_state.dart';
 // this cubit controls the initialisation, loading, displaying and any methods that can
 // affect what is currently being displayed in the folder view e.g. move/delete/upload/rename
 class FolderViewCubit extends Cubit<FolderViewState> {
-  FolderViewCubit() : super(FolderViewInitial());
+  final HomeBloc homeBloc;
+
+  FolderViewCubit({required this.homeBloc}) : super(FolderViewInitial());
 
   // init folderview
   initFolderView(String currentFolderId) {
