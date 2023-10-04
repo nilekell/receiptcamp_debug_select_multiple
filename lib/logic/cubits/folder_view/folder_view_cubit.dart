@@ -57,7 +57,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
     }
   }
 
-// delete folder
+  // delete folder
   deleteFolder(String folderId) async {
     final Folder deletedFolder =
         await DatabaseRepository.instance.getFolderById(folderId);
@@ -163,7 +163,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
     }
-     
+
     try {
       final ImagePicker imagePicker = ImagePicker();
       final XFile? receiptImage =
@@ -172,9 +172,11 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
-      final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(receiptImage.path);
+      final (validImage as bool, invalidImageReason as ValidationError) =
+          await ReceiptService.isValidImage(receiptImage.path);
       if (!validImage) {
-        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+        emit(FolderViewUploadFailure(
+            folderId: currentFolderId, validationType: invalidImageReason));
         fetchFiles(currentFolderId);
         return;
       }
@@ -219,9 +221,11 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
-      final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(receiptPhoto.path);
+      final (validImage as bool, invalidImageReason as ValidationError) =
+          await ReceiptService.isValidImage(receiptPhoto.path);
       if (!validImage) {
-        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+        emit(FolderViewUploadFailure(
+            folderId: currentFolderId, validationType: invalidImageReason));
         fetchFiles(currentFolderId);
         return;
       }
@@ -268,14 +272,16 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
       // iterating over scanned images and checking image size and if they contain text
       for (final path in scannedImagePaths) {
-        final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(path);
+        final (validImage as bool, invalidImageReason as ValidationError) =
+            await ReceiptService.isValidImage(path);
         if (!validImage) {
           // if a single image fails the validation, all images are discarded
-          emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+          emit(FolderViewUploadFailure(
+              folderId: currentFolderId, validationType: invalidImageReason));
           fetchFiles(currentFolderId);
           return;
         }
-        // only adding images that pass validations to list 
+        // only adding images that pass validations to list
         validatedImagePaths.add(path);
       }
       // only iterating over validated images and uploading them consecutively
@@ -302,7 +308,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
     }
   }
 
-// rename receipt
+  // rename receipt
   renameReceipt(Receipt receipt, String newName) async {
     try {
       await DatabaseRepository.instance.renameReceipt(receipt.id, newName);
@@ -322,7 +328,10 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       await FileService.shareFolderAsZip(folder, withPdfs);
     } on Exception catch (e) {
       print(e.toString());
-      emit(FolderViewShareFailure(errorMessage: e.toString(), folderId: folder.id, folderName: folder.name));
+      emit(FolderViewShareFailure(
+          errorMessage: e.toString(),
+          folderId: folder.id,
+          folderName: folder.name));
       fetchFiles(folder.parentId);
     }
   }
