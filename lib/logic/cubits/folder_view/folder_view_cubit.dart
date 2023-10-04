@@ -68,6 +68,10 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       await DatabaseRepository.instance.deleteFolder(folderId);
       emit(FolderViewDeleteSuccess(
           deletedName: deletedFolder.name, folderId: deletedFolder.parentId));
+      
+      // notifying home bloc to reload when a folder is deleted
+      homeBloc.add(HomeLoadReceiptsEvent());
+      
       fetchFiles(deletedFolder.parentId);
     } on Exception catch (e) {
       print(e.toString());
@@ -144,6 +148,10 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       await DatabaseRepository.instance.deleteReceipt(receiptId);
       emit(FolderViewDeleteSuccess(
           deletedName: deletedReceipt.name, folderId: deletedReceipt.parentId));
+
+      // notifying home bloc to reload when a receipt is deleted
+      homeBloc.add(HomeLoadReceiptsEvent());
+
       fetchFiles(deletedReceipt.parentId);
     } on Exception catch (e) {
       print(e.toString());
@@ -196,6 +204,10 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
       emit(FolderViewUploadSuccess(
           uploadedName: receipt.name, folderId: receipt.parentId));
+
+      // notifying home bloc to reload when a receipt is uploaded from gallery
+      homeBloc.add(HomeLoadReceiptsEvent());
+
       fetchFiles(receipt.parentId);
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
@@ -245,6 +257,10 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
       emit(FolderViewUploadSuccess(
           uploadedName: receipt.name, folderId: receipt.parentId));
+
+      // notifying home bloc to reload when a receipt is uploaded from camera
+      homeBloc.add(HomeLoadReceiptsEvent());
+      
       fetchFiles(receipt.parentId);
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
@@ -304,6 +320,9 @@ class FolderViewCubit extends Cubit<FolderViewState> {
             uploadedName: receipt.name, folderId: receipt.parentId));
       }
 
+      // notifying home bloc to reload when a receipt is uploaded from document scan
+      homeBloc.add(HomeLoadReceiptsEvent());
+
       fetchFiles(currentFolderId);
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
@@ -317,6 +336,10 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       await DatabaseRepository.instance.renameReceipt(receipt.id, newName);
       emit(FolderViewRenameSuccess(
           oldName: receipt.name, newName: newName, folderId: receipt.parentId));
+
+      // notifying home bloc to reload when a receipt is renamed
+      homeBloc.add(HomeLoadReceiptsEvent());
+      
       fetchFiles(receipt.parentId);
     } on Exception catch (e) {
       print(e.toString());
