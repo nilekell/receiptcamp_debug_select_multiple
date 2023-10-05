@@ -263,12 +263,31 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                       itemBuilder: (context, index) {
                         var item = state.files[index];
                         if (item is Receipt) {
-                          return SizedBox(
+                          if (item is ReceiptWithSize) {
+                            return SizedBox(
+                                height: 60,
+                                child: ReceiptListTile(
+                                  receipt: item,
+                                  withSize: true,
+                                ));
+                          } else {
+                            return SizedBox(
                               height: 60,
                               child: ReceiptListTile(receipt: item));
+                          }
                         } else if (item is Folder) {
-                          return SizedBox(
-                              height: 60, child: FolderListTile(folder: item));
+                          if (item is FolderWithSize) {
+                            return SizedBox(
+                                height: 60,
+                                child: FolderListTile(
+                                  folder: item,
+                                  storageSize: item.storageSize,
+                                ));
+                          } else {
+                            return SizedBox(
+                                height: 60,
+                                child: FolderListTile(folder: item));
+                          }
                         } else {
                           return const ListTile(
                               title: Text('Unknown file type'));
@@ -335,19 +354,25 @@ class FolderListTile extends StatelessWidget {
   final Folder folder;
   final String displayName;
   final String displayDate;
+  final String displaySize;
 
-  FolderListTile({Key? key, required this.folder})
-      : displayName = folder.name.length > 25
+  final TextStyle displayNameStyle = const TextStyle(
+      fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
+  
+  final TextStyle subTextStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
+
+  FolderListTile({
+    Key? key,
+    required this.folder,
+    int? storageSize, // Optional storageSize parameter
+  })  : displayName = folder.name.length > 25
             ? "${folder.name.substring(0, 25)}..."
             : folder.name,
         displayDate = Utility.formatDisplayDateFromDateTime(
             Utility.formatDateTimeFromUnixTimestamp(folder.lastModified)),
+        displaySize =
+            storageSize != null ? Utility.bytesToSizeString(storageSize) : '',
         super(key: key);
-
-  final TextStyle displayNameStyle = const TextStyle(
-      fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
-  final TextStyle displayDateStyle =
-      const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
   @override
   Widget build(BuildContext context) {
@@ -355,8 +380,8 @@ class FolderListTile extends StatelessWidget {
       padding: const EdgeInsets.only(left: 10),
       child: ListTile(
         subtitle: Text(
-          'Modified $displayDate',
-          style: displayDateStyle,
+          displaySize.isNotEmpty ? displaySize : 'Modified $displayDate',  // Ternary operator to decide text
+          style: subTextStyle,  // Ternary operator to decide style
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -392,21 +417,22 @@ class ReceiptListTile extends StatelessWidget {
   final Receipt receipt;
   final String displayName;
   final String displayDate;
+  final String displaySize;
+  final bool withSize;
 
-  ReceiptListTile({Key? key, required this.receipt})
-      // displayName is the file name without the file extension and is cut off when the receipt name
-      // is > 25 chars or would require 2 lines to be shown completely
+  ReceiptListTile({Key? key, required this.receipt, this.withSize = false})
       : displayName = receipt.name.length > 25
             ? "${receipt.name.substring(0, 25)}...".split('.').first
             : receipt.name.split('.').first,
         displayDate = Utility.formatDisplayDateFromDateTime(
             Utility.formatDateTimeFromUnixTimestamp(receipt.lastModified)),
+        displaySize = Utility.bytesToSizeString(receipt.storageSize),
         super(key: key);
 
   final TextStyle displayNameStyle = const TextStyle(
       fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
-  final TextStyle displayDateStyle =
-      const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
+
+  final TextStyle subTextStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
   @override
   Widget build(BuildContext context) {
@@ -426,8 +452,12 @@ class ReceiptListTile extends StatelessWidget {
               ),
             ),
             subtitle: Text(
-              'Created $displayDate',
-              style: displayDateStyle,
+              withSize
+                  ? displaySize
+                  : 'Modified $displayDate', // Ternary operator to decide text
+              style: subTextStyle, // Ternary operator to decide style
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             trailing: IconButton(
               icon: const Icon(
