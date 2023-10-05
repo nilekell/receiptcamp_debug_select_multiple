@@ -51,7 +51,7 @@ class Utility {
 
   }
 
-  static Future<String> bytesToSizeString(int bytes) async {
+  static String bytesToSizeString(int bytes) {
     try {
       if (bytes <= 0) return "0 B";
       const suffixes = ["B", "KB", "MB", "GB"];
