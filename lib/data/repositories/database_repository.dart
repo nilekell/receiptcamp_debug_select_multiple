@@ -20,6 +20,22 @@ class DatabaseRepository {
 
   // Folder methods
 
+  Future<List<Folder>> getFoldersInFolderSortedBy(String folderId, String column, String order) async {
+    return await _databaseService.getFoldersInFolderSortedBy(folderId, column, order);
+  }
+
+  Future<List<Receipt>> getReceiptsInFolderSortedBy(String folderId, String column, String order) async {
+    return await _databaseService.getReceiptsInFolderSortedBy(folderId, column, order);
+  }
+
+  Future<List<ReceiptWithSize>> getReceiptsBySize(String folderId, String order) async {
+    return await _databaseService.getReceiptsBySize(folderId, order);
+  }
+
+  Future<List<FolderWithSize>> getFoldersByTotalReceiptSize(String folderId, String order) async {
+    return await _databaseService.getFoldersByTotalReceiptSize(folderId, order);
+  }
+
   Future<List<Object>> getFolderContents(String folderId) async {
     return await _databaseService.getFolderContents(folderId);
   }
