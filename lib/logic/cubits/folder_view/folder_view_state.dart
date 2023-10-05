@@ -21,8 +21,12 @@ final class FolderViewLoading extends FolderViewState {}
 final class FolderViewLoadedSuccess extends FolderViewState {
   final List<dynamic> files;
   final Folder folder;
+  final String orderedBy;
+  final String order;
+  const FolderViewLoadedSuccess({required this.files, required this.folder, required this.orderedBy, required this.order});
 
-  const FolderViewLoadedSuccess({required this.files, required this.folder});
+  @override
+  List<Object> get props => [files, folder, orderedBy, order];
 }
 
 final class FolderViewError extends FolderViewState {}

@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/services/permissons.dart';
+import 'package:receiptcamp/data/services/preferences.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/data/utils/receipt_helper.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
@@ -16,25 +17,63 @@ part 'folder_view_state.dart';
 // this cubit controls the initialisation, loading, displaying and any methods that can
 // affect what is currently being displayed in the folder view e.g. move/delete/upload/rename
 class FolderViewCubit extends Cubit<FolderViewState> {
-  FolderViewCubit() : super(FolderViewInitial());
+  FolderViewCubit(this.prefs) : super(FolderViewInitial());
+
+  final PreferencesService prefs; 
 
   // init folderview
   initFolderView(String currentFolderId) {
     emit(FolderViewInitial());
-    fetchFiles(currentFolderId);
+    fetchFilesInFolderSortedBy(currentFolderId, column: prefs.getLastColumn(), order: prefs.getLastOrder());
   }
 
   // get folder files
-  fetchFiles(String folderId) async {
+  fetchFilesInFolderSortedBy(String folderId, {String? column, String? order, bool userSelectedSort = false}) async {
     emit(FolderViewLoading());
+
+    // if column and order are left out of the method call (null), set them to the last value
+    column ??= prefs.getLastColumn();
+    order ??= prefs.getLastOrder();
+
     try {
+      // userSelectedSort is true when the user taps on a tile in order options bottom sheet
+      // this distinguishes between the user navigating between folders and sorting in the options sheet
+      if (userSelectedSort && _isSameSort(order, column)) {
+        // toggles order when the user has submitted the same sort
+        order = order == 'ASC' ? 'DESC' : 'ASC';
+      }
+
       final folder = await DatabaseRepository.instance.getFolderById(folderId);
-      final List<Object> files =
-          await DatabaseRepository.instance.getFolderContents(folderId);
-      emit(FolderViewLoadedSuccess(files: files, folder: folder));
+
+      if (column == 'storageSize') {
+        final List<FolderWithSize> foldersWithSize = await DatabaseRepository.instance.getFoldersByTotalReceiptSize(folderId, order);
+        final List<ReceiptWithSize> receiptsWithSize =  await DatabaseRepository.instance.getReceiptsBySize(folderId, order);
+        final List<Object> files = [...foldersWithSize, ...receiptsWithSize];
+        emit(FolderViewLoadedSuccess(files: files, folder: folder, orderedBy: column, order: order));
+
+        // updating last column and last order
+        await prefs.setLastColumn(column);
+        await prefs.setLastOrder(order);
+        return;
+      }
+
+      final List<Folder> folders = await DatabaseRepository.instance.getFoldersInFolderSortedBy(folderId, column, order);
+      final List<Receipt> receipts = await DatabaseRepository.instance.getReceiptsInFolderSortedBy(folderId, column, order);
+      final List<Object> files = [...folders, ...receipts];
+      emit(FolderViewLoadedSuccess(files: files, folder: folder, orderedBy: column, order: order));
+
+      // updating last column and last order
+      await prefs.setLastColumn(column);
+      await prefs.setLastOrder(order);
+
     } catch (error) {
       emit(FolderViewError());
     }
+  }
+
+  // determines if the last selected order and column is the same as the next selected order and column
+  bool _isSameSort(String currentOrder, currentColumn) {
+    return currentOrder == prefs.getLastOrder() && currentColumn == prefs.getLastColumn();
   }
 
   // move folder
@@ -47,7 +86,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
           oldName: folder.name,
           newName: targetFolderName,
           folderId: folder.parentId));
-      fetchFiles(folder.parentId);
+      fetchFilesInFolderSortedBy(folder.parentId);
     } on Exception catch (e) {
       print(e.toString());
       emit(FolderViewMoveFailure(
@@ -65,7 +104,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       await DatabaseRepository.instance.deleteFolder(folderId);
       emit(FolderViewDeleteSuccess(
           deletedName: deletedFolder.name, folderId: deletedFolder.parentId));
-      fetchFiles(deletedFolder.parentId);
+      fetchFilesInFolderSortedBy(deletedFolder.parentId);
     } on Exception catch (e) {
       print(e.toString());
       emit(FolderViewDeleteFailure(
@@ -92,7 +131,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
       emit(FolderViewUploadSuccess(
           uploadedName: folder.name, folderId: folder.parentId));
-      fetchFiles(parentFolderId);
+      fetchFilesInFolderSortedBy(parentFolderId);
     } on Exception catch (e) {
       print('Error in uploadFolder: $e');
       emit(FolderViewError());
@@ -105,7 +144,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       await DatabaseRepository.instance.renameFolder(folder.id, newName);
       emit(FolderViewRenameSuccess(
           oldName: folder.name, newName: newName, folderId: folder.parentId));
-      fetchFiles(folder.parentId);
+      fetchFilesInFolderSortedBy(folder.parentId);
     } on Exception catch (e) {
       print(e.toString());
       emit(FolderViewRenameFailure(
@@ -123,7 +162,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
           oldName: receipt.name,
           newName: targetFolderName,
           folderId: receipt.parentId));
-      fetchFiles(receipt.parentId);
+      fetchFilesInFolderSortedBy(receipt.parentId);
     } on Exception catch (e) {
       print(e.toString());
       emit(FolderViewMoveFailure(
@@ -141,7 +180,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       await DatabaseRepository.instance.deleteReceipt(receiptId);
       emit(FolderViewDeleteSuccess(
           deletedName: deletedReceipt.name, folderId: deletedReceipt.parentId));
-      fetchFiles(deletedReceipt.parentId);
+      fetchFilesInFolderSortedBy(deletedReceipt.parentId);
     } on Exception catch (e) {
       print(e.toString());
       emit(FolderViewDeleteFailure(
@@ -159,7 +198,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         emit(FolderViewPermissionsFailure(
             folderId: currentFolderId,
             permissionResult: PermissionsService.instance.photosResult));
-        fetchFiles(currentFolderId);
+        fetchFilesInFolderSortedBy(currentFolderId);
         return;
       }
     }
@@ -175,7 +214,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(receiptImage.path);
       if (!validImage) {
         emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
-        fetchFiles(currentFolderId);
+        fetchFilesInFolderSortedBy(currentFolderId);
         return;
       }
 
@@ -191,7 +230,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
       emit(FolderViewUploadSuccess(
           uploadedName: receipt.name, folderId: receipt.parentId));
-      fetchFiles(receipt.parentId);
+      fetchFilesInFolderSortedBy(receipt.parentId);
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
       emit(FolderViewError());
@@ -206,7 +245,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         emit(FolderViewPermissionsFailure(
             folderId: currentFolderId,
             permissionResult: PermissionsService.instance.cameraResult));
-        fetchFiles(currentFolderId);
+        fetchFilesInFolderSortedBy(currentFolderId);
         return;
       }
     }
@@ -222,7 +261,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(receiptPhoto.path);
       if (!validImage) {
         emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
-        fetchFiles(currentFolderId);
+        fetchFilesInFolderSortedBy(currentFolderId);
         return;
       }
 
@@ -238,7 +277,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
       emit(FolderViewUploadSuccess(
           uploadedName: receipt.name, folderId: receipt.parentId));
-      fetchFiles(receipt.parentId);
+      fetchFilesInFolderSortedBy(receipt.parentId);
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
       emit(FolderViewError());
@@ -253,7 +292,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         emit(FolderViewPermissionsFailure(
             folderId: currentFolderId,
             permissionResult: PermissionsService.instance.cameraResult));
-        fetchFiles(currentFolderId);
+        fetchFilesInFolderSortedBy(currentFolderId);
         return;
       }
     }
@@ -272,7 +311,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         if (!validImage) {
           // if a single image fails the validation, all images are discarded
           emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
-          fetchFiles(currentFolderId);
+          fetchFilesInFolderSortedBy(currentFolderId);
           return;
         }
         // only adding images that pass validations to list 
@@ -295,7 +334,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
             uploadedName: receipt.name, folderId: receipt.parentId));
       }
 
-      fetchFiles(currentFolderId);
+      fetchFilesInFolderSortedBy(currentFolderId);
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
       emit(FolderViewError());
@@ -308,7 +347,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       await DatabaseRepository.instance.renameReceipt(receipt.id, newName);
       emit(FolderViewRenameSuccess(
           oldName: receipt.name, newName: newName, folderId: receipt.parentId));
-      fetchFiles(receipt.parentId);
+      fetchFilesInFolderSortedBy(receipt.parentId);
     } on Exception catch (e) {
       print(e.toString());
       emit(FolderViewRenameFailure(
@@ -323,7 +362,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
     } on Exception catch (e) {
       print(e.toString());
       emit(FolderViewShareFailure(errorMessage: e.toString(), folderId: folder.id, folderName: folder.name));
-      fetchFiles(folder.parentId);
+      fetchFilesInFolderSortedBy(folder.parentId);
     }
   }
 }
