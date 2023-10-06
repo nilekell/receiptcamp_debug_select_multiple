@@ -54,3 +54,9 @@ class Receipt {
 
   factory Receipt.fromJson(String source) => Receipt.fromMap(json.decode(source) as Map<String, dynamic>);
 }
+
+class ReceiptWithSize extends Receipt {
+  final bool withSize;
+
+  ReceiptWithSize({required this.withSize, required super.id, required super.name, required super.fileName, required super.lastModified,  required super.dateCreated, required super.parentId, required super.storageSize, required Receipt receipt});
+}

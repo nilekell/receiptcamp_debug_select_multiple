@@ -32,3 +32,10 @@ class Folder {
 
   factory Folder.fromJson(String source) => Folder.fromMap(json.decode(source) as Map<String, dynamic>);
 }
+
+
+class FolderWithSize extends Folder{
+  final int storageSize;
+
+  FolderWithSize({required this.storageSize, required super.id, required super.name, required super.lastModified, required super.parentId});
+}
