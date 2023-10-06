@@ -69,6 +69,83 @@ void main() {
       });
     });
 
+    group('Sorting and Grouping Methods', () {
+      test('getFoldersInFolderSortedBy', () async {
+        const folderId = rootFolderId;
+        final foldersToInsert = [
+          Folder(id: '1', name: 'Beta', lastModified: Utility.getCurrentTime(), parentId: folderId),
+          Folder(id: '2', name: 'Alpha', lastModified: Utility.getCurrentTime(), parentId: folderId),
+          Folder(id: '3', name: 'Gamma', lastModified: Utility.getCurrentTime(), parentId: folderId),
+        ];
+        for (var folder in foldersToInsert) {
+          await dbService.insertFolder(folder);
+        }
+
+        final folders = await dbService.getFoldersInFolderSortedBy(folderId, 'name', 'ASC');
+        expect(folders, hasLength(foldersToInsert.length));
+        for (int i = 0; i < folders.length - 1; i++) {
+          expect(folders[i].name.compareTo(folders[i + 1].name), lessThanOrEqualTo(0));
+        }
+      });
+
+      test('getReceiptsInFolderSortedBy', () async {
+        const folderId = rootFolderId;
+        final receiptsToInsert = [
+          Receipt(id: '1', name: 'Beta', fileName: 'fileB', dateCreated: Utility.getCurrentTime(), lastModified: Utility.getCurrentTime(), storageSize: 200, parentId: folderId),
+          Receipt(id: '2', name: 'Alpha', fileName: 'fileA', dateCreated: Utility.getCurrentTime(), lastModified: Utility.getCurrentTime(), storageSize: 100, parentId: folderId),
+          Receipt(id: '3', name: 'Gamma', fileName: 'fileC', dateCreated: Utility.getCurrentTime(), lastModified: Utility.getCurrentTime(), storageSize: 300, parentId: folderId),
+        ];
+        for (var receipt in receiptsToInsert) {
+          await dbService.insertReceipt(receipt);
+        }
+
+        final receipts = await dbService.getReceiptsInFolderSortedBy(folderId, 'name', 'ASC');
+        expect(receipts, hasLength(receiptsToInsert.length));
+        for (int i = 0; i < receipts.length - 1; i++) {
+          expect(receipts[i].name.compareTo(receipts[i + 1].name), lessThanOrEqualTo(0));
+        }
+      });
+
+      test('getReceiptsBySize', () async {
+        const folderId = rootFolderId;
+        final receiptsToInsert = [
+          // ... same as previous test
+        ];
+        for (var receipt in receiptsToInsert) {
+          await dbService.insertReceipt(receipt);
+        }
+
+        final receipts = await dbService.getReceiptsBySize(folderId, 'ASC');
+        expect(receipts, hasLength(receiptsToInsert.length));
+        for (int i = 0; i < receipts.length - 1; i++) {
+          expect(receipts[i].storageSize, lessThanOrEqualTo(receipts[i + 1].storageSize));
+        }
+      });
+
+      test('getFoldersByTotalReceiptSize', () async {
+        const parentId = rootFolderId;
+        final foldersToInsert = [
+          // ... similar to the foldersToInsert from the first test
+        ];
+        for (var folder in foldersToInsert) {
+          await dbService.insertFolder(folder);
+        }
+
+        final receiptsToInsert = [
+          // ... similar to the receiptsToInsert from the second test, but with differing parentIds to match the folders
+        ];
+        for (var receipt in receiptsToInsert) {
+          await dbService.insertReceipt(receipt);
+        }
+
+        final folders = await dbService.getFoldersByTotalReceiptSize(parentId, 'ASC');
+        expect(folders, hasLength(foldersToInsert.length));
+        for (int i = 0; i < folders.length - 1; i++) {
+          expect(folders[i].storageSize, lessThanOrEqualTo(folders[i + 1].storageSize));
+        }
+      });
+    });
+
     group('FolderMethods', () {
       test('insertFolder', () async {
         final insertionFolderId = Utility.generateUid();
