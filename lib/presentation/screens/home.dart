@@ -1,11 +1,11 @@
 // ignore_for_file: avoid_types_as_parameter_names, non_constant_identifier_names
 import 'dart:io';
-import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/screens/image_view.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class Home extends StatefulWidget {
@@ -71,9 +71,9 @@ class _HomeState extends State<Home> {
                         final receipt = state.receipts[index];
                         return GestureDetector(
                           onTap: () {
-                            final imageProvider =
-                                Image.file(File(receipt.localPath)).image;
-                            showImageViewer(context, imageProvider, swipeDismissible: true, doubleTapZoomable: true);
+                            Navigator.of(context).push(
+                              SlidingImageTransitionRoute(receipt: receipt)
+                            );
                           },
                           child: Column(
                             children: [

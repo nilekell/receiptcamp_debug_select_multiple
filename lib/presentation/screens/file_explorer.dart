@@ -10,6 +10,7 @@ import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/screens/image_view.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/folder_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/order_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/receipt/receipt_sheet.dart';
@@ -437,7 +438,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
   }
 }
 
-class FolderListTile extends StatelessWidget {
+class FolderListTileVisual extends StatelessWidget {
   final Folder folder;
   final String displayName;
   final String displayDate;
@@ -448,11 +449,9 @@ class FolderListTile extends StatelessWidget {
   
   final TextStyle subTextStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
-  FolderListTile({
-    Key? key,
-    required this.folder,
-    int? storageSize, // Optional storageSize parameter
-  })  : displayName = folder.name.length > 25
+  FolderListTileVisual({Key? key, required this.folder})
+      : displayName = folder.name.length > 25
+
             ? "${folder.name.substring(0, 25)}..."
             : folder.name,
         displayDate = Utility.formatDisplayDateFromDateTime(
@@ -483,11 +482,11 @@ class FolderListTile extends StatelessWidget {
             size: 30,
           ),
           onPressed: () {
-            showFolderOptions(context, context.read<FolderViewCubit>(), folder);
+            return;
           },
         ),
         onTap: () {
-          context.read<FileSystemCubit>().selectFolder(folder.id);
+          return;
         },
         title: Text(
           displayName,
@@ -500,14 +499,136 @@ class FolderListTile extends StatelessWidget {
   }
 }
 
-class ReceiptListTile extends StatelessWidget {
+class FolderListTile extends StatelessWidget {
+  final Folder folder;
+  final String displayName;
+  final String displayDate;
+  final String draggableName;
+
+  FolderListTile({Key? key, required this.folder})
+      : displayName = folder.name.length > 25
+            ? "${folder.name.substring(0, 25)}..."
+            : folder.name,
+        draggableName = folder.name.length > 10
+            ? "${folder.name.substring(0, 10)}..."
+            : folder.name,
+        displayDate = Utility.formatDisplayDateFromDateTime(
+            Utility.formatDateTimeFromUnixTimestamp(folder.lastModified)),
+        super(key: key);
+
+  final TextStyle displayNameStyle = const TextStyle(
+      fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
+  final TextStyle displayDateStyle =
+      const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<Object>(
+      onWillAccept: (data) {
+        if (data is Receipt) {
+          return true;
+        } else if (data is Folder) {
+          return data.id != folder.id;
+        } else {
+          return false;
+        }
+      },
+      onAccept: (data) {
+        if (data is Receipt) {
+          context.read<FolderViewCubit>().moveReceipt(data, folder.id);
+          return;
+        } else if (data is Folder) {
+          context.read<FolderViewCubit>().moveFolder(data, folder.id);
+          return;
+        }
+      },
+      builder: (context, candidateData, rejectedData) {
+        return Container(
+          color: candidateData.isNotEmpty ? Colors.grey : Colors.transparent,
+          child: Draggable<Folder>(
+            data: folder,
+            childWhenDragging: ColorFiltered(
+              colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(0.3),
+                BlendMode.srcIn,
+              ),
+              child: FolderListTileVisual(folder: folder),
+            ),
+            feedback: Material(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const Opacity(
+                    opacity: 0.7,
+                    child: Icon(
+                      Icons.folder,
+                      size: 100,
+                    ),
+                  ),
+                  Transform.translate(
+                    offset: const Offset(0, -10),
+                    child: Text(
+                      draggableName,
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: ListTile(
+                subtitle: Text(
+                  'Modified $displayDate',
+                  style: displayDateStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                leading: const Icon(
+                  Icons.folder,
+                  size: 50,
+                ),
+                trailing: IconButton(
+                  icon: const Icon(
+                    Icons.more_vert,
+                    color: Color(primaryGrey),
+                    size: 30,
+                  ),
+                  onPressed: () {
+                    showFolderOptions(
+                        context, context.read<FolderViewCubit>(), folder);
+                  },
+                ),
+                onTap: () {
+                  context.read<FileSystemCubit>().selectFolder(folder.id);
+                },
+                title: Text(
+                  displayName,
+                  style: displayNameStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class ReceiptListTileVisual extends StatelessWidget {
   final Receipt receipt;
   final String displayName;
   final String displayDate;
   final String displaySize;
   final bool withSize;
 
-  ReceiptListTile({Key? key, required this.receipt, this.withSize = false})
+  ReceiptListTileVisual({Key? key, required this.receipt})
+      // displayName is the file name without the file extension and is cut off when the receipt name
+      // is > 25 chars or would require 2 lines to be shown completely
       : displayName = receipt.name.length > 25
             ? "${receipt.name.substring(0, 25)}...".split('.').first
             : receipt.name.split('.').first,
@@ -518,7 +639,7 @@ class ReceiptListTile extends StatelessWidget {
 
   final TextStyle displayNameStyle = const TextStyle(
       fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
-
+  
   final TextStyle subTextStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
   @override
@@ -553,19 +674,124 @@ class ReceiptListTile extends StatelessWidget {
                 size: 30,
               ),
               onPressed: () {
-                showReceiptOptions(
-                    context, context.read<FolderViewCubit>(), receipt);
+                return;
               },
             ),
             onTap: () {
-              final imageProvider = Image.file(File(receipt.localPath)).image;
-              showImageViewer(context, imageProvider,
-                  swipeDismissible: true, doubleTapZoomable: true);
+              return;
             },
             title: Text(displayName,
                 style: displayNameStyle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis)));
+  }
+}
+
+class ReceiptListTile extends StatelessWidget {
+  final Receipt receipt;
+  final String displayName;
+  final String displayDate;
+  final String draggableName;
+
+  ReceiptListTile({Key? key, required this.receipt})
+      // displayName is the file name without the file extension and is cut off when the receipt name
+      // is > 25 chars or would require 2 lines to be shown completely
+      : displayName = receipt.name.length > 25
+            ? "${receipt.name.substring(0, 25)}..."
+            : receipt.name.split('.').first,
+        draggableName = receipt.name.length > 10
+            ? "${receipt.name.substring(0, 10)}..."
+            : receipt.name,
+        displayDate = Utility.formatDisplayDateFromDateTime(
+            Utility.formatDateTimeFromUnixTimestamp(receipt.lastModified)),
+        super(key: key);
+
+  final TextStyle displayNameStyle = const TextStyle(
+      fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
+  final TextStyle displayDateStyle =
+      const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
+
+  @override
+  Widget build(BuildContext context) {
+    return Draggable<Receipt>(
+      data: receipt,
+      childWhenDragging: ColorFiltered(
+        colorFilter: ColorFilter.mode(
+          Colors.black.withOpacity(0.3),
+          BlendMode.srcIn,
+        ),
+        child: ReceiptListTileVisual(receipt: receipt),
+      ),
+      feedback: Material(
+        color: Colors.transparent,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Opacity(
+              opacity: 0.7,
+              child: SizedBox(
+                height: 100,
+                width: 100,
+                child: ClipRRect(
+                  // square image corners
+                  borderRadius: const BorderRadius.all(Radius.zero),
+                  child: Image.file(
+                    File(receipt.localPath),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+            Transform.translate(
+              offset: const Offset(0, 10),
+              child: Text(
+                draggableName,
+                style: const TextStyle(
+                    fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
+      child: Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: ListTile(
+              leading: SizedBox(
+                height: 50,
+                width: 50,
+                child: ClipRRect(
+                  // square image corners
+                  borderRadius: const BorderRadius.all(Radius.zero),
+                  child: Image.file(
+                    File(receipt.localPath),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              subtitle: Text(
+                'Created $displayDate',
+                style: displayDateStyle,
+              ),
+              trailing: IconButton(
+                icon: const Icon(
+                  Icons.more_vert,
+                  color: Color(primaryGrey),
+                  size: 30,
+                ),
+                onPressed: () {
+                  showReceiptOptions(
+                      context, context.read<FolderViewCubit>(), receipt);
+                },
+              ),
+              onTap: () {
+                Navigator.of(context)
+                    .push(SlidingImageTransitionRoute(receipt: receipt));
+              },
+              title: Text(displayName,
+                  style: displayNameStyle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis))),
+    );
   }
 }
 

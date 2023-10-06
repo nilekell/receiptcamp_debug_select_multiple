@@ -37,7 +37,7 @@ dependencies:
   stream_transform: ^2.0.0
   google_fonts: ^4.0.1
   meta: ^1.8.0
-  easy_image_viewer: ^1.2.1
+  photo_view: ^0.14.0
   image_picker: ^1.0.4
   cunning_document_scanner: ^1.1.2
   path: ^1.8.2

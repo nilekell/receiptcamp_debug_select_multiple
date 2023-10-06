@@ -8,6 +8,7 @@ import 'package:receiptcamp/data/services/preferences.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/data/utils/receipt_helper.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
+import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/models/tag.dart';
@@ -17,9 +18,15 @@ part 'folder_view_state.dart';
 // this cubit controls the initialisation, loading, displaying and any methods that can
 // affect what is currently being displayed in the folder view e.g. move/delete/upload/rename
 class FolderViewCubit extends Cubit<FolderViewState> {
+
+  final HomeBloc homeBloc;
+
+  FolderViewCubit({required this.homeBloc}) : super(FolderViewInitial());
+
   FolderViewCubit(this.prefs) : super(FolderViewInitial());
 
   final PreferencesService prefs; 
+
 
   // init folderview
   initFolderView(String currentFolderId) {
@@ -96,7 +103,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
     }
   }
 
-// delete folder
+  // delete folder
   deleteFolder(String folderId) async {
     final Folder deletedFolder =
         await DatabaseRepository.instance.getFolderById(folderId);
@@ -104,7 +111,13 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       await DatabaseRepository.instance.deleteFolder(folderId);
       emit(FolderViewDeleteSuccess(
           deletedName: deletedFolder.name, folderId: deletedFolder.parentId));
+
+      
+      // notifying home bloc to reload when a folder is deleted
+      homeBloc.add(HomeLoadReceiptsEvent());
+      
       fetchFilesInFolderSortedBy(deletedFolder.parentId);
+
     } on Exception catch (e) {
       print(e.toString());
       emit(FolderViewDeleteFailure(
@@ -180,7 +193,12 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       await DatabaseRepository.instance.deleteReceipt(receiptId);
       emit(FolderViewDeleteSuccess(
           deletedName: deletedReceipt.name, folderId: deletedReceipt.parentId));
+      
+      // notifying home bloc to reload when a receipt is deleted
+      homeBloc.add(HomeLoadReceiptsEvent());
+
       fetchFilesInFolderSortedBy(deletedReceipt.parentId);
+
     } on Exception catch (e) {
       print(e.toString());
       emit(FolderViewDeleteFailure(
@@ -202,7 +220,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
     }
-     
+
     try {
       final ImagePicker imagePicker = ImagePicker();
       final XFile? receiptImage =
@@ -211,7 +229,8 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
-      final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(receiptImage.path);
+      final (validImage as bool, invalidImageReason as ValidationError) =
+          await ReceiptService.isValidImage(receiptImage.path);
       if (!validImage) {
         emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
         fetchFilesInFolderSortedBy(currentFolderId);
@@ -230,7 +249,12 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
       emit(FolderViewUploadSuccess(
           uploadedName: receipt.name, folderId: receipt.parentId));
+
+      // notifying home bloc to reload when a receipt is uploaded from gallery
+      homeBloc.add(HomeLoadReceiptsEvent());
+
       fetchFilesInFolderSortedBy(receipt.parentId);
+
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
       emit(FolderViewError());
@@ -258,7 +282,8 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
-      final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(receiptPhoto.path);
+      final (validImage as bool, invalidImageReason as ValidationError) =
+          await ReceiptService.isValidImage(receiptPhoto.path);
       if (!validImage) {
         emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
         fetchFilesInFolderSortedBy(currentFolderId);
@@ -277,7 +302,12 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
       emit(FolderViewUploadSuccess(
           uploadedName: receipt.name, folderId: receipt.parentId));
+
+      // notifying home bloc to reload when a receipt is uploaded from camera
+      homeBloc.add(HomeLoadReceiptsEvent());
+      
       fetchFilesInFolderSortedBy(receipt.parentId);
+
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
       emit(FolderViewError());
@@ -307,14 +337,15 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
       // iterating over scanned images and checking image size and if they contain text
       for (final path in scannedImagePaths) {
-        final (validImage as bool, invalidImageReason as ValidationError) = await ReceiptService.isValidImage(path);
+        final (validImage as bool, invalidImageReason as ValidationError) =
+            await ReceiptService.isValidImage(path);
         if (!validImage) {
           // if a single image fails the validation, all images are discarded
           emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
           fetchFilesInFolderSortedBy(currentFolderId);
           return;
         }
-        // only adding images that pass validations to list 
+        // only adding images that pass validations to list
         validatedImagePaths.add(path);
       }
       // only iterating over validated images and uploading them consecutively
@@ -333,21 +364,30 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         emit(FolderViewUploadSuccess(
             uploadedName: receipt.name, folderId: receipt.parentId));
       }
-
+      
+      // notifying home bloc to reload when a receipt is uploaded from document scan
+      homeBloc.add(HomeLoadReceiptsEvent());
+      
       fetchFilesInFolderSortedBy(currentFolderId);
+
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
       emit(FolderViewError());
     }
   }
 
-// rename receipt
+  // rename receipt
   renameReceipt(Receipt receipt, String newName) async {
     try {
       await DatabaseRepository.instance.renameReceipt(receipt.id, newName);
       emit(FolderViewRenameSuccess(
           oldName: receipt.name, newName: newName, folderId: receipt.parentId));
+
+      // notifying home bloc to reload when a receipt is renamed
+      homeBloc.add(HomeLoadReceiptsEvent());
+      
       fetchFilesInFolderSortedBy(receipt.parentId);
+
     } on Exception catch (e) {
       print(e.toString());
       emit(FolderViewRenameFailure(
