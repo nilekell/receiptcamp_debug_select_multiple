@@ -4,10 +4,6 @@ import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 void showOrderOptions(BuildContext context, FolderViewCubit folderViewCubit, String currentOrder, String currentColumn, String folderId) {
-  const Color secondaryColour = Colors.white;
-  const TextStyle textStyle = TextStyle(fontSize: 16, color: secondaryColour);
-  const double arrowSize = 28;
-
   showModalBottomSheet(
     isScrollControlled: true,
     backgroundColor: const Color(primaryDeepBlue),
@@ -20,7 +16,7 @@ void showOrderOptions(BuildContext context, FolderViewCubit folderViewCubit, Str
         value: folderViewCubit,
         child: DraggableScrollableSheet(
       initialChildSize: 0.5, // initial bottom sheet height
-      minChildSize: 0.25, // minimum possible bottom sheet height
+      minChildSize: 0.25, // defines how low you can drag the the bottom sheet in relation to the screen height, until it close automatically
       maxChildSize:
           0.8, // defines how high you can drag the the bottom sheet in relation to the screen height
       expand: false,
@@ -36,62 +32,41 @@ void showOrderOptions(BuildContext context, FolderViewCubit folderViewCubit, Str
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: secondaryColour),
+                  color: Colors.white),
             ),
           ),
           const Divider(
             thickness: 1,
             endIndent: 20,
             indent: 20,
-            color: secondaryColour,
+            color: Colors.white,
           ),
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 30.0),
-            leading: currentColumn == 'name' && currentOrder == 'ASC'
-                    ? const Icon(Icons.arrow_upward, color: secondaryColour, size: arrowSize,)
-                    : currentColumn == 'name' && currentOrder == 'DESC'
-                        ? const Icon(Icons.arrow_downward, color: secondaryColour, size: arrowSize,)
-                        : Container(width: 20,),
-            title: const Text(
-              'Name',
-              style: textStyle,
-            ),
-            onTap: () {
-              Navigator.of(bottomSheetContext).pop();
-              folderViewCubit.fetchFilesInFolderSortedBy(folderId, column: 'name', order: 'ASC', userSelectedSort: true);
-            },
+          OrderListTile(
+            title: 'Name',
+            currentColumn: currentColumn,
+            currentOrder: currentOrder,
+            columnValue: 'name',
+            folderViewCubit: folderViewCubit,
+            folderId: folderId,
+            bottomSheetContext: context,
           ),
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 30.0),
-            leading: currentColumn == 'lastModified' && currentOrder == 'ASC'
-                    ? const Icon(Icons.arrow_upward, color: secondaryColour, size: arrowSize,)
-                    : currentColumn == 'lastModified' && currentOrder == 'DESC'
-                        ? const Icon(Icons.arrow_downward, color: secondaryColour, size: arrowSize,)
-                        : Container(width: 20,),
-            title: const Text(
-              'Last modified',
-              style: textStyle,
-            ),
-            onTap: () {
-              Navigator.of(bottomSheetContext).pop();
-              folderViewCubit.fetchFilesInFolderSortedBy(folderId, column: 'lastModified', order: 'ASC', userSelectedSort: true);
-            },
+          OrderListTile(
+            title: 'Last modified',
+            currentColumn: currentColumn,
+            currentOrder: currentOrder,
+            columnValue: 'lastModified',
+            folderViewCubit: folderViewCubit,
+            folderId: folderId,
+            bottomSheetContext: context,
           ),
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 30.0),
-            leading: currentColumn == 'storageSize' && currentOrder == 'ASC'
-                    ? const Icon(Icons.arrow_upward, color: secondaryColour, size: arrowSize,)
-                    : currentColumn == 'storageSize' && currentOrder == 'DESC'
-                        ? const Icon(Icons.arrow_downward, color: secondaryColour, size: arrowSize,)
-                        : Container(width: 20,),
-            title: const Text(
-              'Storage used',
-              style: textStyle,
-            ),
-            onTap: () {
-              Navigator.of(bottomSheetContext).pop();
-              folderViewCubit.fetchFilesInFolderSortedBy(folderId, column: 'storageSize', order: 'ASC', userSelectedSort: true);
-            },
+          OrderListTile(
+            title: 'Storage used',
+            currentColumn: currentColumn,
+            currentOrder: currentOrder,
+            columnValue: 'storageSize',
+            folderViewCubit: folderViewCubit,
+            folderId: folderId,
+            bottomSheetContext: context,
           ),
           const SizedBox(height: 50)
         ],
@@ -100,4 +75,59 @@ void showOrderOptions(BuildContext context, FolderViewCubit folderViewCubit, Str
       );
     },
   );
+}
+
+class OrderListTile extends StatelessWidget {
+ final String title;
+  final String currentColumn;
+  final String currentOrder;
+  final String columnValue;
+  final FolderViewCubit folderViewCubit;
+  final String folderId;
+  final BuildContext bottomSheetContext;
+
+  const OrderListTile({super.key, 
+    required this.title,
+    required this.currentColumn,
+    required this.currentOrder,
+    required this.columnValue,
+    required this.folderViewCubit,
+    required this.folderId,
+    required this.bottomSheetContext,
+  });
+
+  final Color secondaryColour = Colors.white;
+  final TextStyle textStyle = const TextStyle(fontSize: 16, color: Colors.white);
+  final double arrowSize = 28;
+
+  @override
+  Widget build(BuildContext context) {
+    // the padding and container are only rendered if the column is the same as the current column
+    return Padding(
+      padding: currentColumn == columnValue ? const EdgeInsets.only(right: 16.0) : EdgeInsets.zero,
+      child: Container(
+        decoration: currentColumn == columnValue ? const BoxDecoration(
+          color: Color(primaryDarkBlue),
+          borderRadius: BorderRadius.only(topRight: Radius.circular(25), bottomRight: Radius.circular(25),)
+        ) : null,
+        child: ListTile(
+          // content padding moves list tile title to the left
+          contentPadding: const EdgeInsets.symmetric(horizontal: 30.0),
+          leading: currentColumn == columnValue && currentOrder == 'ASC'
+                  ? Icon(Icons.arrow_upward, color: secondaryColour, size: arrowSize,)
+                  : currentColumn == columnValue && currentOrder == 'DESC'
+                      ? Icon(Icons.arrow_downward, color: secondaryColour, size: arrowSize,)
+                      : Container(width: 20,),
+          title: Text(
+            title,
+            style: TextStyle(fontSize: 16, color: secondaryColour),
+          ),
+          onTap: () {
+            Navigator.of(bottomSheetContext).pop();
+            folderViewCubit.fetchFilesInFolderSortedBy(folderId, column: columnValue, order: 'ASC', userSelectedSort: true);
+          },
+        ),
+      ),
+    );
+  }
 }
