@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/services/document_path_provider.dart';
+import 'package:receiptcamp/data/services/preferences.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/bloc_observer.dart';
 import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
@@ -23,6 +24,7 @@ void main() async {
   // immediately available to any part of the application that requires it.
   await DocumentDirectoryProvider.instance.initialize();
   await DatabaseRepository.instance.init();
+  await PreferencesService.instance.init();
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);

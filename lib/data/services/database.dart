@@ -86,6 +86,122 @@ class DatabaseService {
 
   // Add Folder operations
 
+  // Method to get all Folder objects in a specific folder sorted by a specific column
+  Future<List<Folder>> getFoldersInFolderSortedBy(
+      String folderId, String column, String order) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT * FROM folders WHERE parentId = ? ORDER BY $column $order',
+        [folderId]);
+    return List.generate(maps.length, (i) {
+      return Folder(
+        id: maps[i]['id'],
+        name: maps[i]['name'],
+        lastModified: maps[i]['lastModified'],
+        parentId: maps[i]['parentId'],
+      );
+    });
+  }
+
+  // Method to get all Receipt objects in a specific folder sorted by a specific column
+  Future<List<Receipt>> getReceiptsInFolderSortedBy(
+      String folderId, String column, String order) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT * FROM receipts WHERE parentId = ? ORDER BY $column $order',
+        [folderId]);
+    return List.generate(maps.length, (i) {
+      return Receipt(
+          id: maps[i]['id'],
+          name: maps[i]['name'],
+          fileName: maps[i]['fileName'],
+          dateCreated: maps[i]['dateCreated'],
+          lastModified: maps[i]['lastModified'],
+          storageSize: maps[i]['storageSize'],
+          parentId: maps[i]['parentId']);
+    });
+  }
+
+  Future<List<ReceiptWithSize>> getReceiptsBySize(
+      String folderId, String order) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT * FROM receipts WHERE parentId = ? ORDER BY storageSize $order',
+      [folderId],
+    );
+
+    // Create a list to hold the ReceiptWithSize objects
+    final List<ReceiptWithSize> receiptsWithSize = [];
+
+    // Iterate through the maps, creating a Receipt and then a ReceiptWithSize for each one
+    for (var map in maps) {
+      final Receipt receipt = Receipt.fromMap(map);
+      final ReceiptWithSize receiptWithSize = ReceiptWithSize(
+        withSize: true,
+        id: receipt.id,
+        name: receipt.name,
+        fileName: receipt.fileName,
+        lastModified: receipt.lastModified,
+        dateCreated: receipt.dateCreated,
+        parentId: receipt.parentId,
+        storageSize: receipt.storageSize,
+        receipt: receipt,
+      );
+      receiptsWithSize.add(receiptWithSize);
+    }
+
+    return receiptsWithSize;
+  }
+
+  Future<List<FolderWithSize>> getFoldersByTotalReceiptSize(
+      String parentId, String order) async {
+    final db = await database;
+    final List<FolderWithSize> foldersWithSizes = [];
+
+    Future<int> getFolderSize(String folderId) async {
+      int folderSize = 0;
+      final List<Map<String, dynamic>> receiptMaps = await db
+          .rawQuery('SELECT * FROM receipts WHERE parentId = ?', [folderId]);
+      for (var map in receiptMaps) {
+        folderSize += (map['storageSize'] as num).toInt();
+      }
+
+      final List<Map<String, dynamic>> subFolderMaps = await db
+          .rawQuery('SELECT * FROM folders WHERE parentId = ?', [folderId]);
+      for (var map in subFolderMaps) {
+        folderSize += await getFolderSize(map['id']);
+      }
+
+      return folderSize;
+    }
+
+    final List<Map<String, dynamic>> folderMaps = await db
+        .rawQuery('SELECT * FROM folders WHERE parentId = ?', [parentId]);
+    for (var map in folderMaps) {
+      final folder = Folder(
+        id: map['id'],
+        name: map['name'],
+        lastModified: map['lastModified'],
+        parentId: map['parentId'],
+      );
+      final storageSize = await getFolderSize(folder.id);
+      foldersWithSizes
+          .add(FolderWithSize(storageSize: storageSize, id: folder.id, name: folder.name, lastModified: folder.lastModified, parentId: folder.parentId));
+    }
+
+    foldersWithSizes.sort((a, b) {
+      if (order.toUpperCase() == 'ASC') {
+        return a.storageSize.compareTo(b.storageSize);
+      } else {
+        return b.storageSize.compareTo(a.storageSize);
+      }
+    });
+
+    return foldersWithSizes;
+  }
+
+
   // Method to get folder contents (this includes receipts and folders)
   Future<List<Object>> getFolderContents(String folderId) async {
     final db = await database;

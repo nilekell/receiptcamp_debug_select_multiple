@@ -165,19 +165,6 @@ class FileService {
     }
   }
 
-  // convert bytes to string that represents file sizes
-  static Future<String> bytesToSizeString(int bytes) async {
-    try {
-      if (bytes <= 0) return "0 B";
-      const suffixes = ["B", "KB", "MB", "GB"];
-      var i = (log(bytes) / log(1024)).floor();
-      return '${(bytes / pow(1024, i)).toStringAsFixed(2)} ${suffixes[i]}';
-    } on Exception catch (e) {
-      print('Error in bytesToSizeString: $e');
-      return '';
-    }
-  }
-
   static Future<bool> isValidImageSize(String imagePath,
       [int maxSizeInMB = 20]) async {
     try {

@@ -40,8 +40,8 @@ void main() {
       expect(displayDate, matches(RegExp(r'^\d{1,2} \w+ \d{4}$')));
     });
 
-    test('bytesToSizeString returns a valid size string', () async {
-      String sizeString = await Utility.bytesToSizeString(1024);
+    test('bytesToSizeString returns a valid size string', () {
+      String sizeString = Utility.bytesToSizeString(1024);
       expect(sizeString, isNotNull);
       expect(sizeString, isA<String>());
       expect(sizeString, equals('1.00 KB'));
