@@ -94,6 +94,7 @@ class _MyAppState extends State<MyApp> {
     return RepositoryProvider.value(
       value: (context) => DatabaseRepository.instance,
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: appName,
         theme: ThemeData(
           textTheme: GoogleFonts.rubikTextTheme(),
