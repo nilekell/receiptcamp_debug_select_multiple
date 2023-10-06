@@ -22,7 +22,7 @@ class SlidingImageTransitionRoute extends PageRouteBuilder {
                 Navigator.of(context).pop();
               },
               key: UniqueKey(),
-              direction: DismissDirection.vertical,
+              direction: DismissDirection.down,
               child: ImageViewScreen(
                 imageProvider: Image.file(File(receipt.localPath)).image,
                 receipt: receipt,
@@ -163,7 +163,7 @@ class ImageViewAppBar extends StatelessWidget {
               Navigator.of(context).pop();
             },
             icon: Transform.translate(
-              offset: const Offset(8.0, 12.0),
+              offset: const Offset(8.0, 10.0),
               child: const Icon(
                 Icons.close,
                 color: Colors.white,
@@ -176,7 +176,7 @@ class ImageViewAppBar extends StatelessWidget {
               showImageOptions(context, receipt);
             },
             icon: Transform.translate(
-              offset: const Offset(-8.0, 12.0),
+              offset: const Offset(-8.0, 10.0),
               child: const Icon(
                 Icons.more_horiz_sharp,
                 color: Colors.white,

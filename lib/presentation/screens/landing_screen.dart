@@ -58,7 +58,7 @@ class _LandingScreenState extends State<LandingScreen>
                       create: (context) => FileSystemCubit(),
                     ),
                     BlocProvider(
-                      create: (context) => FolderViewCubit(homeBloc: context.read<HomeBloc>()),
+                      create: (context) => FolderViewCubit(homeBloc: context.read<HomeBloc>(), prefs: PreferencesService.instance),
                     ),
                   ],
                   child: const FileExplorer(),

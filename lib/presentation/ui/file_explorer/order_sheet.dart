@@ -68,7 +68,6 @@ void showOrderOptions(BuildContext context, FolderViewCubit folderViewCubit, Str
             folderId: folderId,
             bottomSheetContext: context,
           ),
-          const SizedBox(height: 50)
         ],
       ),
     ),

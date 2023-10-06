@@ -20,13 +20,9 @@ part 'folder_view_state.dart';
 class FolderViewCubit extends Cubit<FolderViewState> {
 
   final HomeBloc homeBloc;
-
-  FolderViewCubit({required this.homeBloc}) : super(FolderViewInitial());
-
-  FolderViewCubit(this.prefs) : super(FolderViewInitial());
-
   final PreferencesService prefs; 
 
+  FolderViewCubit({required this.homeBloc, required this.prefs}) : super(FolderViewInitial());
 
   // init folderview
   initFolderView(String currentFolderId) {

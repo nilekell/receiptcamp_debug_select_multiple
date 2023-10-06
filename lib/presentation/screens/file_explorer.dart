@@ -1,6 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
-import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -449,7 +448,7 @@ class FolderListTileVisual extends StatelessWidget {
   
   final TextStyle subTextStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
-  FolderListTileVisual({Key? key, required this.folder})
+  FolderListTileVisual({Key? key, required this.folder, int? storageSize})
       : displayName = folder.name.length > 25
 
             ? "${folder.name.substring(0, 25)}..."
@@ -467,7 +466,7 @@ class FolderListTileVisual extends StatelessWidget {
       child: ListTile(
         subtitle: Text(
           displaySize.isNotEmpty ? displaySize : 'Modified $displayDate',  // Ternary operator to decide text
-          style: subTextStyle,  // Ternary operator to decide style
+          style: subTextStyle,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -503,9 +502,10 @@ class FolderListTile extends StatelessWidget {
   final Folder folder;
   final String displayName;
   final String displayDate;
+  final String displaySize;
   final String draggableName;
 
-  FolderListTile({Key? key, required this.folder})
+  FolderListTile({Key? key, required this.folder, int? storageSize}) // Optional storageSize parameter
       : displayName = folder.name.length > 25
             ? "${folder.name.substring(0, 25)}..."
             : folder.name,
@@ -514,6 +514,8 @@ class FolderListTile extends StatelessWidget {
             : folder.name,
         displayDate = Utility.formatDisplayDateFromDateTime(
             Utility.formatDateTimeFromUnixTimestamp(folder.lastModified)),
+        displaySize =
+            storageSize != null ? Utility.bytesToSizeString(storageSize) : '',
         super(key: key);
 
   final TextStyle displayNameStyle = const TextStyle(
@@ -581,7 +583,7 @@ class FolderListTile extends StatelessWidget {
               padding: const EdgeInsets.only(left: 10),
               child: ListTile(
                 subtitle: Text(
-                  'Modified $displayDate',
+                  displaySize.isNotEmpty ? displaySize : 'Modified $displayDate',
                   style: displayDateStyle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -626,7 +628,7 @@ class ReceiptListTileVisual extends StatelessWidget {
   final String displaySize;
   final bool withSize;
 
-  ReceiptListTileVisual({Key? key, required this.receipt})
+  ReceiptListTileVisual({Key? key, required this.receipt,  this.withSize = false})
       // displayName is the file name without the file extension and is cut off when the receipt name
       // is > 25 chars or would require 2 lines to be shown completely
       : displayName = receipt.name.length > 25
@@ -663,7 +665,7 @@ class ReceiptListTileVisual extends StatelessWidget {
               withSize
                   ? displaySize
                   : 'Modified $displayDate', // Ternary operator to decide text
-              style: subTextStyle, // Ternary operator to decide style
+              style: subTextStyle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -691,9 +693,11 @@ class ReceiptListTile extends StatelessWidget {
   final Receipt receipt;
   final String displayName;
   final String displayDate;
+  final String displaySize;
+  final bool withSize;
   final String draggableName;
 
-  ReceiptListTile({Key? key, required this.receipt})
+  ReceiptListTile({Key? key, required this.receipt, this.withSize = false})
       // displayName is the file name without the file extension and is cut off when the receipt name
       // is > 25 chars or would require 2 lines to be shown completely
       : displayName = receipt.name.length > 25
@@ -704,6 +708,8 @@ class ReceiptListTile extends StatelessWidget {
             : receipt.name,
         displayDate = Utility.formatDisplayDateFromDateTime(
             Utility.formatDateTimeFromUnixTimestamp(receipt.lastModified)),
+        displaySize = Utility.bytesToSizeString(receipt.storageSize),
+          
         super(key: key);
 
   final TextStyle displayNameStyle = const TextStyle(
@@ -769,7 +775,9 @@ class ReceiptListTile extends StatelessWidget {
                 ),
               ),
               subtitle: Text(
-                'Created $displayDate',
+                withSize
+                  ? displaySize
+                  : 'Modified $displayDate',
                 style: displayDateStyle,
               ),
               trailing: IconButton(
