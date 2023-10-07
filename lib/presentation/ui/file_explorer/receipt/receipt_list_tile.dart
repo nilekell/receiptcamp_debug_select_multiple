@@ -39,7 +39,10 @@ class ReceiptListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Draggable<Receipt>(
+    return LongPressDraggable<Receipt>(
+      dragAnchorStrategy: (draggable, context, position) {
+        return const Offset(50, 50);
+      },
       data: receipt,
       childWhenDragging: ColorFiltered(
         colorFilter: ColorFilter.mode(

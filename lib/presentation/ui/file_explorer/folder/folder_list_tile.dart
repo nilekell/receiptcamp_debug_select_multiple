@@ -58,7 +58,10 @@ class FolderListTile extends StatelessWidget {
       builder: (context, candidateData, rejectedData) {
         return Container(
           color: candidateData.isNotEmpty ? Colors.grey : Colors.transparent,
-          child: Draggable<Folder>(
+          child: LongPressDraggable<Folder>(
+            dragAnchorStrategy: (draggable, context, position) {
+              return const Offset(50, 50);
+            },
             data: folder,
             childWhenDragging: ColorFiltered(
               colorFilter: ColorFilter.mode(
