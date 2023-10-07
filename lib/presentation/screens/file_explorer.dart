@@ -267,7 +267,7 @@ Widget getSortDisplayWidget(String orderedBy, String order) {
             case 'name':
               return 'Name';
             case 'storageSize':
-              return 'Storage usage';
+              return 'Storage used';
             case 'lastModified':
               return 'Last modified';
             default:
