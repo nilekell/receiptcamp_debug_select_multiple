@@ -29,7 +29,6 @@ class _FileExplorerState extends State<FileExplorer> {
   void initState() {
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
-    context.read<FileSystemCubit>().initializeFileSystemCubit();
     super.initState();
   }
 
@@ -293,13 +292,6 @@ class RefreshableFolderView extends StatefulWidget {
 
 class _RefreshableFolderViewState extends State<RefreshableFolderView> {
   @override
-  void initState() {
-    print('RefreshableFolderView instantiated');
-    context.read<FolderViewCubit>().initFolderView(rootFolderId);
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return BlocConsumer<FolderViewCubit, FolderViewState>(
       listenWhen: (previous, current) => current is FolderViewActionState,
@@ -320,7 +312,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
             );
           case FolderViewLoadedSuccess():
             print(
-                'RefreshableFolderView built with folder: ${state.folder.name}');
+                'RefreshableFolderView built with folder: ${state.folder.name}, ${state.orderedBy}, ${state.order}');
             return RefreshIndicator(
               onRefresh: () async {
                 print('refreshing folder ${state.folder.name}');

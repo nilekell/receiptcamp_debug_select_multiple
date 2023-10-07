@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 import 'package:equatable/equatable.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/services/permissons.dart';
 import 'package:receiptcamp/data/services/preferences.dart';
@@ -25,9 +26,10 @@ class FolderViewCubit extends Cubit<FolderViewState> {
   FolderViewCubit({required this.homeBloc, required this.prefs}) : super(FolderViewInitial());
 
   // init folderview
-  initFolderView(String currentFolderId) {
+  initFolderView() {
     emit(FolderViewInitial());
-    fetchFilesInFolderSortedBy(currentFolderId, column: prefs.getLastColumn(), order: prefs.getLastOrder());
+    print('RefreshableFolderView instantiated');
+    fetchFilesInFolderSortedBy(rootFolderId, column: prefs.getLastColumn(), order: prefs.getLastOrder());
   }
 
   // get folder files

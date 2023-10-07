@@ -55,10 +55,10 @@ class _LandingScreenState extends State<LandingScreen>
                 MultiBlocProvider(
                   providers: [
                     BlocProvider<FileSystemCubit>(
-                      create: (context) => FileSystemCubit(),
+                      create: (context) => FileSystemCubit()..initializeFileSystemCubit(),
                     ),
                     BlocProvider(
-                      create: (context) => FolderViewCubit(homeBloc: context.read<HomeBloc>(), prefs: PreferencesService.instance),
+                      create: (context) => FolderViewCubit(homeBloc: context.read<HomeBloc>(), prefs: PreferencesService.instance)..initFolderView(),
                     ),
                   ],
                   child: const FileExplorer(),
