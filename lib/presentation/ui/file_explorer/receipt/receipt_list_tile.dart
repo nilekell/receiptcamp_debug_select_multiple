@@ -15,6 +15,7 @@ class ReceiptListTile extends StatelessWidget {
   final String displayDate;
   final String displaySize;
   final bool withSize;
+  // Optional withSize parameter used to determine whether to show displaySize in subtitle & ReceiptListTileVisual
   final String draggableName;
 
   ReceiptListTile({Key? key, required this.receipt, this.withSize = false})
@@ -49,7 +50,7 @@ class ReceiptListTile extends StatelessWidget {
           Colors.black.withOpacity(0.3),
           BlendMode.srcIn,
         ),
-        child: ReceiptListTileVisual(receipt: receipt),
+        child: ReceiptListTileVisual(receipt: receipt, withSize: withSize),
       ),
       feedback: Material(
         color: Colors.transparent,
@@ -126,6 +127,7 @@ class ReceiptListTile extends StatelessWidget {
   }
 }
 
+// placeholder widget while draggable is active
 class ReceiptListTileVisual extends StatelessWidget {
   final Receipt receipt;
   final String displayName;
