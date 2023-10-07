@@ -53,8 +53,20 @@ class _FileExplorerState extends State<FileExplorer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<FileSystemCubit, FileSystemCubitState>(
-          builder: ((context, state) {
+      body: BlocConsumer<FileSystemCubit, FileSystemCubitState>(
+          listener: (context, state) {
+        switch (state) {
+          case FileSystemCubitFolderInformationSuccess():
+          // listening to state here so RefreshableFolderView can be built with the new folder contents, whenever
+          // a folder is navigated to
+            print('FileExplorer: fetchFiles for ${state.folder.name}');
+            context
+                .read<FolderViewCubit>()
+                .fetchFilesInFolderSortedBy(state.folder.id);
+          default:
+            print('FileExplorer builder state: ${state.toString()}');
+        }
+      }, builder: ((context, state) {
         switch (state) {
           case FileSystemCubitInitial() || FileSystemCubitLoading():
             return const Column(
@@ -99,23 +111,8 @@ class _FileExplorerState extends State<FileExplorer> {
                 Expanded(
                   child: Stack(
                     children: [
-                      BlocListener<FileSystemCubit, FileSystemCubitState>(
-                        listener: (context, state) {
-                          switch (state) {
-                            case FileSystemCubitFolderInformationSuccess():
-                              print(
-                                  'RefreshableFolderView: fetchFiles for ${state.folder.name}');
-                              context
-                                  .read<FolderViewCubit>()
-                                  .fetchFilesInFolderSortedBy(state.folder.id);
-                            default:
-                              print(
-                                  'RefreshableFolderViewState: ${state.toString()}');
-                          }
-                        },
-                        child: RefreshableFolderView(
-                            scrollController: _scrollController),
-                      ),
+                      RefreshableFolderView(
+                          scrollController: _scrollController),
                       if (_showUploadButton)
                         Positioned(
                           right: 28,
@@ -271,7 +268,7 @@ Widget getSortDisplayWidget(String orderedBy, String order) {
             case 'lastModified':
               return 'Last modified';
             default:
-              return '';
+              return 'name';
           }
         }(),
         style: sortTextStyle,
