@@ -321,6 +321,8 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                     .fetchFilesInFolderSortedBy(state.folder.id);
               },
               child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: widget.scrollController,
                 slivers: <Widget>[
                   state.files.isNotEmpty ?
                   SliverToBoxAdapter(
