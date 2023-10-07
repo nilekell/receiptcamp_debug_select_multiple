@@ -21,12 +21,17 @@ class FileExplorer extends StatefulWidget {
   State<FileExplorer> createState() => _FileExplorerState();
 }
 
-class _FileExplorerState extends State<FileExplorer> {
+class _FileExplorerState extends State<FileExplorer> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
   late ScrollController _scrollController;
   final ValueNotifier<bool> _showUploadButtonNotifier = ValueNotifier<bool>(true);
 
   @override
   void initState() {
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
     super.initState();
@@ -46,6 +51,7 @@ class _FileExplorerState extends State<FileExplorer> {
 
   @override
   void dispose() {
+    _animationController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -76,43 +82,46 @@ class _FileExplorerState extends State<FileExplorer> {
               ],
             );
           case FileSystemCubitFolderInformationSuccess():
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 5),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        BackButton(
-                          previousFolderId: state.folder.parentId,
-                          currentFolderId: state.folder.id,
-                          visible: state.folder.id != rootFolderId,
-                        ),
-                      ],
-                    ),
-                    FolderName(
-                      name: state.folder.id != rootFolderId
-                          ? state.folder.name
-                          : 'Expenses',
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 4,
-                ),
-                const Divider(
-                  thickness: 2,
-                  height: 1,
-                  indent: 25,
-                  endIndent: 25,
-                ),
-                Expanded(
-                  child: Stack(
+            _animationController.forward(from: 0.0);
+            return FadeTransition(
+              opacity: _animationController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 5),
+                  Stack(
+                    alignment: Alignment.center,
                     children: [
-                      RefreshableFolderView(
-                          scrollController: _scrollController),
+                      Row(
+                        children: [
+                          BackButton(
+                            previousFolderId: state.folder.parentId,
+                            currentFolderId: state.folder.id,
+                            visible: state.folder.id != rootFolderId,
+                          ),
+                        ],
+                      ),
+                      FolderName(
+                        name: state.folder.id != rootFolderId
+                            ? state.folder.name
+                            : 'Expenses',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 4,
+                  ),
+                  const Divider(
+                    thickness: 2,
+                    height: 1,
+                    indent: 25,
+                    endIndent: 25,
+                  ),
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        RefreshableFolderView(
+                            scrollController: _scrollController),
                         ValueListenableBuilder<bool>(
                           valueListenable: _showUploadButtonNotifier,
                           child: Positioned(
@@ -132,6 +141,7 @@ class _FileExplorerState extends State<FileExplorer> {
                     ),
                   ),
                 ],
+              ),
             );
           case FileSystemCubitError():
             print(
