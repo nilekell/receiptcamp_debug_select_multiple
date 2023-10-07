@@ -7,4 +7,4 @@ const primaryLightBlue = 0xFF00A6FF;
 const primaryDeepBlue = 0xFF2A0089;
 const primaryGrey = 0xFF606060;
 
-const fadeDuration = Duration(milliseconds: 175);
+const switchTabfadeDuration = Duration(milliseconds: 175);

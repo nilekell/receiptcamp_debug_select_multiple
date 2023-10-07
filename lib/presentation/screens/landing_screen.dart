@@ -28,7 +28,7 @@ class _LandingScreenState extends State<LandingScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: fadeDuration,
+      duration: switchTabfadeDuration,
     );
   }
 
