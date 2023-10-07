@@ -23,7 +23,7 @@ class FileExplorer extends StatefulWidget {
 
 class _FileExplorerState extends State<FileExplorer> {
   late ScrollController _scrollController;
-  bool _showUploadButton = true;
+  final ValueNotifier<bool> _showUploadButtonNotifier = ValueNotifier<bool>(true);
 
   @override
   void initState() {
@@ -36,11 +36,11 @@ class _FileExplorerState extends State<FileExplorer> {
     if (_scrollController.position.userScrollDirection ==
         ScrollDirection.reverse) {
       // Hide the upload button when user scroll down
-      if (_showUploadButton) setState(() => _showUploadButton = false);
+      if (_showUploadButtonNotifier.value) _showUploadButtonNotifier.value = false;
     } else if (_scrollController.position.userScrollDirection ==
         ScrollDirection.forward) {
       // Show the upload button when user scroll up
-      if (!_showUploadButton) setState(() => _showUploadButton = true);
+      if (!_showUploadButtonNotifier.value) _showUploadButtonNotifier.value = true;
     }
   }
 
@@ -113,16 +113,25 @@ class _FileExplorerState extends State<FileExplorer> {
                     children: [
                       RefreshableFolderView(
                           scrollController: _scrollController),
-                      if (_showUploadButton)
-                        Positioned(
-                          right: 28,
-                          bottom: 28,
-                          child: UploadButton(currentFolder: state.folder),
-                        )
-                    ],
+                        ValueListenableBuilder<bool>(
+                          valueListenable: _showUploadButtonNotifier,
+                          child: Positioned(
+                                right: 28,
+                                bottom: 28,
+                                child: UploadButton(currentFolder: state.folder),
+                              ),
+                          builder: (context, showUploadButton, child) {
+                            if (showUploadButton) {
+                              return child!;
+                            } else {
+                              return const SizedBox.shrink(); // Return an empty widget that takes up no space
+                            }
+                          },
+                          )
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
             );
           case FileSystemCubitError():
             print(
