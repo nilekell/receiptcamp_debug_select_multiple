@@ -16,7 +16,7 @@ class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
 
   @override
-  _LandingScreenState createState() => _LandingScreenState();
+  State<LandingScreen> createState() => _LandingScreenState();
 }
 
 class _LandingScreenState extends State<LandingScreen>
