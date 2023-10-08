@@ -73,8 +73,7 @@ class ImageViewScreen extends StatefulWidget {
       : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
-  _ImageViewScreenState createState() => _ImageViewScreenState();
+  State<ImageViewScreen> createState() => _ImageViewScreenState();
 }
 
 class _ImageViewScreenState extends State<ImageViewScreen> {
