@@ -335,87 +335,88 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 controller: widget.scrollController,
                 slivers: <Widget>[
-                  state.files.isNotEmpty ?
-                  SliverToBoxAdapter(
-                    child: SortOption(
-                      displayWidget:
-                          getSortDisplayWidget(state.orderedBy, state.order),
-                      currentColumn: state.orderedBy,
-                      currentOrder: state.order,
-                      folderId: state.folder.id,
-                      cubit: context.read<FolderViewCubit>(),
-                    ),
-                  ) : SliverToBoxAdapter(child: Container()),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        var item = state.files[index];
-                        if (item is Receipt) {
-                          if (item is ReceiptWithSize) {
-                            return SizedBox(
-                                height: 60,
-                                child: ReceiptListTile(
-                                  receipt: item,
-                                  withSize: true,
-                                ));
-                          } else {
-                            return SizedBox(
-                              height: 60,
-                              child: ReceiptListTile(receipt: item));
-                          }
-                        } else if (item is Folder) {
-                          if (item is FolderWithSize) {
-                            return SizedBox(
-                                height: 60,
-                                child: FolderListTile(
-                                  folder: item,
-                                  storageSize: item.storageSize,
-                                ));
-                          } else {
-                            return SizedBox(
-                                height: 60,
-                                child: FolderListTile(folder: item));
-                          }
-                        } else {
-                          return const ListTile(
-                              title: Text('Unknown file type'));
-                        }
-                      },
-                      childCount: state.files
-                          .length, // specifies the number of children this delegate will build
-                    ),
-                  ),
-                  if (state.files.isEmpty)
-                    SliverFillRemaining(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Transform.scale(
-                            scale: 1,
-                            child: Image.asset('assets/logo.png'),
+                  state.files.isNotEmpty
+                      ? SliverToBoxAdapter(
+                          child: SortOption(
+                            displayWidget: getSortDisplayWidget(
+                                state.orderedBy, state.order),
+                            currentColumn: state.orderedBy,
+                            currentOrder: state.order,
+                            folderId: state.folder.id,
+                            cubit: context.read<FolderViewCubit>(),
                           ),
-                          const SizedBox(
-                            height: 12,
+                        )
+                      : SliverToBoxAdapter(child: Container()),
+                  state.files.isNotEmpty
+                      ? SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              var item = state.files[index];
+                              if (item is Receipt) {
+                                if (item is ReceiptWithSize) {
+                                  return SizedBox(
+                                      height: 60,
+                                      child: ReceiptListTile(
+                                        receipt: item,
+                                        withSize: true,
+                                      ));
+                                } else {
+                                  return SizedBox(
+                                      height: 60,
+                                      child: ReceiptListTile(receipt: item));
+                                }
+                              } else if (item is Folder) {
+                                if (item is FolderWithSize) {
+                                  return SizedBox(
+                                      height: 60,
+                                      child: FolderListTile(
+                                        folder: item,
+                                        storageSize: item.storageSize,
+                                      ));
+                                } else {
+                                  return SizedBox(
+                                      height: 60,
+                                      child: FolderListTile(folder: item));
+                                }
+                              } else {
+                                return const ListTile(
+                                    title: Text('Unknown file type'));
+                              }
+                            },
+                            childCount: state.files
+                                .length, // specifies the number of children this delegate will build
                           ),
-                          const Text(
-                            'To add receipts, tap',
-                            style: TextStyle(
-                                color: Color(primaryGrey),
-                                fontSize: 23,
-                                fontWeight: FontWeight.w100),
-                            textAlign: TextAlign.center,
+                        )
+                      : SliverFillRemaining(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Transform.scale(
+                                scale: 1,
+                                child: Image.asset('assets/logo.png'),
+                              ),
+                              const SizedBox(
+                                height: 12,
+                              ),
+                              const Text(
+                                'To add receipts, tap',
+                                style: TextStyle(
+                                    color: Color(primaryGrey),
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.w100),
+                                textAlign: TextAlign.center,
+                              ),
+                              const Text(
+                                'the + button below',
+                                style: TextStyle(
+                                    color: Color(primaryGrey),
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.w100),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
-                          const Text(
-                            'the + button below',
-                            style: TextStyle(
-                                color: Color(primaryGrey),
-                                fontSize: 23,
-                                fontWeight: FontWeight.w100),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
+                        ),
                 ],
               ),
             );
