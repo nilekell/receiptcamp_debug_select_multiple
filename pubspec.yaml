@@ -84,8 +84,8 @@ flutter:
   assets:
     - assets/common_receipt_words.txt
 
-    - assets/logo.png
-
+    - assets/x2_retina_receipt_icon.png
+    
     - assets/folder.png
     - assets/folder_plus.png
     - assets/folder_move.png

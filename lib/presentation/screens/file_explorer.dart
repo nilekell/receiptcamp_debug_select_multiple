@@ -391,10 +391,10 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              Transform.scale(
-                                scale: 1,
-                                child: Image.asset('assets/logo.png'),
-                              ),
+                              SizedBox(
+                                height: 200,
+                                width: 200,
+                                child: Image.asset('assets/x2_retina_receipt_icon.png')),
                               const SizedBox(
                                 height: 12,
                               ),
