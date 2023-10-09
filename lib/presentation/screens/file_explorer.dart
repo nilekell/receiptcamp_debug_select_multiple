@@ -7,6 +7,7 @@ import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/screens/error_view.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/folder_list_tile.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/order_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/receipt/receipt_list_tile.dart';
@@ -146,13 +147,7 @@ class _FileExplorerState extends State<FileExplorer> with SingleTickerProviderSt
           case FileSystemCubitError():
             print(
                 'FileSystemCubitError with state: ${state.runtimeType.toString()}');
-            return const Center(
-              child: Text(
-                'Uh oh, an error occurred. Please switch tabs and/or report the error.',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center,
-              ),
-            );
+            return const ErrorView();
           default:
             print(
                 'FileExplorer BlocBuilder - Unaccounted for state: ${state.runtimeType.toString()}');
@@ -427,13 +422,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
           case FolderViewError():
             print(
                 'FolderViewCubitError with state: ${state.runtimeType.toString()}');
-            return const Center(
-              child: Text(
-                'Uh oh, an error occurred. Please switch tabs and/or report the error',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center,
-              ),
-            );
+            return const ErrorView();
           default:
             print(
                 'RefreshableFolderView BlocBuilder - Unaccounted for state: ${state.runtimeType.toString()}');

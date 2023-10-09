@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/screens/error_view.dart';
 import 'package:receiptcamp/presentation/screens/image_view.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
@@ -105,7 +106,7 @@ class _HomeState extends State<Home> {
           );
         default:
           print('Home Screen: ${state.toString()}');
-          return Container();
+          return const ErrorView();
       }
     });
   }
