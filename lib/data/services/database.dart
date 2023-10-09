@@ -236,6 +236,61 @@ class DatabaseService {
     return [...foldersList, ...receiptsList]; // combining two lists and return
   }
 
+  Future<List<Receipt>> getAllReceiptsInFolder(String folderId) async {
+    final List<Receipt> allReceipts = [];
+
+    Future<void> fetchReceipts(String currentFolderId) async {
+      final db = await database;
+
+      // Fetch all folders in the current folder
+      final List<Map<String, dynamic>> folders = await db.rawQuery('''
+      SELECT *
+      FROM folders
+      WHERE parentId = ?
+    ''', [currentFolderId]);
+
+      final foldersList = List<Folder>.generate(folders.length, (i) {
+        return Folder(
+          id: folders[i]['id'],
+          name: folders[i]['name'],
+          lastModified: folders[i]['lastModified'],
+          parentId: folders[i]['parentId'],
+        );
+      });
+
+      // Fetch all receipts in the current folder
+      final List<Map<String, dynamic>> receipts = await db.rawQuery('''
+      SELECT *
+      FROM receipts
+      WHERE parentId = ?
+    ''', [currentFolderId]);
+
+      final receiptsList = List<Receipt>.generate(receipts.length, (i) {
+        return Receipt(
+          id: receipts[i]['id'],
+          name: receipts[i]['name'],
+          fileName: receipts[i]['fileName'],
+          dateCreated: receipts[i]['dateCreated'],
+          lastModified: receipts[i]['lastModified'],
+          storageSize: receipts[i]['storageSize'],
+          parentId: receipts[i]['parentId'],
+        );
+      });
+
+      allReceipts.addAll(receiptsList); // Add the receipts to the global list
+
+      // If there are folders, then we do a recursive call
+      for (final folder in foldersList) {
+        await fetchReceipts(folder.id);
+      }
+    }
+
+    await fetchReceipts(folderId);
+
+    return allReceipts;
+  }
+
+
   // Method to rename folder
   Future<void> renameFolder(String folderId, String newName) async {
     final db = await database;
