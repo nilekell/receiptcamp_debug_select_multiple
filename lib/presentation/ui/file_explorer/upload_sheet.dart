@@ -108,16 +108,22 @@ class UploadOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      child: IconButton(
-          iconSize: iconSize,
-          color: iconColour,
-          onPressed: onPressed,
-          icon: Image.asset(
-            assetPath,
-            colorBlendMode: BlendMode.srcIn,
+    return Material(
+      shape: const CircleBorder(),
+      color: Colors.transparent,
+      child: InkWell(
+        splashColor: Colors.white,
+        radius: 100.0,
+        child: IconButton(
+            iconSize: iconSize,
             color: iconColour,
-          )),
+            onPressed: onPressed,
+            icon: Image.asset(
+              assetPath,
+              colorBlendMode: BlendMode.srcIn,
+              color: iconColour,
+            )),
+      ),
     );
   }
 }
