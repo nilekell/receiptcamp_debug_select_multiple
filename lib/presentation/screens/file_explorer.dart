@@ -398,21 +398,16 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                               const SizedBox(
                                 height: 12,
                               ),
-                              const Text(
-                                'To add receipts, tap',
-                                style: TextStyle(
-                                    color: Color(primaryGrey),
-                                    fontSize: 23,
-                                    fontWeight: FontWeight.w100),
-                                textAlign: TextAlign.center,
-                              ),
-                              const Text(
-                                'the + button below',
-                                style: TextStyle(
-                                    color: Color(primaryGrey),
-                                    fontSize: 23,
-                                    fontWeight: FontWeight.w100),
-                                textAlign: TextAlign.center,
+                              const Padding(
+                                padding: EdgeInsets.all(24.0),
+                                child: Text(
+                                  'To add receipts, tap the + button below',
+                                  style: TextStyle(
+                                      color: Color(primaryGrey),
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w100),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ],
                           ),
