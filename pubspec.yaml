@@ -48,6 +48,7 @@ dependencies:
   flutter_image_compress: ^2.0.3
   share_plus: ^7.1.0
   pdf: ^3.10.4
+  syncfusion_flutter_xlsio: ^23.1.40
   gallery_saver: ^2.3.2
   in_app_review: ^2.0.6
   url_launcher: ^6.1.14
@@ -97,6 +98,7 @@ flutter:
     - assets/download.png
     - assets/share.png
     - assets/export_as_pdf.png
+    - assets/excel.png
     - assets/scan.png
     - assets/camera.png
     
