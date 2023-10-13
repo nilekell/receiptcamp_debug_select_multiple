@@ -142,6 +142,7 @@ class ImageViewAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedPositioned(
+      curve: Curves.easeOut,
       top: _isAppBarVisible ? 0 : -100,
       left: 0,
       right: 0,
