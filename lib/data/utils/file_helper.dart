@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:archive/archive_io.dart';
 import 'package:pdf/pdf.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
+import 'package:receiptcamp/data/services/directory_path_provider.dart';
+import 'package:receiptcamp/data/utils/text_recognition.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
@@ -120,11 +121,8 @@ class FileService {
 
   static Future<String> getLocalImagePath(ImageFileType imageFileType) async {
     try {
-      Directory imageDirectory = await getApplicationDocumentsDirectory();
-      String imageDirectoryPath = imageDirectory.path;
       final fileName = generateFileName(imageFileType);
-      final localImagePath = '$imageDirectoryPath/$fileName';
-
+      final localImagePath = '${DirectoryPathProvider.instance.appDocDirPath}/$fileName';
       return localImagePath;
     } on Exception catch (e) {
       print('Error in getLocalImagePath: $e');
