@@ -209,9 +209,8 @@ class FileService {
           build: ((context) {
             return pw.Image(pdfImage);
           })));
-
-      final tempDir = (await getTemporaryDirectory()).path;
-      final pdfFile = File('$tempDir/${receipt.name}.pdf');
+          
+      final pdfFile = File('${DirectoryPathProvider.instance.tempDirPath}/${receipt.name}.pdf');
 
       return pdfFile.writeAsBytes(await pdf.save());
     } on Exception catch (e) {

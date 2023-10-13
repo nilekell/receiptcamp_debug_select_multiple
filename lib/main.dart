@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
-import 'package:receiptcamp/data/services/document_path_provider.dart';
+import 'package:receiptcamp/data/services/directory_path_provider.dart';
 import 'package:receiptcamp/data/services/preferences.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/bloc_observer.dart';
@@ -19,10 +19,10 @@ import 'presentation/ui/ui_constants.dart';
 void main() async {
   Bloc.observer = AppBlocObserver();
   WidgetsFlutterBinding.ensureInitialized();
-  // Initializing DocumentDirectoryProvider.instance in `main()` ensures that the documents directory path is
+  // Initializing DirectoryPathProvider.instance in `main()` ensures that the documents directory path is
   // fetched and set as soon as the application starts, making the path
   // immediately available to any part of the application that requires it.
-  await DocumentDirectoryProvider.instance.initialize();
+  await DirectoryPathProvider.instance.initialize();
   await DatabaseRepository.instance.init();
   await PreferencesService.instance.init();
   await SystemChrome.setPreferredOrientations([
