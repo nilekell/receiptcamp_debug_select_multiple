@@ -93,4 +93,63 @@ class TextRecognitionService {
       return false;
     }
   }
+  
+  static Future<String> extractPriceFromImage(String imagePath) async {
+    String finalPrice;
+    double finalValue = 0.00;
+    String currencySign = '£';
+
+    final inputImage = InputImage.fromFilePath(imagePath);
+    final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+    final RecognizedText recognizedText =
+        await textRecognizer.processImage(inputImage);
+
+    // (\£|\$|\€): This will match any of the currency symbols (£, $, €).
+    // (\d+): This will match one or more digits.
+    // (\.\d{2})?: This will match the optional decimal point followed by exactly two digits.
+    RegExp priceRegExp = RegExp(
+      r'(\£|\$|\€)(\d+)(\.\d{2})?',
+      multiLine: true,
+      caseSensitive: false,
+    );
+
+    RegExp discardRegExp = RegExp(
+      r'subtotal|savings|promotions|promotion|service|opt serv|points|point|voucher|tax|discount|vat|tip|service charge|coupon|membership|deposit|fee|delivery|shipping|promo|refund|adjustment|gift card',
+      caseSensitive: false,
+    );
+
+    String scannedText = '';
+    List<String> potentialPrices = [];
+
+    for (TextBlock block in recognizedText.blocks) {
+      for (TextLine line in block.lines) {
+        if (discardRegExp.hasMatch(line.text)) continue;
+        for (TextElement element in line.elements) {
+          scannedText = element.text;
+          if (priceRegExp.hasMatch(scannedText) == false) continue;
+          if (scannedText == '') continue;
+          if (potentialPrices.contains(scannedText)) continue;
+          potentialPrices.add(scannedText);
+          currencySign = scannedText[0];
+        }
+      }
+    }
+
+    for (final price in potentialPrices) {
+      double? value = double.tryParse(price.trim().substring(1));
+      if (value == null) continue;
+      if (value < finalValue) continue;
+      finalValue = value;
+    }
+
+    finalPrice = '$currencySign${finalValue.toStringAsFixed(2)}';
+
+    // print('##################');
+    // print(basename(imagePath));
+    // print('potential prices: $potentialPrices');
+    // print('finalValue: $finalValue');
+    // print('finalPrice: $finalPrice');
+
+    return finalPrice;
+  }
 }
