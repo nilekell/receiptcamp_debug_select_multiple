@@ -164,8 +164,8 @@ class FolderName extends StatelessWidget {
     super.key,
     required this.name,
   }) : displayName = name.length > 20
-            ? "${name.substring(0, 20)}...".split('.').first
-            : name.split('.').first;
+            ? "${name.substring(0, 20)}..."
+            : name;
 
   final String displayName;
 
