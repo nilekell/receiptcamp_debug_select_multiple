@@ -63,7 +63,7 @@ class ReceiptWithSize extends Receipt {
 }
 
 class ExcelReceipt extends Receipt {
-  final String price;
+  String price;
 
   ExcelReceipt({required this.price, required Receipt receipt})
       : super(
@@ -74,8 +74,4 @@ class ExcelReceipt extends Receipt {
             lastModified: receipt.lastModified,
             storageSize: receipt.storageSize,
             parentId: receipt.parentId);
-
-  set price(String value) {
-    price = value;
-  }
 }
