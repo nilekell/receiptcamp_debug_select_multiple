@@ -139,13 +139,6 @@ class DatabaseService {
       final Receipt receipt = Receipt.fromMap(map);
       final ReceiptWithSize receiptWithSize = ReceiptWithSize(
         withSize: true,
-        id: receipt.id,
-        name: receipt.name,
-        fileName: receipt.fileName,
-        lastModified: receipt.lastModified,
-        dateCreated: receipt.dateCreated,
-        parentId: receipt.parentId,
-        storageSize: receipt.storageSize,
         receipt: receipt,
       );
       receiptsWithSize.add(receiptWithSize);
@@ -187,7 +180,7 @@ class DatabaseService {
       );
       final storageSize = await getFolderSize(folder.id);
       foldersWithSizes
-          .add(FolderWithSize(storageSize: storageSize, id: folder.id, name: folder.name, lastModified: folder.lastModified, parentId: folder.parentId));
+          .add(FolderWithSize(storageSize: storageSize, folder: folder));
     }
 
     foldersWithSizes.sort((a, b) {

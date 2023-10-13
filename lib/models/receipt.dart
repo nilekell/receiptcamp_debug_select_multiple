@@ -1,6 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
-import 'package:receiptcamp/data/services/document_path_provider.dart';
+import 'package:receiptcamp/data/services/directory_path_provider.dart';
 
 // class to model receipts to be stored in sql db
 class Receipt {
@@ -16,7 +16,7 @@ class Receipt {
 
   // builds and returns the full path of the receipt's image based on the app's
   // current application document directory path
-  String get localPath => '${DocumentDirectoryProvider.instance.appDocDirPath}/$fileName';
+  String get localPath => '${DirectoryPathProvider.instance.appDocDirPath}/$fileName';
 
   Receipt(
       {required this.id,
@@ -57,6 +57,25 @@ class Receipt {
 
 class ReceiptWithSize extends Receipt {
   final bool withSize;
+  final Receipt receipt;
 
-  ReceiptWithSize({required this.withSize, required super.id, required super.name, required super.fileName, required super.lastModified,  required super.dateCreated, required super.parentId, required super.storageSize, required Receipt receipt});
+  ReceiptWithSize({required this.withSize, required this.receipt}) : super(id: receipt.id, name: receipt.name, fileName: receipt.fileName, dateCreated: receipt.dateCreated, lastModified: receipt.lastModified, storageSize: receipt.storageSize, parentId: receipt.parentId);
+}
+
+class ExcelReceipt extends Receipt {
+  final String price;
+
+  ExcelReceipt({required this.price, required Receipt receipt})
+      : super(
+            id: receipt.id,
+            name: receipt.name,
+            fileName: receipt.fileName,
+            dateCreated: receipt.dateCreated,
+            lastModified: receipt.lastModified,
+            storageSize: receipt.storageSize,
+            parentId: receipt.parentId);
+
+  set price(String value) {
+    price = value;
+  }
 }
