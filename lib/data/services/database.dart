@@ -500,8 +500,6 @@ class DatabaseService {
     }
   }
 
-  /* Unused method, but kept for potential future use
-  note: this method has no unit test but would be required if used in future)
   Future<bool> folderIsEmpty(String folderId) async {
     final db = await database;
     final countReceiptsResult = await db.rawQuery('''
@@ -526,7 +524,6 @@ class DatabaseService {
 
     return total < 1;
   }
-  */
 
   Future<void> deleteAllFoldersExceptRoot() async {
   final Database db = await database;
