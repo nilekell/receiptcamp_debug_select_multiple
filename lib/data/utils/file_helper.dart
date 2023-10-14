@@ -1,10 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:gallery_saver/gallery_saver.dart';
-import 'package:image/image.dart';
 import 'package:path/path.dart';
 import 'package:archive/archive_io.dart';
 import 'package:pdf/pdf.dart';
@@ -17,7 +17,6 @@ import 'package:receiptcamp/models/receipt.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:image/image.dart' as img;
-import 'package:syncfusion_flutter_xlsio/xlsio.dart';
 
 class FileService {
 
@@ -359,87 +358,6 @@ class FileService {
 
       return excelReceipts;
     }
-
-  static Future<File> createExcelSheetfromReceipts(List<ExcelReceipt> excelReceipts, Folder folder) async {
-    // Create a new Excel document.
-    final Workbook workbook = Workbook();
-
-    // Accessing worksheet via index.
-    final Worksheet sheet = workbook.worksheets[0];
-
-    // Create column titles
-    sheet.getRangeByName('A1').setText('Name');
-    sheet.getRangeByName('B1').setText('Price');
-    sheet.getRangeByName('C1').setText('Date Created');
-    sheet.getRangeByName('D1').setText('Image');
-    sheet.getRangeByName('E1').setText('Parent Name');
-    sheet.getRangeByName('F1').setText('File Name');
-
-    // Starting index for data
-    int rowIndex = 2;
-    
-    const double columnWidth = 25.0;
-
-    for (final excelReceipt in excelReceipts) {
-      // Insert data into rows
-      final nameColumn = sheet.getRangeByName('A$rowIndex');
-      nameColumn.setText(excelReceipt.name);
-      nameColumn.columnWidth = columnWidth;
-
-      final priceColumn = sheet.getRangeByName('B$rowIndex');
-      priceColumn.setText(excelReceipt.price);
-      priceColumn.columnWidth = columnWidth;
-
-      final dateColumn = sheet.getRangeByName('C$rowIndex');
-      dateColumn.setText(Utility.formatDateTimeFromUnixTimestamp(excelReceipt.dateCreated));
-      dateColumn.columnWidth = columnWidth;
-      
-      // Load the image using the 'image' package.
-      img.Image? receiptImage = decodeImage(File(excelReceipt.localPath).readAsBytesSync());
-
-      //Adding a picture
-      final List<int> bytes = File(excelReceipt.localPath).readAsBytesSync();
-      if (receiptImage != null) {
-        final picture = sheet.pictures.addStream(rowIndex, 4, bytes);
-
-        // Set picture dimensions to match actual image dimensions.
-        picture.width = receiptImage.width;
-        picture.height = receiptImage.height;
-      }
-
-      // picture.width = 1000;
-      // picture.height = 1000;
-
-      // Set column width.
-      sheet.getRangeByName('D$rowIndex').columnWidth = 1000;
-
-      // Set row height for the row where the image will be inserted.
-      sheet.getRangeByName('D$rowIndex').rowHeight = 1000;
-
-      final folderNameColumn = sheet.getRangeByName('E$rowIndex');
-      folderNameColumn.setText(excelReceipt.name);
-      folderNameColumn.columnWidth = columnWidth;
-
-      final fileNameColumn = sheet.getRangeByName('F$rowIndex');
-      fileNameColumn.setText(excelReceipt.fileName);
-      fileNameColumn.columnWidth = columnWidth;
-
-      rowIndex++; // Increment the row index for the next iteration
-    }
-
-    // Save to the Excel file
-    final List<int> bytes = workbook.saveAsStream();
-    workbook.dispose();
-
-    // create temporary path to store excel file
-    String tempXlsxFileFullPath = await tempFilePathGenerator('${folder.name}.xlsx');
-
-    // create a .xlsx file from the encoded bytes
-    final excelFile =
-        await File(tempXlsxFileFullPath).writeAsBytes(bytes);
-
-    return excelFile;
-  }
 
   static Future<String> tempFilePathGenerator(String fileName) async {
     final tempFileFullPath = '${DirectoryPathProvider.instance.tempDirPath}/$fileName';
