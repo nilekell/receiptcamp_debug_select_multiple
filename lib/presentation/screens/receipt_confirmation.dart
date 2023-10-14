@@ -203,21 +203,21 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView>
             switch (state) {
               case ConfirmReceiptInitial() || ConfirmReceiptLoading():
                 return AlertDialog(
-            shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(40.0))),
-            backgroundColor: const Color(primaryDeepBlue),
-            content: Row(
-              children: [
-                const CircularProgressIndicator(),
-                Container(
-                    margin: const EdgeInsets.only(left: 16),
-                    child: const Text(
-                      "Processing receipts...",
-                      style: TextStyle(color: Colors.white),
-                    )),
-              ],
-            ),
-          );
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(40.0))),
+                  backgroundColor: const Color(primaryDeepBlue),
+                  content: Row(
+                    children: [
+                      const CircularProgressIndicator(),
+                      Container(
+                          margin: const EdgeInsets.only(left: 16),
+                          child: const Text(
+                            "Processing receipts...",
+                            style: TextStyle(color: Colors.white),
+                          )),
+                    ],
+                  ),
+                );
               case ConfirmReceiptEmpty():
                 return const SizedBox.shrink();
               case ConfirmReceiptError():
@@ -258,16 +258,22 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView>
                                       receipt: receipt));
                             },
                             key: UniqueKey(),
-                            leading: SizedBox(
+                            leading: Container(
                               height: 100,
                               width: 50,
-                              child: ClipRRect(
-                                // square image corners
-                                borderRadius:
-                                    const BorderRadius.all(Radius.zero),
-                                child: Image.file(
-                                  File(receipt.localPath),
-                                  fit: BoxFit.cover,
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.zero),
+                              ),
+                              child: Transform.translate(
+                                offset: const Offset(0, 2),
+                                child: ClipRRect(
+                                  // square image corners
+                                  borderRadius:
+                                      const BorderRadius.all(Radius.zero),
+                                  child: Image.file(
+                                    File(receipt.localPath),
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                             ),
@@ -279,12 +285,25 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView>
                               key: UniqueKey(),
                               child: TextFormField(
                                 decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(20.0),
-                                        borderSide: const BorderSide(
-                                            color: Color(primaryDarkBlue),
-                                            width: 2.0))),
+                                  isDense: true,
+                                  contentPadding: const EdgeInsets.all(8),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                    borderSide: const BorderSide(
+                                      color: Color(
+                                          primaryDarkBlue),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                    borderSide: const BorderSide(
+                                      color: Color(
+                                          primaryLightBlue),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                ),
                                 focusNode: _focusNode.enclosingScope,
                                 initialValue: receipt.price,
                                 keyboardType: TextInputType.text,
@@ -301,7 +320,7 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView>
                           ),
                         );
                       }),
-                ); 
+                );
             }
           })),
     );
