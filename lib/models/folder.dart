@@ -23,6 +23,14 @@ class Folder {
     };
   }
 
+  fromMap(Map<dynamic, dynamic> map) {
+    return Folder(
+        id: map['id'] as String,
+        name: map['name'] as String,
+        parentId: map['parentId'] as String,
+        lastModified: map['lastModified'] as int);
+  }
+
   factory Folder.fromMap(Map<dynamic, dynamic> map) {
     return Folder(
         id: map['id'] as String,
