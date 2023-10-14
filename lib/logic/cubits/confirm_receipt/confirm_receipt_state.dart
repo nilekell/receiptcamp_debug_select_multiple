@@ -20,6 +20,31 @@ final class ConfirmReceiptSuccess extends ConfirmReceiptState {
   List<Object> get props => [excelReceipts];
 }
 
+final class ConfirmReceiptFileLoading extends ConfirmReceiptSuccess {
+  const ConfirmReceiptFileLoading({required super.excelReceipts});
+
+  @override
+  List<Object> get props => [excelReceipts];
+}
+
+final class ConfirmReceiptFileLoaded extends ConfirmReceiptSuccess {
+
+  final File excelFile;
+
+  const ConfirmReceiptFileLoaded({required this.excelFile, required super.excelReceipts});
+
+  @override
+  List<Object> get props => [excelFile, excelReceipts];
+}
+
+final class ConfirmReceiptFileClose extends ConfirmReceiptSuccess {
+  const ConfirmReceiptFileClose({required super.excelReceipts});
+}
+
+final class ConfirmReceiptFileError extends ConfirmReceiptSuccess {
+  const ConfirmReceiptFileError({required super.excelReceipts});
+}
+
 final class ConfirmReceiptEmpty extends ConfirmReceiptState {
 }
 
