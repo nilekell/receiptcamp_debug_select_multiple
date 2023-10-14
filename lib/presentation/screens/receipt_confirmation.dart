@@ -185,7 +185,13 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView>
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: titleMainAxisSize,
               children: const [
-                Text('Confirm receipt prices'),
+                Text(
+                  'Confirm receipt prices',
+                  style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
               ],
             ),
             actions: [
@@ -241,85 +247,113 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView>
 
                 return FadeTransition(
                   opacity: _animationController,
-                  child: ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: state.excelReceipts.length,
-                      itemBuilder: (context, index) {
-                        final receipt = state.excelReceipts[index];
-                        final displayName = receipt.name.length > 25
-                            ? "${receipt.name.substring(0, 25)}..."
-                            : receipt.name.split('.').first;
-                        return Container(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ListTile(
-                            onTap: () {
-                              Navigator.of(context).push(
-                                  SlidingImageTransitionRoute(
-                                      receipt: receipt));
-                            },
-                            key: UniqueKey(),
-                            leading: Container(
-                              height: 100,
-                              width: 50,
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.all(Radius.zero),
-                              ),
-                              child: Transform.translate(
-                                offset: const Offset(0, 2),
-                                child: ClipRRect(
-                                  // square image corners
-                                  borderRadius:
-                                      const BorderRadius.all(Radius.zero),
-                                  child: Image.file(
-                                    File(receipt.localPath),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            title: Text(displayName,
-                                style: displayNameStyle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis),
-                            subtitle: Form(
-                              key: UniqueKey(),
-                              child: TextFormField(
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  contentPadding: const EdgeInsets.all(8),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    borderSide: const BorderSide(
-                                      color: Color(
-                                          primaryDarkBlue),
-                                      width: 1.5,
+                  child: Column(
+                    children: [
+                      // Folder Name
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          widget.folder.name,
+                          style: const TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w600,
+                              color: Color(primaryGrey)),
+                        ),
+                      ),
+                      // Divider
+                      const Divider(
+                        thickness: 2,
+                        height: 1,
+                        indent: 25,
+                        endIndent: 25,
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            itemCount: state.excelReceipts.length,
+                            itemBuilder: (context, index) {
+                              final receipt = state.excelReceipts[index];
+                              final displayName = receipt.name.length > 25
+                                  ? "${receipt.name.substring(0, 25)}..."
+                                  : receipt.name.split('.').first;
+                              return Container(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ListTile(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                        SlidingImageTransitionRoute(
+                                            receipt: receipt));
+                                  },
+                                  key: UniqueKey(),
+                                  leading: Container(
+                                    height: 100,
+                                    width: 50,
+                                    decoration: const BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.zero),
+                                    ),
+                                    child: Transform.translate(
+                                      offset: const Offset(0, -6),
+                                      child: ClipRRect(
+                                        // square image corners
+                                        borderRadius:
+                                            const BorderRadius.all(Radius.zero),
+                                        child: Image.file(
+                                          File(receipt.localPath),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    borderSide: const BorderSide(
-                                      color: Color(
-                                          primaryLightBlue),
-                                      width: 1.5,
+                                  title: Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Text(displayName,
+                                        style: displayNameStyle,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis),
+                                  ),
+                                  subtitle: Form(
+                                    key: UniqueKey(),
+                                    child: TextFormField(
+                                      decoration: InputDecoration(
+                                        isDense: true,
+                                        contentPadding: const EdgeInsets.all(8),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20.0),
+                                          borderSide: const BorderSide(
+                                            color: Color(primaryDarkBlue),
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20.0),
+                                          borderSide: const BorderSide(
+                                            color: Color(primaryLightBlue),
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                      ),
+                                      focusNode: _focusNode.enclosingScope,
+                                      initialValue: receipt.price,
+                                      keyboardType: TextInputType.text,
+                                      onChanged: (newPrice) {
+                                        // updating price of particular receipt in receiptsToShare
+                                        // whenever the user types in text form
+                                        if (newPrice != receipt.price) {
+                                          receipt.price = newPrice;
+                                          receiptsToShare[index] = receipt;
+                                        }
+                                      },
                                     ),
                                   ),
                                 ),
-                                focusNode: _focusNode.enclosingScope,
-                                initialValue: receipt.price,
-                                keyboardType: TextInputType.text,
-                                onChanged: (newPrice) {
-                                  // updating price of particular receipt in receiptsToShare
-                                  // whenever the user types in text form
-                                  if (newPrice != receipt.price) {
-                                    receipt.price = newPrice;
-                                    receiptsToShare[index] = receipt;
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
+                              );
+                            }),
+                      ),
+                    ],
+                  ),
                 );
             }
           })),
