@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/logic/cubits/confirm_receipt/confirm_receipt_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
@@ -62,7 +61,8 @@ class ReceiptConfirmationView extends StatefulWidget {
       _ReceiptConfirmationViewState();
 }
 
-class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView> with SingleTickerProviderStateMixin {
+class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   List<ExcelReceipt> receiptsToShare = [];
 
@@ -91,11 +91,45 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView> with 
     ));
   }
 
-  Future<void> _handleExcelSharing() async {
-    final excelFile = await FileService.createExcelSheetfromReceipts(
-        receiptsToShare, widget.folder);
-    await FileService.shareFolderAsExcel(widget.folder, excelFile)
-        .whenComplete(() => Navigator.of(context).pop());
+  Future<void> _showExcelProcessingDialog(BuildContext context) {
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: ((context) {
+          return AlertDialog(
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(40.0))),
+            backgroundColor: const Color(primaryDeepBlue),
+            content: Row(
+              children: [
+                const CircularProgressIndicator(),
+                Container(
+                    margin: const EdgeInsets.only(left: 16),
+                    child: const Text(
+                      "Creating Excel sheet...",
+                      style: TextStyle(color: Colors.white),
+                    )),
+              ],
+            ),
+          );
+        }));
+  }
+
+  Future<void> _showErrorDialog(BuildContext context) {
+    return showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: ((context) {
+          return const AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(40.0))),
+            backgroundColor: Color(primaryDeepBlue),
+            content: Text(
+              "Failed to create excel sheet, please try again later",
+              style: TextStyle(color: Colors.white),
+            ),
+          );
+        }));
   }
 
   // aligning title text in row depending on platform
@@ -110,21 +144,42 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView> with 
   @override
   Widget build(BuildContext context) {
     return BlocListener<ConfirmReceiptCubit, ConfirmReceiptState>(
-      listener: (context, state) async {
-        if (state is ConfirmReceiptSuccess) {
-          receiptsToShare.addAll(List.from(state.excelReceipts));
-          return;
-        }
-
-        if (state is ConfirmReceiptEmpty) {
-          if (!mounted) return;
-          Navigator.of(context).pop();
-          _showEmptySnackBar(context);
-          return;
+      listener: (context, state) {
+        switch (state) {
+          case ConfirmReceiptFileLoading():
+            _showExcelProcessingDialog(context);
+            return;
+          case ConfirmReceiptFileLoaded():
+            final sharedExcel = state.excelFile;
+            Navigator.of(context).pop(); // hiding loading dialog
+            // showing share sheet
+            context
+                .read<ConfirmReceiptCubit>()
+                .shareExcelFile(sharedExcel, widget.folder);
+            return;
+          case ConfirmReceiptFileClose():
+            // closing ReceiptConfirmationView
+            Navigator.of(context).pop();
+          case ConfirmReceiptFileError():
+            _showErrorDialog(context);
+          case ConfirmReceiptSuccess():
+            // initially populating all excel receipts
+            receiptsToShare.addAll(List.from(state.excelReceipts));
+            return;
+          case ConfirmReceiptEmpty():
+            if (!mounted) return;
+            Navigator.of(context).pop();
+            _showEmptySnackBar(context);
+            return;
+          default:
+            return;
         }
       },
       child: Scaffold(
           appBar: AppBar(
+            leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop()),
             backgroundColor: const Color(primaryDarkBlue),
             title: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -135,19 +190,34 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView> with 
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.ios_share),
-                onPressed: () async {
-                  await _handleExcelSharing();
-                },
-              ),
+                  icon: const Icon(Icons.ios_share),
+                  onPressed: () {
+                    context
+                        .read<ConfirmReceiptCubit>()
+                        .generateExcelFile(receiptsToShare, widget.folder);
+                  }),
             ],
           ),
           body: BlocBuilder<ConfirmReceiptCubit, ConfirmReceiptState>(
               builder: (context, state) {
-
             switch (state) {
               case ConfirmReceiptInitial() || ConfirmReceiptLoading():
-                return const Center(child: CircularProgressIndicator());
+                return AlertDialog(
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(40.0))),
+            backgroundColor: const Color(primaryDeepBlue),
+            content: Row(
+              children: [
+                const CircularProgressIndicator(),
+                Container(
+                    margin: const EdgeInsets.only(left: 16),
+                    child: const Text(
+                      "Processing receipts...",
+                      style: TextStyle(color: Colors.white),
+                    )),
+              ],
+            ),
+          );
               case ConfirmReceiptEmpty():
                 return const SizedBox.shrink();
               case ConfirmReceiptError():
@@ -163,7 +233,12 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView> with 
                   ],
                 );
               case ConfirmReceiptSuccess():
-               _animationController.forward(from: 0.0);
+                // preventing fade animation from showing after share button is tapped
+                state is! ConfirmReceiptFileLoading &&
+                        state is! ConfirmReceiptFileLoaded
+                    ? _animationController.forward(from: 0.0)
+                    : null;
+
                 return FadeTransition(
                   opacity: _animationController,
                   child: ListView.builder(
@@ -179,8 +254,8 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView> with 
                           child: ListTile(
                             onTap: () {
                               Navigator.of(context).push(
-                                    SlidingImageTransitionRoute(
-                                        receipt: receipt));
+                                  SlidingImageTransitionRoute(
+                                      receipt: receipt));
                             },
                             key: UniqueKey(),
                             leading: SizedBox(
@@ -205,7 +280,8 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView> with 
                               child: TextFormField(
                                 decoration: InputDecoration(
                                     border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(20.0),
+                                        borderRadius:
+                                            BorderRadius.circular(20.0),
                                         borderSide: const BorderSide(
                                             color: Color(primaryDarkBlue),
                                             width: 2.0))),
@@ -213,11 +289,11 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView> with 
                                 initialValue: receipt.price,
                                 keyboardType: TextInputType.text,
                                 onChanged: (newPrice) {
+                                  // updating price of particular receipt in receiptsToShare
+                                  // whenever the user types in text form
                                   if (newPrice != receipt.price) {
-                                      receipt.price = newPrice;
-                                      receiptsToShare[index] = receipt;
-                                      print(
-                                          '${receiptsToShare[index].name}, ${receiptsToShare[index].price}');
+                                    receipt.price = newPrice;
+                                    receiptsToShare[index] = receipt;
                                   }
                                 },
                               ),
@@ -225,7 +301,7 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView> with 
                           ),
                         );
                       }),
-                );
+                ); 
             }
           })),
     );
