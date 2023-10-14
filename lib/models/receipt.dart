@@ -39,16 +39,14 @@ class Receipt {
     };
   }
 
-  factory Receipt.fromMap(Map<String, dynamic> map) {
-    return Receipt(
-        id: map['id'] as String,
-        name: map['name'] as String,
-        fileName: map['fileName'] as String,
-        dateCreated: map['dateCreated'] as int,
-        lastModified: map['lastModified'] as int,
-        storageSize: map['storageSize'] as int,
-        parentId: map['parentId'] as String);
-  }
+  Receipt.fromMap(Map<String, dynamic> map)
+    : id = map['id'],
+      name = map['name'],
+      fileName = map['fileName'],
+      dateCreated = map['dateCreated'],
+      lastModified = map['lastModified'],
+      storageSize = map['storageSize'],
+      parentId = map['parentId'];
 
   String toJson() => json.encode(toMap());
 
@@ -74,4 +72,15 @@ class ExcelReceipt extends Receipt {
             lastModified: receipt.lastModified,
             storageSize: receipt.storageSize,
             parentId: receipt.parentId);
+
+  ExcelReceipt.fromMap(Map<String, dynamic> map)
+      : price = map['price'],
+        super.fromMap(map);
+
+  @override
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> superMap = super.toMap();
+    superMap['price'] = price;
+    return superMap;
+  }
 }
