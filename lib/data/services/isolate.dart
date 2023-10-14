@@ -6,6 +6,8 @@ import 'package:image/image.dart' as img;
 import 'package:image/image.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
+import 'package:receiptcamp/data/services/directory_path_provider.dart';
+import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
@@ -28,6 +30,7 @@ abstract class IsolateService {
     final SendPort sendPort = args['sendPort'];
 
     BackgroundIsolateBinaryMessenger.ensureInitialized(isolateParams.rootToken);
+    DirectoryPathProvider.instance.initialize();
 
     final File resultFile =
         await _createExcelSheetfromReceipts(isolateParams.computeParams);
@@ -90,11 +93,10 @@ abstract class IsolateService {
   int imageColIndex = 0;
 
   for (final excelReceipt in excelReceipts) {
-    final String appDocDirPath = (await getApplicationDocumentsDirectory()).path;
-    img.Image? receiptImage = decodeImage(File('$appDocDirPath/${excelReceipt.fileName}').readAsBytesSync());
+    img.Image? receiptImage = decodeImage(File('${DirectoryPathProvider.instance.appDocDirPath}/${excelReceipt.fileName}').readAsBytesSync());
 
     if (receiptImage != null) {
-      final List<int> bytes = File('$appDocDirPath/${excelReceipt.fileName}').readAsBytesSync();
+      final List<int> bytes = File('${DirectoryPathProvider.instance.appDocDirPath}/${excelReceipt.fileName}').readAsBytesSync();
       const int maxCellDimension = 100;
       double aspectRatio = receiptImage.width / receiptImage.height;
       int newWidth, newHeight;
@@ -124,7 +126,7 @@ abstract class IsolateService {
 
   final List<int> bytes = workbook.saveAsStream();
   workbook.dispose();
-  String tempXlsxFileFullPath = '${(await getTemporaryDirectory()).path}/${folder.name}.xlsx';
+  String tempXlsxFileFullPath = '${DirectoryPathProvider.instance.tempDirPath}/${folder.name}.xlsx';
   final excelFile = await File(tempXlsxFileFullPath).writeAsBytes(bytes);
 
   return excelFile;
