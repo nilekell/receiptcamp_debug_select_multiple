@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:image/image.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
@@ -35,115 +36,97 @@ abstract class IsolateService {
   }
 
   static FutureOr<File> _createExcelSheetfromReceipts(
-      Map<String, dynamic> computeParams) async {
-    final List<Map<String, dynamic>> serializedReceipts =
-        computeParams['excelReceipts'];
-    final Map<String, dynamic> serializedFolder = computeParams['folder'];
+    Map<String, dynamic> computeParams) async {
+  final List<Map<String, dynamic>> serializedReceipts =
+      computeParams['excelReceipts'];
+  final Map<String, dynamic> serializedFolder = computeParams['folder'];
 
-    final List<ExcelReceipt> excelReceipts =
-        serializedReceipts.map((e) => ExcelReceipt.fromMap(e)).toList();
-    final Folder folder = Folder.fromMap(serializedFolder);
+  final List<ExcelReceipt> excelReceipts =
+      serializedReceipts.map((e) => ExcelReceipt.fromMap(e)).toList();
+  final Folder folder = Folder.fromMap(serializedFolder);
 
-    // Create a new Excel document.
-    final Workbook workbook = Workbook();
+  final Workbook workbook = Workbook();
+  final Worksheet sheet = workbook.worksheets[0];
 
-    // Accessing worksheet via index.
-    final Worksheet sheet = workbook.worksheets[0];
+  final Style headingStyle = workbook.styles.add('HeadingStyle');
+  headingStyle.bold = true;
+  headingStyle.hAlign = HAlignType.center;
 
-    // Create column titles
-    sheet.getRangeByName('A1').setText('Name');
-    sheet.getRangeByName('B1').setText('Price');
-    sheet.getRangeByName('C1').setText('Date Created');
-    sheet.getRangeByName('D1').setText('Image');
-    sheet.getRangeByName('E1').setText('Parent Name');
-    sheet.getRangeByName('F1').setText('File Name');
+  sheet.getRangeByName('A1').setText('Name');
+  sheet.getRangeByName('A1').cellStyle = headingStyle;
+  sheet.getRangeByName('B1').setText('Price');
+  sheet.getRangeByName('B1').cellStyle = headingStyle;
+  sheet.getRangeByName('C1').setText('Date Created');
+  sheet.getRangeByName('C1').cellStyle = headingStyle;
+  sheet.getRangeByName('D1').setText('Folder Name');
+  sheet.getRangeByName('D1').cellStyle = headingStyle;
+  sheet.getRangeByName('E1').setText('File Name');
+  sheet.getRangeByName('E1').cellStyle = headingStyle;
 
-    // Starting index for data
-    int rowIndex = 2;
+  int rowIndex = 2;
+  const double columnWidth = 25.0;
 
-    const double columnWidth = 25.0;
+  for (final excelReceipt in excelReceipts) {
+    sheet.getRangeByName('A$rowIndex').setText(excelReceipt.name);
+    sheet.getRangeByName('A$rowIndex').columnWidth = columnWidth;
 
-    for (final excelReceipt in excelReceipts) {
-      // Insert data into rows
-      final nameColumn = sheet.getRangeByName('A$rowIndex');
-      nameColumn.setText(excelReceipt.name);
-      nameColumn.columnWidth = columnWidth;
+    sheet.getRangeByName('B$rowIndex').setText(excelReceipt.price);
+    sheet.getRangeByName('B$rowIndex').columnWidth = columnWidth;
 
-      final priceColumn = sheet.getRangeByName('B$rowIndex');
-      priceColumn.setText(excelReceipt.price);
-      priceColumn.columnWidth = columnWidth;
+    sheet.getRangeByName('C$rowIndex').setText(Utility.formatDateTimeFromUnixTimestamp(excelReceipt.dateCreated));
+    sheet.getRangeByName('C$rowIndex').columnWidth = columnWidth;
 
-      final dateColumn = sheet.getRangeByName('C$rowIndex');
-      dateColumn.setText(
-          Utility.formatDateTimeFromUnixTimestamp(excelReceipt.dateCreated));
-      dateColumn.columnWidth = columnWidth;
+    final folder = await DatabaseRepository.instance.getFolderById(excelReceipt.parentId);
+    sheet.getRangeByName('D$rowIndex').setText(folder.name);
+    sheet.getRangeByName('D$rowIndex').columnWidth = columnWidth;
 
-      // Load the image using the 'image' package.
+    sheet.getRangeByName('E$rowIndex').setText(excelReceipt.fileName);
+    sheet.getRangeByName('E$rowIndex').columnWidth = columnWidth;
 
-      final String appDocDirPath =
-          (await getApplicationDocumentsDirectory()).path;
+    rowIndex++;
+  }
 
-      img.Image? receiptImage = decodeImage(
-          File('$appDocDirPath/${excelReceipt.fileName}').readAsBytesSync());
+  int imageStartRow = rowIndex + 5;
+  int imageColIndex = 0;
 
-      //Adding a picture
-      final List<int> bytes =
-          File('$appDocDirPath/${excelReceipt.fileName}').readAsBytesSync();
-      if (receiptImage != null) {
-        final picture = sheet.pictures.addStream(rowIndex, 4, bytes);
+  for (final excelReceipt in excelReceipts) {
+    final String appDocDirPath = (await getApplicationDocumentsDirectory()).path;
+    img.Image? receiptImage = decodeImage(File('$appDocDirPath/${excelReceipt.fileName}').readAsBytesSync());
 
-        const int maxCellDimension =
-            100; // Maximum dimension for either width or height
+    if (receiptImage != null) {
+      final List<int> bytes = File('$appDocDirPath/${excelReceipt.fileName}').readAsBytesSync();
+      const int maxCellDimension = 100;
+      double aspectRatio = receiptImage.width / receiptImage.height;
+      int newWidth, newHeight;
 
-        double aspectRatio = receiptImage.width / receiptImage.height;
-
-        int newWidth, newHeight;
-
-        if (aspectRatio >= 1) {
-          // Width is greater than height
-          newWidth = maxCellDimension;
-          newHeight = (maxCellDimension / aspectRatio).floor();
-        } else {
-          // Height is greater than width
-          newHeight = maxCellDimension;
-          newWidth = (maxCellDimension * aspectRatio).floor();
-        }
-
-        picture.width = newWidth;
-        picture.height = newHeight;
-
-        // Add padding by increasing the column width and row height
-        const double padding = 20; // adjust as needed
-        sheet.getRangeByName('D$rowIndex').columnWidth = newWidth + padding;
-        sheet.getRangeByName('D$rowIndex').rowHeight = newHeight + padding;
-
-        // // Set static row height and column width for the cell.
-        // sheet.getRangeByName('D$rowIndex').rowHeight = maxCellDimension.toDouble();
-        // sheet.getRangeByName('D$rowIndex').columnWidth = maxCellDimension.toDouble();
+      if (aspectRatio >= 1) {
+        newWidth = maxCellDimension;
+        newHeight = (maxCellDimension / aspectRatio).floor();
+      } else {
+        newHeight = maxCellDimension;
+        newWidth = (maxCellDimension * aspectRatio).floor();
       }
 
-      final folderNameColumn = sheet.getRangeByName('E$rowIndex');
-      folderNameColumn.setText(excelReceipt.name);
-      folderNameColumn.columnWidth = columnWidth;
+      if (imageColIndex == 5) {
+        imageStartRow += 15; 
+        imageColIndex = 0;
+      }
 
-      final fileNameColumn = sheet.getRangeByName('F$rowIndex');
-      fileNameColumn.setText(excelReceipt.fileName);
-      fileNameColumn.columnWidth = columnWidth;
+      sheet.getRangeByIndex(imageStartRow, imageColIndex + 1).setText(excelReceipt.name);
+      final picture = sheet.pictures.addStream(imageStartRow + 1, imageColIndex + 1, bytes);
+      
+      picture.width = newWidth * 2;
+      picture.height = newHeight * 2;
 
-      rowIndex++; // Increment the row index for the next iteration
+      imageColIndex++;
     }
-
-    // Save to the Excel file
-    final List<int> bytes = workbook.saveAsStream();
-    workbook.dispose();
-
-    // create temporary path to store excel file
-    String tempXlsxFileFullPath =
-        '${((await getTemporaryDirectory()).path)}/${folder.name}.xlsx';
-
-    // create a .xlsx file from the encoded bytes
-    final excelFile = await File(tempXlsxFileFullPath).writeAsBytes(bytes);
-
-    return excelFile;
   }
+
+  final List<int> bytes = workbook.saveAsStream();
+  workbook.dispose();
+  String tempXlsxFileFullPath = '${(await getTemporaryDirectory()).path}/${folder.name}.xlsx';
+  final excelFile = await File(tempXlsxFileFullPath).writeAsBytes(bytes);
+
+  return excelFile;
+}
 }
