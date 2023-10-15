@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/cubits/confirm_receipt/confirm_receipt_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/screens/file_explorer.dart';
 import 'package:receiptcamp/presentation/screens/image_view.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
@@ -178,7 +179,7 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView>
       child: Scaffold(
           appBar: AppBar(
             leading: IconButton(
-                icon: const Icon(Icons.close),
+                icon: const Icon(Icons.close, size: 26,),
                 onPressed: () => Navigator.of(context).pop()),
             backgroundColor: const Color(primaryDarkBlue),
             title: Row(
@@ -249,16 +250,9 @@ class _ReceiptConfirmationViewState extends State<ReceiptConfirmationView>
                   opacity: _animationController,
                   child: Column(
                     children: [
-                      // Folder Name
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          widget.folder.name,
-                          style: const TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.w600,
-                              color: Color(primaryGrey)),
-                        ),
+                        child: FolderName(name: widget.folder.name),
                       ),
                       // Divider
                       const Divider(
