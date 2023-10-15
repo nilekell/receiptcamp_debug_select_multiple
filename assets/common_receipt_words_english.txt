@@ -119,3 +119,41 @@ sale
 name
 thank
 you
+subtotal
+savings
+saving
+promotions
+promotion
+service
+opt serv
+points
+point
+voucher
+tax
+discount
+vat
+tip
+service charge
+coupon
+membership
+deposit
+fee
+delivery
+shipping
+promo
+refund
+adjustment
+gift card
+add-on
+extras
+upgrade
+surcharge
+packaging
+handling
+convenience fee
+loyalty
+rewards
+mileage
+win
+earn
+chance

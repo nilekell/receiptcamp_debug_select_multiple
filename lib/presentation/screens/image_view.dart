@@ -108,6 +108,8 @@ class _ImageViewScreenState extends State<ImageViewScreen> {
         GestureDetector(
           onTap: _toggleAppBar,
           child: PhotoView(
+            maxScale: PhotoViewComputedScale.contained * 6,
+            minScale: PhotoViewComputedScale.contained * 0.5,
             backgroundDecoration: const BoxDecoration(
               color: Colors.black,
             ),
@@ -142,6 +144,7 @@ class ImageViewAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedPositioned(
+      curve: Curves.easeOut,
       top: _isAppBarVisible ? 0 : -100,
       left: 0,
       right: 0,

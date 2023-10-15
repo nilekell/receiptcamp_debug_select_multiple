@@ -1,6 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
-import 'package:receiptcamp/data/services/document_path_provider.dart';
+import 'package:receiptcamp/data/services/directory_path_provider.dart';
 
 // class to model receipts to be stored in sql db
 class Receipt {
@@ -16,7 +16,7 @@ class Receipt {
 
   // builds and returns the full path of the receipt's image based on the app's
   // current application document directory path
-  String get localPath => '${DocumentDirectoryProvider.instance.appDocDirPath}/$fileName';
+  String get localPath => '${DirectoryPathProvider.instance.appDocDirPath}/$fileName';
 
   Receipt(
       {required this.id,
@@ -39,16 +39,14 @@ class Receipt {
     };
   }
 
-  factory Receipt.fromMap(Map<String, dynamic> map) {
-    return Receipt(
-        id: map['id'] as String,
-        name: map['name'] as String,
-        fileName: map['fileName'] as String,
-        dateCreated: map['dateCreated'] as int,
-        lastModified: map['lastModified'] as int,
-        storageSize: map['storageSize'] as int,
-        parentId: map['parentId'] as String);
-  }
+  Receipt.fromMap(Map<String, dynamic> map)
+    : id = map['id'],
+      name = map['name'],
+      fileName = map['fileName'],
+      dateCreated = map['dateCreated'],
+      lastModified = map['lastModified'],
+      storageSize = map['storageSize'],
+      parentId = map['parentId'];
 
   String toJson() => json.encode(toMap());
 
@@ -57,6 +55,32 @@ class Receipt {
 
 class ReceiptWithSize extends Receipt {
   final bool withSize;
+  final Receipt receipt;
 
-  ReceiptWithSize({required this.withSize, required super.id, required super.name, required super.fileName, required super.lastModified,  required super.dateCreated, required super.parentId, required super.storageSize, required Receipt receipt});
+  ReceiptWithSize({required this.withSize, required this.receipt}) : super(id: receipt.id, name: receipt.name, fileName: receipt.fileName, dateCreated: receipt.dateCreated, lastModified: receipt.lastModified, storageSize: receipt.storageSize, parentId: receipt.parentId);
+}
+
+class ExcelReceipt extends Receipt {
+  String price;
+
+  ExcelReceipt({required this.price, required Receipt receipt})
+      : super(
+            id: receipt.id,
+            name: receipt.name,
+            fileName: receipt.fileName,
+            dateCreated: receipt.dateCreated,
+            lastModified: receipt.lastModified,
+            storageSize: receipt.storageSize,
+            parentId: receipt.parentId);
+
+  ExcelReceipt.fromMap(Map<String, dynamic> map)
+      : price = map['price'],
+        super.fromMap(map);
+
+  @override
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> superMap = super.toMap();
+    superMap['price'] = price;
+    return superMap;
+  }
 }

@@ -7,29 +7,42 @@ import 'package:path_provider/path_provider.dart';
 // This class is required as the application documents directory path changes between
 // app updates so needs to be fetched whenever the app opens so it can be used to construct the
 // Receipt class' localPath member
-class DocumentDirectoryProvider {
-  DocumentDirectoryProvider._privateConstructor();
+class DirectoryPathProvider {
+  DirectoryPathProvider._privateConstructor();
 
-  static final DocumentDirectoryProvider _instance =
-      DocumentDirectoryProvider._privateConstructor();
+  static final DirectoryPathProvider _instance =
+      DirectoryPathProvider._privateConstructor();
 
-  static DocumentDirectoryProvider get instance => _instance;
+  static DirectoryPathProvider get instance => _instance;
 
   // a private field that stores the application documents directory path.
   String _appDocDirPath = 'uninitialised path';
+  
+  // a private field that stores the temporary directory path
+  String _tempDirPath = 'uninitialised path';
 
-  // a public getter to access the `_appDocDirPath`.
+  // a public getter to access the application documents directory path.
   String get appDocDirPath => _appDocDirPath;
+  
+  // a public getter to access the temporary directory path.
+  String get tempDirPath => _tempDirPath;
 
-  // a method that asynchronously fetches and sets the application documents directory path.
+  // a method that asynchronously fetches and sets the application documents & temporary directory paths.
   Future<void> initialize() async {
     try {
       final dir = await getApplicationDocumentsDirectory();
       _appDocDirPath = dir.path;
-      print('DocumentDirectoryProvider initialised with appDocDirPath: $_appDocDirPath');
+      final tempDir = await getTemporaryDirectory();
+      _tempDirPath = tempDir.path;
+
+      print('DirectoryPathProvider initialised with appDocDirPath: $appDocDirPath');
+      print('DirectoryPathProvider initialised with tempDirPath: $tempDirPath');
     } on Exception catch (e) {
       print("Error initializing appDocDirPath: $e");
       print('appDocDirPath: $appDocDirPath');
+      print('_appDocDirPath: $_appDocDirPath');
+      print('tempDirPath: $tempDirPath');
+      print('_tempDirPath: $_tempDirPath');
       rethrow;
     }
   }

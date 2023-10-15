@@ -48,6 +48,7 @@ dependencies:
   flutter_image_compress: ^2.0.3
   share_plus: ^7.1.0
   pdf: ^3.10.4
+  syncfusion_flutter_xlsio: ^23.1.40
   gallery_saver: ^2.3.2
   in_app_review: ^2.0.6
   url_launcher: ^6.1.14
@@ -62,6 +63,7 @@ dependencies:
   intl: ^0.18.1
   path_provider: ^2.0.15
   google_mlkit_text_recognition: ^0.10.0
+  google_mlkit_language_id: ^0.8.0
 
 dev_dependencies:
   flutter_test:
@@ -82,7 +84,14 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-    - assets/common_receipt_words.txt
+    - assets/common_receipt_words_english.txt
+    - assets/common_receipt_words_spanish.txt
+    - assets/common_receipt_words_french.txt
+    - assets/common_receipt_words_portugese.txt
+    - assets/common_receipt_words_german.txt
+    - assets/common_receipt_words_italian.txt
+    - assets/common_receipt_words_dutch.txt
+    - assets/common_receipt_words_romanian.txt
 
     - assets/x2_retina_receipt_icon.png
     
@@ -97,6 +106,7 @@ flutter:
     - assets/download.png
     - assets/share.png
     - assets/export_as_pdf.png
+    - assets/excel.png
     - assets/scan.png
     - assets/camera.png
     

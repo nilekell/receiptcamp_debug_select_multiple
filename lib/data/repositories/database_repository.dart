@@ -40,6 +40,16 @@ class DatabaseRepository {
     return await _databaseService.getFolderContents(folderId);
   }
 
+  Future<List<Receipt>> getAllReceiptsInFolder(String folderId) async {
+    return await _databaseService.getAllReceiptsInFolder(folderId);
+  }
+
+  Future<bool> folderIsEmpty(String folderId) async {
+    return await _databaseService.folderIsEmpty(folderId);
+  }
+
+
+
   // Method to get list of folders except for a specified folder
   Future<List<Folder>> getFoldersThatCanBeMovedTo(String fileToBeMovedId, String fileToBeMovedParentId) async {
     return await _databaseService.getFoldersThatCanBeMovedTo(fileToBeMovedId, fileToBeMovedParentId);

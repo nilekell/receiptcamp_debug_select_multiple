@@ -65,39 +65,37 @@ class _HomeState extends State<Home> {
                       context.read<HomeBloc>().add(HomeInitialEvent());
                     },
                     child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       // key preserves scroll position when switching tabs
                       key: const PageStorageKey<String>('HomeKey'),
                       itemCount: state.receipts.length,
                       itemBuilder: (context, index) {
                         final receipt = state.receipts[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              SlidingImageTransitionRoute(receipt: receipt)
-                            );
-                          },
-                          child: Column(
-                            children: [
-                              Container(
-                                color: Colors.white,
-                                height: MediaQuery.of(context).size.height / 3,
-                                padding: const EdgeInsets.all(
-                                    4.0), // padding between each card
-                                child: HomeReceiptTile(
-                                  receipt: receipt,
-                                ),
+                        return Column(
+                          children: [
+                            index == 0 ? const Padding(padding: EdgeInsetsDirectional.only(top: 24.0)) : const SizedBox.shrink(),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(25.0),
                               ),
-                              if (index !=
-                                  state.receipts.length -
-                                      1) // Check to not add a divider after the last item
-                                Divider(
-                                    thickness: 1,
-                                    indent: 16,
-                                    endIndent: 16,
-                                    color: Colors.grey[
-                                        400]), // Divider between HomeReceiptTile
-                            ],
-                          ),
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              height: MediaQuery.of(context).size.height / 3,
+                              child: HomeReceiptTile(
+                                receipt: receipt,
+                              ),
+                            ),
+                            index !=
+                                state.receipts.length -
+                                    1 ? // Check to not add a divider after the last item, instead add padding
+                              Divider(
+                                // how much space divider occupies vertically
+                                height: 40.0,
+                                  thickness: 1.0,
+                                  indent: 20.0,
+                                  endIndent: 20.0,
+                                  color: Colors.grey[
+                                      400]) : const Padding(padding: EdgeInsetsDirectional.symmetric(vertical: 8.0)),
+                          ],
                         );
                       },
                     )),
@@ -127,44 +125,54 @@ class HomeReceiptTile extends StatelessWidget {
   final Receipt receipt;
   final String displayDate;
 
+  final titleTextStyle = const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold);
+  final subTitleTextStyle = const TextStyle(fontSize: 16.0, color: Color(primaryGrey));
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Container(
-        color: Colors.white,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
-              child: Text(
-                displayName,
-                style: const TextStyle(
-                    fontSize: 18.0, fontWeight: FontWeight.bold),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+    return InkWell(
+      onTap: () {
+        Navigator.of(context)
+            .push(SlidingImageTransitionRoute(receipt: receipt));
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              displayName.length > 30 ? '${displayName.substring(0,30)}...' : displayName,
+              style: titleTextStyle,
             ),
-            Expanded(
-              child: ClipRRect(
-                // Round the top corners of the image
-                borderRadius: BorderRadius.circular(25.0),
+          ),
+          Flexible(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Container(
+                          decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(topRight: Radius.circular(40.0)), // rounding border corners
+                border: Border.all(
+                  color: const Color(primaryLightBlue), // border color
+                  width: 2, // border width
+                ),
+                          ),
+                          child: ClipRRect(
+                borderRadius: const BorderRadius.only(topRight: Radius.circular(40.0)), // rounding image corners
                 child: Image.file(
                   File(receipt.localPath),
                   fit: BoxFit.cover,
                 ),
-              ),
+                          ),
+                        ),
+              )),
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              'Created on $displayDate',
+              style: subTitleTextStyle,
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
-              child: Text(
-                'Created on $displayDate',
-                style: const TextStyle(fontSize: 16.0, color: Colors.grey),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

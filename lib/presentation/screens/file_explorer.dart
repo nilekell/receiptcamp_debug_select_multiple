@@ -164,8 +164,8 @@ class FolderName extends StatelessWidget {
     super.key,
     required this.name,
   }) : displayName = name.length > 20
-            ? "${name.substring(0, 20)}...".split('.').first
-            : name.split('.').first;
+            ? "${name.substring(0, 20)}..."
+            : name;
 
   final String displayName;
 
@@ -302,12 +302,83 @@ class RefreshableFolderView extends StatefulWidget {
 }
 
 class _RefreshableFolderViewState extends State<RefreshableFolderView> {
+
+  void _showEmptySnackBar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      backgroundColor: Color(primaryDeepBlue),
+      behavior: SnackBarBehavior.floating,
+      content: Text("Folder is empty, add some receipts to export"),
+      duration: Duration(milliseconds: 2000),
+    ));
+  }
+
+  Future<void> _showZipProcessingDialog(BuildContext context) {
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: ((context) {
+          return AlertDialog(
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(40.0))),
+            backgroundColor: const Color(primaryDeepBlue),
+            content: Row(
+              children: [
+                const CircularProgressIndicator(),
+                Container(
+                    margin: const EdgeInsets.only(left: 16),
+                    child: const Text(
+                      "Creating zip file...",
+                      style: TextStyle(color: Colors.white),
+                    )),
+              ],
+            ),
+          );
+        }));
+  }
+
+  Future<void> _showErrorDialog(BuildContext context) {
+    return showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: ((context) {
+          return const AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(40.0))),
+            backgroundColor: Color(primaryDeepBlue),
+            content: Text(
+              "Failed to create zip file, please try again later",
+              style: TextStyle(color: Colors.white),
+            ),
+          );
+        }));
+  }
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<FolderViewCubit, FolderViewState>(
-      listenWhen: (previous, current) => current is FolderViewActionState,
+      listenWhen: (previous, current) => current is FolderViewActionState || current is FolderViewLoadedSuccess,
       listener: (context, state) {
-        SnackBarUtility.showSnackBar(context, state as FolderViewActionState);
+        if (state is FolderViewActionState) {
+          SnackBarUtility.showSnackBar(context, state);
+          return;
+        }
+        if (state is FolderViewFileLoading) {
+          _showZipProcessingDialog(context);
+          return;
+        }
+        if (state is FolderViewError) {
+          _showErrorDialog(context);
+          return;
+        }
+        if (state is FolderViewFileEmpty) {
+          _showEmptySnackBar(context);
+        }
+        if (state is FolderViewFileLoaded) {
+          final folder = state.folder;
+          final zipFile = state.zipFile;
+          Navigator.of(context).pop();
+          context.read<FolderViewCubit>().shareFolder(folder, zipFile);
+          return;
+        }
       },
       buildWhen: (previous, current) =>
           previous is! FolderViewActionState ||
@@ -335,7 +406,8 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 controller: widget.scrollController,
                 slivers: <Widget>[
-                  state.files.isNotEmpty
+                  state.files.isNotEmpty ||
+                          state is FolderViewFileState
                       ? SliverToBoxAdapter(
                           child: SortOption(
                             displayWidget: getSortDisplayWidget(
@@ -347,7 +419,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                           ),
                         )
                       : SliverToBoxAdapter(child: Container()),
-                  state.files.isNotEmpty
+                  state.files.isNotEmpty || state is FolderViewFileState
                       ? SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {

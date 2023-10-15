@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
+import 'package:receiptcamp/presentation/screens/receipt_confirmation.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/delete_folder_confirmation_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/move_folder_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/rename_folder_dialog.dart';
@@ -21,7 +22,7 @@ void showFolderOptions(
     ),
     context: context,
     builder: (bottomSheetContext) => DraggableScrollableSheet(
-      initialChildSize: 0.5, // initial bottom sheet height
+      initialChildSize: 0.55, // initial bottom sheet height
       minChildSize: 0.25, // minimum possible bottom sheet height
       maxChildSize:
           0.8, // defines how high you can drag the the bottom sheet in relation to the screen height
@@ -138,8 +139,7 @@ void showFolderOptions(
             ),
             onTap: () {
               Navigator.of(bottomSheetContext).pop();
-              // opening deleting folder dialog
-              folderViewCubit.shareFolder(folder, false);
+              folderViewCubit.generateZipFile(folder, false);
             },
           ),
           ListTile(
@@ -164,11 +164,36 @@ void showFolderOptions(
               ),
             ),
             onTap: () {
-              Navigator.of(bottomSheetContext).pop();
-              folderViewCubit.shareFolder(folder, true);
+              folderViewCubit.generateZipFile(folder, true);
             },
           ),
-          const SizedBox(height: 50)
+          ListTile(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Transform.translate(
+                offset: const Offset(-10, 0),
+                child: Transform.scale(
+                    scale: 0.70,
+                    child: Image.asset(
+                      'assets/excel.png',
+                      color: secondaryColour,
+                      colorBlendMode: BlendMode.srcIn,
+                    )),
+              ),
+            ),
+            title: Transform.translate(
+              offset: const Offset(-15, 0),
+              child: const Text(
+                'Export with Excel',
+                style: textStyle,
+              ),
+            ),
+            onTap: () {
+              Navigator.of(bottomSheetContext).pop();
+              Navigator.of(context)
+            .push(SlidingTransitionRoute(folder: folder));
+            },
+          ),
         ],
       ),
     ),
