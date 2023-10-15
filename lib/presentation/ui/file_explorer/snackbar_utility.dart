@@ -28,6 +28,8 @@ abstract class SnackBarUtility {
             break;
         }
         break;
+      // for rename/move/delete/share failures, an unexpected error has occured so snackbar has shown
+      // and a bug fix will be required in the future
       case FolderViewRenameSuccess():
         message = "'${state.oldName}' renamed to '${state.newName}'";
         break;
@@ -47,7 +49,7 @@ abstract class SnackBarUtility {
         message = "Failed to delete '${state.deletedName}'";
         break;
       case FolderViewShareFailure():
-        message = "Failed to share '${state.folderName}' - folder is empty ";
+        message = "Failed to share '${state.folderName}' ";
         break;
       case FolderViewPermissionsFailure():
         if (state.permissionResult == PermissionFailedResult.invalidCamera) {
