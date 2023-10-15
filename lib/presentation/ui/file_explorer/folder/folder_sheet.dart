@@ -139,8 +139,7 @@ void showFolderOptions(
             ),
             onTap: () {
               Navigator.of(bottomSheetContext).pop();
-              // opening deleting folder dialog
-              folderViewCubit.shareFolder(folder, false);
+              folderViewCubit.generateZipFile(folder, false);
             },
           ),
           ListTile(
@@ -165,8 +164,7 @@ void showFolderOptions(
               ),
             ),
             onTap: () {
-              Navigator.of(bottomSheetContext).pop();
-              folderViewCubit.shareFolder(folder, true);
+              folderViewCubit.generateZipFile(folder, true);
             },
           ),
           ListTile(
