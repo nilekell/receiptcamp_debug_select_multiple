@@ -1,9 +1,13 @@
+import 'dart:io';
+import 'dart:isolate';
 import 'package:bloc/bloc.dart';
 import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
+import 'package:receiptcamp/data/services/isolate.dart';
 import 'package:receiptcamp/data/services/permissons.dart';
 import 'package:receiptcamp/data/services/preferences.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
@@ -22,6 +26,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
   final HomeBloc homeBloc;
   final PreferencesService prefs; 
+  List<dynamic> cachedCurrentlyDisplayedFiles = [];
 
   FolderViewCubit({required this.homeBloc, required this.prefs}) : super(FolderViewInitial());
 
@@ -33,7 +38,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
   }
 
   // get folder files
-  fetchFilesInFolderSortedBy(String folderId, {String? column, String? order, bool userSelectedSort = false}) async {
+  fetchFilesInFolderSortedBy(String folderId, {String? column, String? order, bool userSelectedSort = false, useCachedFiles = false}) async {
     emit(FolderViewLoading());
 
     // if column and order are left out of the method call (null), set them to the last value
@@ -41,6 +46,8 @@ class FolderViewCubit extends Cubit<FolderViewState> {
     order ??= prefs.getLastOrder();
 
     try {
+      final folder = await DatabaseRepository.instance.getFolderById(folderId);
+
       // userSelectedSort is true when the user taps on a tile in order options bottom sheet
       // this distinguishes between the user navigating between folders and sorting in the options sheet
       if (userSelectedSort && _isSameSort(order, column)) {
@@ -48,12 +55,16 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         order = order == 'ASC' ? 'DESC' : 'ASC';
       }
 
-      final folder = await DatabaseRepository.instance.getFolderById(folderId);
+      if (useCachedFiles) {
+        emit(FolderViewLoadedSuccess(files: cachedCurrentlyDisplayedFiles, folder: folder, orderedBy: column, order: order));
+        return;
+      }
 
       if (column == 'storageSize') {
         final List<FolderWithSize> foldersWithSize = await DatabaseRepository.instance.getFoldersByTotalReceiptSize(folderId, order);
         final List<ReceiptWithSize> receiptsWithSize =  await DatabaseRepository.instance.getReceiptsBySize(folderId, order);
         final List<Object> files = [...foldersWithSize, ...receiptsWithSize];
+        cachedCurrentlyDisplayedFiles = files;
         emit(FolderViewLoadedSuccess(files: files, folder: folder, orderedBy: column, order: order));
 
         // updating last column and last order
@@ -65,6 +76,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       final List<Folder> folders = await DatabaseRepository.instance.getFoldersInFolderSortedBy(folderId, column, order);
       final List<Receipt> receipts = await DatabaseRepository.instance.getReceiptsInFolderSortedBy(folderId, column, order);
       final List<Object> files = [...folders, ...receipts];
+      cachedCurrentlyDisplayedFiles = files;
       emit(FolderViewLoadedSuccess(files: files, folder: folder, orderedBy: column, order: order));
 
       // updating last column and last order
@@ -98,6 +110,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
           oldName: folder.name,
           newName: targetFolderName,
           folderId: folder.parentId));
+      fetchFilesInFolderSortedBy(folder.parentId, useCachedFiles: true);
     }
   }
 
@@ -120,6 +133,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       print(e.toString());
       emit(FolderViewDeleteFailure(
           deletedName: deletedFolder.name, folderId: deletedFolder.parentId));
+      fetchFilesInFolderSortedBy(deletedFolder.parentId, useCachedFiles: true);
     }
   }
 
@@ -146,6 +160,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
     } on Exception catch (e) {
       print('Error in uploadFolder: $e');
       emit(FolderViewError());
+      fetchFilesInFolderSortedBy(parentFolderId, useCachedFiles: true);
     }
   }
 
@@ -160,6 +175,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       print(e.toString());
       emit(FolderViewRenameFailure(
           oldName: folder.name, newName: newName, folderId: folder.parentId));
+      fetchFilesInFolderSortedBy(folder.parentId, useCachedFiles: true);
     }
   }
 
@@ -180,6 +196,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
           oldName: receipt.name,
           newName: targetFolderName,
           folderId: receipt.parentId));
+      fetchFilesInFolderSortedBy(receipt.parentId, useCachedFiles: true);
     }
   }
 
@@ -201,6 +218,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       print(e.toString());
       emit(FolderViewDeleteFailure(
           deletedName: deletedReceipt.name, folderId: deletedReceipt.parentId));
+      fetchFilesInFolderSortedBy(deletedReceipt.parentId, useCachedFiles: true);
     }
   }
 
@@ -214,7 +232,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         emit(FolderViewPermissionsFailure(
             folderId: currentFolderId,
             permissionResult: PermissionsService.instance.photosResult));
-        fetchFilesInFolderSortedBy(currentFolderId);
+        fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
         return;
       }
     }
@@ -231,7 +249,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
           await ReceiptService.isValidImage(receiptImage.path);
       if (!validImage) {
         emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
-        fetchFilesInFolderSortedBy(currentFolderId);
+        fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
         return;
       }
 
@@ -256,6 +274,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
       emit(FolderViewError());
+       fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
     }
   }
 
@@ -267,7 +286,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         emit(FolderViewPermissionsFailure(
             folderId: currentFolderId,
             permissionResult: PermissionsService.instance.cameraResult));
-        fetchFilesInFolderSortedBy(currentFolderId);
+        fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
         return;
       }
     }
@@ -284,7 +303,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
           await ReceiptService.isValidImage(receiptPhoto.path);
       if (!validImage) {
         emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
-        fetchFilesInFolderSortedBy(currentFolderId);
+        fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
         return;
       }
 
@@ -309,6 +328,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
       emit(FolderViewError());
+      fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
     }
   }
 
@@ -320,7 +340,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         emit(FolderViewPermissionsFailure(
             folderId: currentFolderId,
             permissionResult: PermissionsService.instance.cameraResult));
-        fetchFilesInFolderSortedBy(currentFolderId);
+        fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
         return;
       }
     }
@@ -340,7 +360,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         if (!validImage) {
           // if a single image fails the validation, all images are discarded
           emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
-          fetchFilesInFolderSortedBy(currentFolderId);
+          fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
           return;
         }
         // only adding images that pass validations to list
@@ -371,6 +391,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
       emit(FolderViewError());
+      fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
     }
   }
 
