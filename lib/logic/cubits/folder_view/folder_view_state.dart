@@ -96,6 +96,44 @@ final class FolderViewDeleteFailure extends FolderViewActionState {
 
 // Sharing states
 
+final class FolderViewFileState extends FolderViewLoadedSuccess {
+  const FolderViewFileState({required super.files, required super.folder, required super.orderedBy, required super.order});
+  
+  @override
+  List<Object> get props => [files, folder, orderedBy, order];
+}
+
+final class FolderViewFileLoading extends FolderViewFileState {
+  const FolderViewFileLoading({required super.files, required super.folder, required super.orderedBy, required super.order});
+  
+  @override
+  List<Object> get props => [files, folder, orderedBy, order];
+}
+
+final class FolderViewFileLoaded extends FolderViewFileState {
+  const FolderViewFileLoaded({required this.zipFile, required super.files, required super.folder, required super.orderedBy, required super.order});
+
+  final File zipFile;
+
+  @override
+  List<Object> get props => [files, folder, orderedBy, order, zipFile];
+}
+
+final class FolderViewFileError extends FolderViewFileState {
+  const FolderViewFileError({required super.files, required super.folder, required super.orderedBy, required super.order});
+
+  @override
+  List<Object> get props => [files, folder, orderedBy, order];
+}
+
+final class FolderViewFileEmpty extends FolderViewFileState {
+  const FolderViewFileEmpty({required super.files, required super.folder, required super.orderedBy, required super.order});
+
+  @override
+  List<Object> get props => [files, folder, orderedBy, order];
+}
+
+// currently FolderViewShareSuccess is not used
 final class FolderViewShareSuccess extends FolderViewActionState {
   const FolderViewShareSuccess({required this.receiptName, required super.folderId});
 

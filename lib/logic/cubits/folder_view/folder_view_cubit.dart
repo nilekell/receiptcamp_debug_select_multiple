@@ -390,17 +390,61 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       print(e.toString());
       emit(FolderViewRenameFailure(
           oldName: receipt.name, newName: newName, folderId: receipt.parentId));
+      fetchFilesInFolderSortedBy(receipt.parentId, useCachedFiles: true);
+    }
+  }
+
+  generateZipFile(Folder folder, bool withPdfs) async {
+
+    final folderIsEmpty = await DatabaseRepository.instance.folderIsEmpty(folder.id);
+    
+    if (folderIsEmpty) {
+      emit(FolderViewFileEmpty(folder: folder, files: cachedCurrentlyDisplayedFiles, orderedBy: prefs.getLastColumn(), order: prefs.getLastOrder(),));
+      fetchFilesInFolderSortedBy(folder.parentId, useCachedFiles: true);
+      return;
+    }
+
+    emit(FolderViewFileLoading(files: cachedCurrentlyDisplayedFiles, folder: folder, orderedBy: prefs.getLastColumn(), order: prefs.getLastOrder()));
+
+    try {
+      Map<String, dynamic> serializedFolder = folder.toMap();
+
+      Map<String, dynamic> computeParams = {
+        'folder': serializedFolder,
+        'withPdfs': withPdfs
+      };
+
+      // Prepare data to pass to isolate
+      final isolateParams = IsolateParams(
+        computeParams: computeParams,
+        rootToken: RootIsolateToken.instance!,
+      );
+
+      final receivePort = ReceivePort();
+      await Isolate.spawn(IsolateService.zipFileEntryFunction, {
+        'isolateParams': isolateParams,
+        'sendPort': receivePort.sendPort,
+      });
+
+      // Receive data back from the isolate
+      final File zipFile = await receivePort.first;
+
+      emit(FolderViewFileLoaded(zipFile: zipFile, files: cachedCurrentlyDisplayedFiles, folder: folder, orderedBy: prefs.getLastColumn(), order: prefs.getLastOrder()));
+    } on Exception catch (e) {
+      print(e.toString());
+      emit(FolderViewFileError(files: cachedCurrentlyDisplayedFiles, folder: folder, orderedBy: prefs.getLastColumn(), order: prefs.getLastOrder()));
+      fetchFilesInFolderSortedBy(folder.parentId, useCachedFiles: true);
     }
   }
 
   // share folder
-  shareFolder(Folder folder, bool withPdfs) async {
+  shareFolder(Folder folder, File zipFile) async {
     try {
-      await FileService.shareFolderAsZip(folder, withPdfs);
+      await FileService.shareFolderAsZip(folder, zipFile);
     } on Exception catch (e) {
       print(e.toString());
       emit(FolderViewShareFailure(errorMessage: e.toString(), folderId: folder.id, folderName: folder.name));
-      fetchFilesInFolderSortedBy(folder.parentId);
+      fetchFilesInFolderSortedBy(folder.parentId, useCachedFiles: true);
     }
   }
 }
