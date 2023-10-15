@@ -182,14 +182,67 @@ class TextRecognitionService {
       finalValue = value;
     }
 
-    finalPrice = '$currencySign${finalValue.toStringAsFixed(2)}';
-
-    // print('##################');
-    // print(basename(imagePath));
-    // print('potential prices: $potentialPrices');
-    // print('finalValue: $finalValue');
-    // print('finalPrice: $finalPrice');
-
+    String finalPrice = '$currencySign${finalValue.toStringAsFixed(2)}';
+    
     return finalPrice;
+  }
+
+  // getting words to discard in receipt when scanning for price
+  // only for latin languages
+  static Future<RegExp> getDiscardRegExp(String textToAnalyze) async {
+    final languageIdentifier = LanguageIdentifier(confidenceThreshold: 0.5);
+    final String detectedLanguage =
+        await languageIdentifier.identifyLanguage(textToAnalyze);
+
+    String discardRegExpPattern;
+
+    switch (detectedLanguage) {
+  case 'en': // English
+    discardRegExpPattern =
+        r'subtotal|savings|saving|promotions|promotion|service|opt serv|points|point|voucher|tax|discount|vat|tip|service charge|coupon|membership|deposit|fee|delivery|shipping|promo|refund|adjustment|gift card|add-on|extras|upgrade|surcharge|packaging|handling|convenience fee|loyalty|rewards|mileage|win|earn|chance';
+    break;
+  case 'fr': // French
+    discardRegExpPattern =
+        r'sous-total|économies|économie|promotions|promotion|service|opt serv|points|point|bon|taxe|rabais|tva|pourboire|frais de service|coupon|adhésion|dépôt|frais|livraison|expédition|promo|remboursement|ajustement|carte cadeau|supplément|extra|mise à niveau|supplément|emballage|manutention|frais de commodité|fidélité|récompenses|kilométrage|gagner|gagne|chance';
+    break;
+  case 'de': // German
+    discardRegExpPattern =
+        r'Teilsumme|Ersparnisse|Ersparnis|Aktionen|Aktion|Bedienung|Opt Dienst|Punkte|Punkt|Gutschein|Steuer|Rabatt|MwSt|Trinkgeld|Servicegebühr|Gutschein|Mitgliedschaft|Anzahlung|Gebühr|Lieferung|Versand|Promo|Rückerstattung|Anpassung|Geschenkkarte|Zusatz|Extras|Upgrade|Aufschlag|Verpackung|Handhabung|Komfortgebühr|Treue|Prämien|Kilometer|gewinnen|verdienen|Chance';
+    break;
+  case 'es': // Spanish
+    discardRegExpPattern =
+        r'subtotal|ahorros|ahorro|promociones|promoción|servicio|serv opc|puntos|punto|vale|impuesto|descuento|iva|propina|cargo de servicio|cupón|membresía|depósito|tarifa|entrega|envío|promo|reembolso|ajuste|tarjeta regalo|complemento|extras|mejora|recargo|embalaje|manipulación|cargo por comodidad|lealtad|recompensas|kilometraje|ganar|ganancia|oportunidad';
+    break;
+  case 'pt': // Portuguese
+    discardRegExpPattern =
+        r'subtotal|economias|economia|promoções|promoção|serviço|serv opc|pontos|ponto|vale|imposto|desconto|iva|gorjeta|taxa de serviço|cupom|associação|depósito|tarifa|entrega|remessa|promo|reembolso|ajuste|cartão presente|adicional|extras|melhoria|sobretaxa|embalagem|manuseio|taxa de conveniência|lealdade|recompensas|quilometragem|ganhar|ganho|chance';
+    break;
+  case 'it': // Italian
+    discardRegExpPattern =
+        r'subtotale|risparmi|risparmio|promozioni|promozione|servizio|serv opt|punti|punto|buono|tassa|sconto|IVA|mancia|spesa di servizio|coupon|adesione|deposito|tariffa|consegna|spedizione|promo|rimborso|aggiustamento|buono regalo|extra|extras|aggiornamento|sovrattassa|imballaggio|maneggiamento|tassa di comodità|lealtà|ricompense|chilometraggio|vincere|guadagnare|opportunità';
+    break;
+  case 'ro': // Romanian
+    discardRegExpPattern =
+        r'subtotal|economii|economie|promoții|promoție|serviciu|serv opț|puncte|punct|tichet|taxă|reducere|TVA|bacșiș|taxă de serviciu|cupon|membru|depozit|tarif|livrare|transport|promo|rambursare|ajustare|card cadou|suplimentar|extra|actualizare|suprataxă|ambalaj|manipulare|taxa de comoditate|loialitate|recompense|kilometraj|câștiga|câștig|șansă';
+    break;
+  case 'nl': // Dutch
+    discardRegExpPattern =
+        r"subtotaal|besparingen|besparing|promoties|promotie|service|opt serv|punten|punt|voucher|belasting|korting|btw|fooien|servicekosten|coupon|lidmaatschap|aanbetaling|vergoeding|bezorging|verzending|promo|terugbetaling|aanpassing|cadeaubon|toevoeging|extra's|upgrade|toeslag|verpakking|afhandeling|gemaksvergoeding|loyaliteit|beloningen|kilometerstand|winnen|verdienen|kans";
+    break;
+  default: // Default to English
+    discardRegExpPattern =
+        r'subtotal|savings|saving|promotions|promotion|service|opt serv|points|point|voucher|tax|discount|vat|tip|service charge|coupon|membership|deposit|fee|delivery|shipping|promo|refund|adjustment|gift card|add-on|extras|upgrade|surcharge|packaging|handling|convenience fee|loyalty|rewards|mileage|win|earn|chance';
+    break;
+}
+
+
+    RegExp discardRegExp = RegExp(
+      discardRegExpPattern,
+      caseSensitive: false,
+    );
+
+    languageIdentifier.close();
+
+    return discardRegExp;
   }
 }
