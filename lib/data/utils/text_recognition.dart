@@ -141,27 +141,21 @@ class TextRecognitionService {
         await textRecognizer.processImage(inputImage);
 
     final textToAnalyse = recognizedText.text;
-
-    // getting correct latin language for discardRegExp
     RegExp discardRegExp = await getDiscardRegExp(textToAnalyse);
 
     RegExp priceRegExp = RegExp(
-      r'((\$|€|¥|£|₹)\s?(\d+)(\.\d{2})?|(\d+)(\.\d{2})?\s?(\$|€|¥|£|₹))',
+      r'((\$|€|¥|£|₹)\s?(\d+\.\d{2})?)|(\d+\.\d{2})',
       caseSensitive: false,
     );
 
-    String scannedText = '';
     List<String> potentialPrices = [];
 
     for (TextBlock block in recognizedText.blocks) {
       for (TextLine line in block.lines) {
-        // skipping lines that have text that may look like a price but is actually a promo
         if (discardRegExp.hasMatch(line.text)) continue;
         for (TextElement element in line.elements) {
-          scannedText = element.text;
-          // skipping text that has no currency symbol in it
+          String scannedText = element.text;
           if (priceRegExp.hasMatch(scannedText) == false) continue;
-          // skipping if scannedText is already in potentialPrices
           if (potentialPrices.contains(scannedText)) continue;
 
           potentialPrices.add(scannedText);
@@ -169,39 +163,34 @@ class TextRecognitionService {
       }
     }
 
-    Set<String> currencySymbols = {
-      '\$', '€', '¥', '£', '₹'
-    };
-
-    print('potentialPrices: $potentialPrices');
-
-    // setting default currency symbol
-    String currencySign = '£';
-
-    // setting initial final value
+    Set<String> currencySymbols = {'\$', '€', '¥', '£', '₹'};
     double finalValue = 0.00;
+    String currencySign = '£'; // Default currency symbol
 
     for (final potentialPrice in potentialPrices) {
       String cleanedPrice = potentialPrice.trim();
 
-      // Capture and remove currency symbol from price to extract numerical value
+      bool foundCurrencySymbol = false;
+
       for (String symbol in currencySymbols) {
         if (cleanedPrice.contains(symbol)) {
           currencySign = symbol;
           cleanedPrice = cleanedPrice.replaceAll(symbol, '');
-          print('cleanedPrice: $cleanedPrice');
+          foundCurrencySymbol = true;
           break;
         }
       }
 
       double? value = double.tryParse(cleanedPrice);
-      if (value == null) continue;
-      if (value < finalValue) continue;
+      if (value == null || value < finalValue) continue;
       finalValue = value;
+      
+      if (!foundCurrencySymbol) {
+        currencySign = '£'; // Default currency symbol if none found
+      }
     }
 
     String finalPrice = '$currencySign${finalValue.toStringAsFixed(2)}';
-    
     return finalPrice;
   }
 
