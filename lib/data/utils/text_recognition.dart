@@ -133,28 +133,20 @@ class TextRecognitionService {
       return false;
     }
   }
-  
-  static Future<String> extractPriceFromImage(String imagePath) async {
-    String finalPrice;
-    double finalValue = 0.00;
-    String currencySign = '£';
 
+  static Future<String> extractPriceFromImage(String imagePath) async {
     final inputImage = InputImage.fromFilePath(imagePath);
     final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
     final RecognizedText recognizedText =
         await textRecognizer.processImage(inputImage);
 
-    // (\£|\$|\€): This will match any of the currency symbols (£, $, €).
-    // (\d+): This will match one or more digits.
-    // (\.\d{2})?: This will match the optional decimal point followed by exactly two digits.
-    RegExp priceRegExp = RegExp(
-      r'(\£|\$|\€)(\d+)(\.\d{2})?',
-      multiLine: true,
-      caseSensitive: false,
-    );
+    final textToAnalyse = recognizedText.text;
 
-    RegExp discardRegExp = RegExp(
-      r'subtotal|savings|promotions|promotion|service|opt serv|points|point|voucher|tax|discount|vat|tip|service charge|coupon|membership|deposit|fee|delivery|shipping|promo|refund|adjustment|gift card',
+    // getting correct latin language for discardRegExp
+    RegExp discardRegExp = await getDiscardRegExp(textToAnalyse);
+
+    RegExp priceRegExp = RegExp(
+      r'((\$|€|¥|£|₹)\s?(\d+)(\.\d{2})?|(\d+)(\.\d{2})?\s?(\$|€|¥|£|₹))',
       caseSensitive: false,
     );
 
@@ -163,20 +155,46 @@ class TextRecognitionService {
 
     for (TextBlock block in recognizedText.blocks) {
       for (TextLine line in block.lines) {
+        // skipping lines that have text that may look like a price but is actually a promo
         if (discardRegExp.hasMatch(line.text)) continue;
         for (TextElement element in line.elements) {
           scannedText = element.text;
+          // skipping text that has no currency symbol in it
           if (priceRegExp.hasMatch(scannedText) == false) continue;
-          if (scannedText == '') continue;
+          // skipping if scannedText is already in potentialPrices
           if (potentialPrices.contains(scannedText)) continue;
+
           potentialPrices.add(scannedText);
-          currencySign = scannedText[0];
         }
       }
     }
 
-    for (final price in potentialPrices) {
-      double? value = double.tryParse(price.trim().substring(1));
+    Set<String> currencySymbols = {
+      '\$', '€', '¥', '£', '₹'
+    };
+
+    print('potentialPrices: $potentialPrices');
+
+    // setting default currency symbol
+    String currencySign = '£';
+
+    // setting initial final value
+    double finalValue = 0.00;
+
+    for (final potentialPrice in potentialPrices) {
+      String cleanedPrice = potentialPrice.trim();
+
+      // Capture and remove currency symbol from price to extract numerical value
+      for (String symbol in currencySymbols) {
+        if (cleanedPrice.contains(symbol)) {
+          currencySign = symbol;
+          cleanedPrice = cleanedPrice.replaceAll(symbol, '');
+          print('cleanedPrice: $cleanedPrice');
+          break;
+        }
+      }
+
+      double? value = double.tryParse(cleanedPrice);
       if (value == null) continue;
       if (value < finalValue) continue;
       finalValue = value;
