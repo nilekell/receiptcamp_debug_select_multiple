@@ -191,7 +191,7 @@ void showFolderOptions(
             onTap: () {
               Navigator.of(bottomSheetContext).pop();
               Navigator.of(context)
-            .push(SlidingTransitionRoute(folder: folder));
+            .push(SlidingReceiptConfirmationTransitionRoute(folder: folder));
             },
           ),
         ],
