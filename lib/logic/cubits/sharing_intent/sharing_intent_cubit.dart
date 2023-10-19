@@ -6,7 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/utils/receipt_helper.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
-import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
+import 'package:receiptcamp/logic/cubits/file_explorer/file_explorer_cubit.dart';
 import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
@@ -17,10 +17,10 @@ part 'sharing_intent_state.dart';
 
 class SharingIntentCubit extends Cubit<SharingIntentState> {
 
-  SharingIntentCubit({required this.homeBloc, required this.fileSystemCubit, required this.mediaStream, required this.initialMedia, required this.landingCubit}) : super(SharingIntentFilesInitial());
+  SharingIntentCubit({required this.homeBloc, required this.fileExplorerCubit, required this.mediaStream, required this.initialMedia, required this.landingCubit}) : super(SharingIntentFilesInitial());
 
   final HomeBloc homeBloc;
-  final FileSystemCubit fileSystemCubit;
+  final FileExplorerCubit fileExplorerCubit;
   final LandingCubit landingCubit;
 
   Stream<List<File>> mediaStream;
@@ -111,7 +111,7 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
       landingCubit.updateIndex(1);
       // navigating to parent folder in FileExplorer when RecieveReceiptView is closed
       // notifying fileSystemCubit to reload after all receipts imported
-      fileSystemCubit.selectFolder(folderId);
+      fileExplorerCubit.selectFolder(folderId);
       emit(SharingIntentClose(folders: const [], savedReceipts: savedReceipts));
     } on Exception catch (e) {
       print(e.toString());
