@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'dart:io';
 import 'dart:isolate';
 import 'package:bloc/bloc.dart';
@@ -362,16 +364,18 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
+      bool someImagesFailed = false;
+      ValidationError invalidImageReason = ValidationError.none;
+
       // iterating over scanned images and checking image size and if they contain text
       for (final path in scannedImagePaths) {
         bool validImage;
         (validImage, invalidImageReason)  =
             await ReceiptService.isValidImage(path);
         if (!validImage) {
-          // if a single image fails the validation, all images are discarded
-          emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
-          fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
-          return;
+          someImagesFailed = true;
+          // fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
+          continue;
         }
         // only adding images that pass validations to list
         validatedImagePaths.add(path);
@@ -391,6 +395,12 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
         emit(FolderViewUploadSuccess(
             uploadedName: receipt.name, folderId: receipt.parentId));
+      }
+
+      if (someImagesFailed) {
+        print(invalidImageReason.name);
+        // if a single image fails the validation, show the upload failed
+        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
       }
       
       // notifying home bloc to reload when a receipt is uploaded from document scan
