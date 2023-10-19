@@ -281,7 +281,7 @@ class FolderViewCubit extends Cubit<FolderViewState> {
             uploadedName: receipt.name, folderId: receipt.parentId));
       }
 
-      // notifying home bloc to reload when a receipt is uploaded from gallery
+      // notifying home bloc to reload when all receipts uploaded from gallery
       homeBloc.add(HomeLoadReceiptsEvent());
 
       if (someImagesFailed) {
