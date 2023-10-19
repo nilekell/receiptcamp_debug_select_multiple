@@ -10,6 +10,8 @@ import 'package:receiptcamp/data/services/sharing_intent.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/bloc_observer.dart';
 import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
+import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
 import 'package:receiptcamp/logic/cubits/sharing_intent/sharing_intent_cubit.dart';
 import 'package:receiptcamp/presentation/screens/landing_screen.dart';
@@ -33,11 +35,6 @@ void main() async {
   // timeDilation = 8;
   runApp(MultiBlocProvider(
     providers: [
-      BlocProvider<SharingIntentCubit>(
-          create: (context) => SharingIntentCubit(
-              mediaStream: SharingIntentService.instance.mediaStream,
-              initialMedia: SharingIntentService.instance.initialMedia)..init(),
-        ),
       BlocProvider<LandingCubit>(
           create: (BuildContext context) => LandingCubit()),
       BlocProvider<HomeBloc>(
@@ -45,8 +42,28 @@ void main() async {
             HomeBloc(databaseRepository: DatabaseRepository.instance)
               ..add(HomeInitialEvent()),
       ),
-      BlocProvider(create: (BuildContext context) => SearchBloc(databaseRepository: DatabaseRepository.instance)
-              ..add(const SearchInitialEvent()))
+      BlocProvider<FileSystemCubit>(
+        create: (context) => FileSystemCubit()..initializeFileSystemCubit(),
+      ),
+      BlocProvider(
+        create: (context) => FolderViewCubit(
+            homeBloc: context.read<HomeBloc>(),
+            prefs: PreferencesService.instance)
+          ..initFolderView(),
+      ),
+      BlocProvider<SharingIntentCubit>(
+        create: (context) => SharingIntentCubit(
+            mediaStream: SharingIntentService.instance.mediaStream,
+            initialMedia: SharingIntentService.instance.initialMedia,
+            homeBloc: context.read<HomeBloc>(),
+            fileSystemCubit: context.read<FileSystemCubit>(),
+            landingCubit: context.read<LandingCubit>())
+          ..init(),
+      ),
+      BlocProvider(
+          create: (BuildContext context) =>
+              SearchBloc(databaseRepository: DatabaseRepository.instance)
+                ..add(const SearchInitialEvent()))
     ],
     child: const MyApp(),
   ));
