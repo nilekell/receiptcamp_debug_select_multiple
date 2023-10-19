@@ -30,19 +30,19 @@ class SharingIntentService {
   Future<List<File>> _mapSharedMediaFiles(
       List<SharedMediaFile> sharedMediaFiles) async {
 
-    print('sharedMediaFiles count: ${sharedMediaFiles.length}');
+    // print('sharedMediaFiles count: ${sharedMediaFiles.length}');
     List<File> sharedFiles = [];
 
     File tempImage;
 
     for (final file in sharedMediaFiles) {
-      print('sharedMediaFile: ${file.path}');
+      // print('sharedMediaFile: ${file.path}');
       File sharedImage = File(file.path);
       String sharedImageExtension = extension(sharedImage.path);
 
       // skipping over and deleting images that aren't jpeg or png
       if (!imageFileExtensionRegExp.hasMatch(sharedImageExtension)) {
-        print('discarded ${basename(sharedImage.path)}: image is not jpeg/png');
+        // print('discarded ${basename(sharedImage.path)}: image is not jpeg/png');
         sharedImage.delete();
         continue;
       }
@@ -51,7 +51,7 @@ class SharingIntentService {
       final (validImage as bool, invalidImageReason as ValidationError) =
           await ReceiptService.isValidImage(file.path);
       if (!validImage) {
-        print('discarded ${basename(sharedImage.path)}: image failed validation - ${invalidImageReason.name}');
+        // print('discarded ${basename(sharedImage.path)}: image failed validation - ${invalidImageReason.name}');
         sharedImage.delete();
         continue;
       }
@@ -59,7 +59,7 @@ class SharingIntentService {
       // copying images to temporary directory folder
       String newTempPath = '${DirectoryPathProvider.instance.tempDirPath}/${(basename(sharedImage.path).toLowerCase())}';
       tempImage = await sharedImage.copy(newTempPath);
-      print('saving file: ${basename(tempImage.path)}');
+      // print('saving file: ${basename(tempImage.path)}');
       sharedFiles.add(tempImage);
 
       sharedImage.delete();
