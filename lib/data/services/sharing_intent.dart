@@ -35,6 +35,8 @@ class SharingIntentService {
 
     File tempImage;
 
+    ValidationError invalidImageReason = ValidationError.none;
+
     for (final file in sharedMediaFiles) {
       // print('sharedMediaFile: ${file.path}');
       File sharedImage = File(file.path);
@@ -48,7 +50,8 @@ class SharingIntentService {
       }
 
       // skipping over and deleting images that don't pass receipt validation
-      final (validImage as bool, invalidImageReason as ValidationError) =
+      bool validImage;
+      (validImage, invalidImageReason) =
           await ReceiptService.isValidImage(file.path);
       if (!validImage) {
         // print('discarded ${basename(sharedImage.path)}: image failed validation - ${invalidImageReason.name}');

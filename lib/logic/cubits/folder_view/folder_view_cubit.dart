@@ -237,6 +237,8 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       }
     }
 
+    ValidationError invalidImageReason = ValidationError.none;
+
     try {
       final ImagePicker imagePicker = ImagePicker();
       final XFile? receiptImage =
@@ -245,7 +247,9 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
-      final (validImage as bool, invalidImageReason as ValidationError) =
+      bool validImage;
+
+      (validImage, invalidImageReason) =
           await ReceiptService.isValidImage(receiptImage.path);
       if (!validImage) {
         emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
@@ -291,6 +295,8 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       }
     }
 
+    ValidationError invalidImageReason = ValidationError.none;
+
     try {
       final ImagePicker imagePicker = ImagePicker();
       final XFile? receiptPhoto =
@@ -299,10 +305,13 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
-      final (validImage as bool, invalidImageReason as ValidationError) =
+      bool validImage;
+
+      (validImage, invalidImageReason) =
           await ReceiptService.isValidImage(receiptPhoto.path);
       if (!validImage) {
-        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+        emit(FolderViewUploadFailure(
+            folderId: currentFolderId, validationType: invalidImageReason));
         fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
         return;
       }
@@ -355,7 +364,8 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
       // iterating over scanned images and checking image size and if they contain text
       for (final path in scannedImagePaths) {
-        final (validImage as bool, invalidImageReason as ValidationError) =
+        bool validImage;
+        (validImage, invalidImageReason)  =
             await ReceiptService.isValidImage(path);
         if (!validImage) {
           // if a single image fails the validation, all images are discarded
