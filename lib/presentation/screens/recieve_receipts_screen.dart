@@ -5,10 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart';
 import 'package:receiptcamp/logic/cubits/sharing_intent/sharing_intent_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
+import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class SlidingReceiveReceiptTransitionRoute extends PageRouteBuilder {
-  SlidingReceiveReceiptTransitionRoute()
+  final List<File> receiptFiles;
+  
+  SlidingReceiveReceiptTransitionRoute({required this.receiptFiles})
       : super(
           opaque: false,
           pageBuilder: (BuildContext context, Animation<double> animation,
@@ -19,7 +22,7 @@ class SlidingReceiveReceiptTransitionRoute extends PageRouteBuilder {
               },
               key: UniqueKey(),
               direction: DismissDirection.down,
-              child: const ReceiveReceiptView(),
+              child: ReceiveReceiptView(receiptFiles: receiptFiles),
             );
           },
           transitionsBuilder: (BuildContext context,
@@ -39,7 +42,7 @@ class SlidingReceiveReceiptTransitionRoute extends PageRouteBuilder {
               position: offsetAnimation,
               child: BlocProvider.value(
                 value: context.read<SharingIntentCubit>(),
-                child: const ReceiveReceiptView(),
+                child: ReceiveReceiptView(receiptFiles: receiptFiles,),
               ),
             );
           },
@@ -48,7 +51,9 @@ class SlidingReceiveReceiptTransitionRoute extends PageRouteBuilder {
 }
 
 class ReceiveReceiptView extends StatefulWidget {
-  const ReceiveReceiptView({super.key});
+  const ReceiveReceiptView({super.key, required this.receiptFiles});
+
+  final List<File> receiptFiles;
 
   @override
   State<ReceiveReceiptView> createState() => _ReceiveReceiptViewState();
@@ -69,25 +74,72 @@ class _ReceiveReceiptViewState extends State<ReceiveReceiptView>
 
   @override
   void dispose() {
-    super.dispose();
+    widget.receiptFiles.clear();
     _animationController.dispose();
+    super.dispose();
   }
 
-  Future<void> _showErrorDialog(BuildContext context) {
-    return showDialog(
-        barrierDismissible: true,
+  Widget _showErrorDialog(BuildContext context, String message) {
+    return AlertDialog(
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(40.0))),
+      backgroundColor: const Color(primaryDeepBlue),
+      content: Text(
+        message,
+        style: const TextStyle(color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _showLoadingDialog(BuildContext context) {
+    return AlertDialog(
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(40.0))),
+      backgroundColor: const Color(primaryDeepBlue),
+      content: Row(
+        children: [
+          const CircularProgressIndicator(),
+          Container(
+              margin: const EdgeInsets.only(left: 16),
+              child: const Text(
+                "Processing images...",
+                style: TextStyle(color: Colors.white),
+              )),
+        ],
+      ),
+    );
+  }
+  Future<void> _showProcessingDialog(BuildContext context) async {
+    showDialog(
+      barrierDismissible: false,
         context: context,
-        builder: ((context) {
-          return const AlertDialog(
-            shape: RoundedRectangleBorder(
+        builder: (context) {
+          return AlertDialog(
+            shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(40.0))),
-            backgroundColor: Color(primaryDeepBlue),
-            content: Text(
-              "Failed to import files, please try again later",
-              style: TextStyle(color: Colors.white),
+            backgroundColor: const Color(primaryDeepBlue),
+            content: Row(
+              children: [
+                const CircularProgressIndicator(),
+                Container(
+                    margin: const EdgeInsets.only(left: 16),
+                    child: const Text(
+                      "Importing receipts...",
+                      style: TextStyle(color: Colors.white),
+                    )),
+              ],
             ),
           );
-        }));
+        });
+  }
+
+  void _showSavedReceiptSnackBar(BuildContext context, Receipt receipt) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: const Color(primaryDeepBlue),
+      behavior: SnackBarBehavior.floating,
+      content: Text("'${receipt.name}' added successfully"),
+      duration: const Duration(seconds: 2),
+    ));
   }
 
   // aligning title text in row depending on platform
@@ -97,16 +149,24 @@ class _ReceiveReceiptViewState extends State<ReceiveReceiptView>
   final TextStyle displayNameStyle = const TextStyle(
       fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
 
-  final ValueNotifier<Folder?> selectedFolderNotifier = ValueNotifier<Folder?>(null);
-
+  final ValueNotifier<Folder?> selectedFolderNotifier =
+      ValueNotifier<Folder?>(null);
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<SharingIntentCubit, SharingIntentState>(
       listener: (context, state) {
         switch (state) {
-          case SharingIntentError():
-            _showErrorDialog(context);
+          case SharingIntentSavingReceipts():
+            _showProcessingDialog(context);
+          case SharingIntentClose():
+            // closing _showProcessingDialog
+            Navigator.of(context).pop();
+            // closing ReceiveReceiptView
+            Navigator.of(context).pop();
+            for (final receipt in state.savedReceipts) {
+              _showSavedReceiptSnackBar(context, receipt);
+            }
           default:
             return;
         }
@@ -114,16 +174,18 @@ class _ReceiveReceiptViewState extends State<ReceiveReceiptView>
       child: Scaffold(
           bottomNavigationBar: Theme(
             data: ThemeData(
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent
-            ),
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent),
             child: BottomNavigationBar(
-              onTap: null,
-              backgroundColor: const Color(primaryDarkBlue),
-              items: const [
-              BottomNavigationBarItem(icon: Text(''), label: ''),
-              BottomNavigationBarItem(icon: Text(''), label: '',)
-            ]),
+                onTap: null,
+                backgroundColor: const Color(primaryDarkBlue),
+                items: const [
+                  BottomNavigationBarItem(icon: Text(''), label: ''),
+                  BottomNavigationBarItem(
+                    icon: Text(''),
+                    label: '',
+                  )
+                ]),
           ),
           appBar: AppBar(
             leading: IconButton(
@@ -148,54 +210,32 @@ class _ReceiveReceiptViewState extends State<ReceiveReceiptView>
             ),
             actions: [
               ValueListenableBuilder(
-                valueListenable: selectedFolderNotifier,
-                builder: (context, Folder? selectedFolder, child) {
-                  return IconButton(
-                    icon: const Icon(Icons.save_alt),
-                    onPressed:  selectedFolderNotifier.value == null
-                        ? null
-                        : () {
-                          print('saving folder to ${selectedFolderNotifier.value!.name}');
-                          
-                        }
-                            
-                  );
-                } 
-              ),
+                  valueListenable: selectedFolderNotifier,
+                  builder: (context, Folder? selectedFolder, child) {
+                    return IconButton(
+                        icon: const Icon(Icons.save_alt),
+                        onPressed: selectedFolderNotifier.value == null
+                            ? null
+                            : () {
+                              print('inserting receipts: ${widget.receiptFiles}');
+                                context
+                                    .read<SharingIntentCubit>()
+                                    .insertReceiptsIntoFolder(
+                                        selectedFolderNotifier.value!.id,
+                                        widget.receiptFiles);
+                              });
+                  }),
             ],
           ),
           body: BlocBuilder<SharingIntentCubit, SharingIntentState>(
               builder: (context, state) {
             switch (state) {
-              case SharingIntentFilesRecieved() || SharingIntentLoading():
-                return AlertDialog(
-                  shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(40.0))),
-                  backgroundColor: const Color(primaryDeepBlue),
-                  content: Row(
-                    children: [
-                      const CircularProgressIndicator(),
-                      Container(
-                          margin: const EdgeInsets.only(left: 16),
-                          child: const Text(
-                            "Processing receipts...",
-                            style: TextStyle(color: Colors.white),
-                          )),
-                    ],
-                  ),
-                );
               case SharingIntentError():
-                return Column(
-                  children: [
-                    const Text(
-                        'Uh oh, an unexpected error occured. Please go back and/or report the error'),
-                    ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('Go back'))
-                  ],
-                );
+                return _showErrorDialog(context, "Uh oh, an unexpected error occured. Please go back and/or report the error");
+              case SharingIntentNoValidFiles():
+                return _showErrorDialog(context, "Sorry, these images don't seem to be receipts so they can't be imported.");
+              case SharingIntentLoading() || SharingIntentFilesRecieved():
+                return _showLoadingDialog(context);
               case SharingIntentSuccess():
                 _animationController.forward(from: 0.0);
                 return FadeTransition(
@@ -207,16 +247,22 @@ class _ReceiveReceiptViewState extends State<ReceiveReceiptView>
                           Expanded(
                             child: ListView.builder(
                                 physics: const AlwaysScrollableScrollPhysics(),
-                                itemCount: state.files.length,
+                                itemCount: widget.receiptFiles.length,
                                 itemBuilder: (context, index) {
-                                  final file = state.files[index];
+                                  final file = widget.receiptFiles[index];
                                   final fileName = basename(file.path);
                                   final displayName = (fileName.length > 25
-                                      ? "${fileName.substring(0, 25)}..."
-                                      : fileName.split('.').first).toUpperCase();
+                                          ? "${fileName.substring(0, 25)}..."
+                                          : fileName.split('.').first)
+                                      .toUpperCase();
                                   return Column(
                                     children: [
-                                      index == 0 ? const SizedBox(height: 20,) : const SizedBox.shrink(),
+                                      // adding padding above first ListTile
+                                      index == 0
+                                          ? const SizedBox(
+                                              height: 20,
+                                            )
+                                          : const SizedBox.shrink(),
                                       Container(
                                         padding: const EdgeInsets.all(16.0),
                                         child: ListTile(
@@ -242,69 +288,66 @@ class _ReceiveReceiptViewState extends State<ReceiveReceiptView>
                                             ),
                                           ),
                                           title: Padding(
-                                            padding:
-                                                const EdgeInsets.only(bottom: 8.0),
+                                            padding: const EdgeInsets.only(
+                                                bottom: 8.0),
                                             child: Text(displayName,
                                                 style: displayNameStyle,
                                                 maxLines: 1,
-                                                overflow: TextOverflow.ellipsis),
+                                                overflow:
+                                                    TextOverflow.ellipsis),
                                           ),
                                         ),
                                       ),
-                                      index != state.files.length - 1 ? const Divider(
-                                        thickness: 2,
-                                        height: 1,
-                                        indent: 25,
-                                        endIndent: 25,
-                                      ) : const SizedBox.shrink(),
-                                      index != state.files.length - 1 ? const SizedBox.shrink() : const SizedBox(height: 40,),
+                                      // adding dividers between ListTiles
+                                      index != widget.receiptFiles.length - 1
+                                          ? const Divider(
+                                              thickness: 2,
+                                              height: 1,
+                                              indent: 25,
+                                              endIndent: 25,
+                                            )
+                                          : const SizedBox.shrink(),
+                                      // adding padding after last ListTile
+                                      index != widget.receiptFiles.length - 1
+                                          ? const SizedBox.shrink()
+                                          : const SizedBox(
+                                              height: 40,
+                                            ),
                                     ],
                                   );
                                 }),
                           ),
                         ],
                       ),
+                      // Select Folder DropDown Button
                       Positioned(
                         bottom: 40,
                         left: 20,
                         right: 20,
                         child: Center(
                           child: ValueListenableBuilder<Folder?>(
-                            valueListenable: selectedFolderNotifier,
-                            builder: (context, Folder? selectedFolder, child) {
-                              return DropdownButtonHideUnderline(
-                              child: DropdownButton2<Folder>(
-                                isExpanded: true,
-                                hint: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.folder,
-                                      size: 20,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(
-                                      width: 4,
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        selectedFolder == null ? 'Select Folder' : selectedFolder.name,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
+                              valueListenable: selectedFolderNotifier,
+                              builder:
+                                  (context, Folder? selectedFolder, child) {
+                                return DropdownButtonHideUnderline(
+                                  child: DropdownButton2<Folder>(
+                                    isExpanded: true,
+                                    hint: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.folder,
+                                          size: 20,
                                           color: Colors.white,
                                         ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                items: state.folders
-                                    .map((Folder folder) =>
-                                        DropdownMenuItem<Folder>(
-                                          value: folder,
+                                        const SizedBox(
+                                          width: 4,
+                                        ),
+                                        Expanded(
                                           child: Text(
-                                            folder.name,
+                                            selectedFolder == null
+                                                ? 'Select Folder'
+                                                : selectedFolder.name,
+                                            textAlign: TextAlign.center,
                                             style: const TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
@@ -312,23 +355,39 @@ class _ReceiveReceiptViewState extends State<ReceiveReceiptView>
                                             ),
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                        ))
-                                    .toList(),
-                                value: selectedFolder,
-                                onChanged: (value) {
-                                   selectedFolderNotifier.value = value;
-                                },
-                                buttonStyleData: ButtonStyleData(
-                                  height: 50,
-                                  // width: 160,
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 14),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
-                                      color: Colors.black26,
+                                        ),
+                                      ],
                                     ),
-                                    color: const Color(primaryDeepBlue),
+                                    items: state.folders
+                                        .map((Folder folder) =>
+                                            DropdownMenuItem<Folder>(
+                                              value: folder,
+                                              child: Text(
+                                                folder.name,
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ))
+                                        .toList(),
+                                    value: selectedFolder,
+                                    onChanged: (value) {
+                                      selectedFolderNotifier.value = value;
+                                    },
+                                    buttonStyleData: ButtonStyleData(
+                                      height: 50,
+                                      // width: 160,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 14),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(14),
+                                        border: Border.all(
+                                          color: Colors.black26,
+                                        ),
+                                        color: const Color(primaryDeepBlue),
                                       ),
                                       elevation: 2,
                                     ),
@@ -369,7 +428,8 @@ class _ReceiveReceiptViewState extends State<ReceiveReceiptView>
                     ],
                   ),
                 );
-            }
+            default:
+              return Container();}
           })),
     );
   }
