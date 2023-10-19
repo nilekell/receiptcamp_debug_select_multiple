@@ -243,39 +243,53 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
     try {
       final ImagePicker imagePicker = ImagePicker();
-      final XFile? receiptImage =
-          await imagePicker.pickImage(source: ImageSource.gallery);
-      if (receiptImage == null) {
-        return;
+
+      final List<XFile> receiptImages = await imagePicker.pickMultiImage();
+
+      if (receiptImages.isEmpty) return;
+
+      // if (receiptImages.length > 10) {
+      //   return;
+      //   // use isolate service
+      // }
+
+      bool someImagesFailed = false;
+      ValidationError invalidImageReason = ValidationError.none;
+
+      for (final image in receiptImages) {
+        bool validImage;
+
+        (validImage, invalidImageReason) =
+            await ReceiptService.isValidImage(image.path);
+
+        if (!validImage) {
+          someImagesFailed = true;
+          continue;
+        }
+
+        final List<dynamic> results =
+            await ReceiptService.processingReceiptAndTags(
+                image, currentFolderId);
+        final Receipt receipt = results[0];
+        final List<Tag> tags = results[1];
+
+        await DatabaseRepository.instance.insertTags(tags);
+        await DatabaseRepository.instance.insertReceipt(receipt);
+        print('Image ${receipt.name} saved at ${receipt.localPath}');
+
+        emit(FolderViewUploadSuccess(
+            uploadedName: receipt.name, folderId: receipt.parentId));
       }
-
-      bool validImage;
-
-      (validImage, invalidImageReason) =
-          await ReceiptService.isValidImage(receiptImage.path);
-      if (!validImage) {
-        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
-        fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
-        return;
-      }
-
-      final List<dynamic> results =
-          await ReceiptService.processingReceiptAndTags(
-              receiptImage, currentFolderId);
-      final Receipt receipt = results[0];
-      final List<Tag> tags = results[1];
-
-      await DatabaseRepository.instance.insertTags(tags);
-      await DatabaseRepository.instance.insertReceipt(receipt);
-      print('Image ${receipt.name} saved at ${receipt.localPath}');
-
-      emit(FolderViewUploadSuccess(
-          uploadedName: receipt.name, folderId: receipt.parentId));
 
       // notifying home bloc to reload when a receipt is uploaded from gallery
       homeBloc.add(HomeLoadReceiptsEvent());
 
-      fetchFilesInFolderSortedBy(receipt.parentId);
+      if (someImagesFailed) {
+        print(invalidImageReason.name);
+        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+      }
+
+      fetchFilesInFolderSortedBy(currentFolderId);
 
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
