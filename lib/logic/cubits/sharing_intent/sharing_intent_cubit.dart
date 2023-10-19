@@ -110,7 +110,7 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
       // directly navigating to FileExplorer tab
       landingCubit.updateIndex(1);
       // navigating to parent folder in FileExplorer when RecieveReceiptView is closed
-      // notifying fileSystemCubit to reload after all receipts imported
+      // notifying fileExplorerCubit to reload after all receipts imported
       fileExplorerCubit.selectFolder(folderId);
       emit(SharingIntentClose(folders: const [], savedReceipts: savedReceipts));
     } on Exception catch (e) {
