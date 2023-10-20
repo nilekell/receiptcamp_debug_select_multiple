@@ -40,24 +40,32 @@ class FolderViewCubit extends Cubit<FolderViewState> {
   }
 
   // get folder files
-  fetchFilesInFolderSortedBy(String folderId, {String? column, String? order, bool userSelectedSort = false, useCachedFiles = false}) async {
+  fetchFilesInFolderSortedBy(String folderId, {String? column, String? order, bool userSelectedSort = false, bool useCachedFiles = false}) async {
     emit(FolderViewLoading());
 
     // if column and order are left out of the method call (null), set them to the last value
     column ??= prefs.getLastColumn();
     order ??= prefs.getLastOrder();
 
+    // setting last order & column values
+    final String lastColumn = prefs.getLastColumn();
+    final String lastOrder = prefs.getLastOrder();
+
     try {
       final folder = await DatabaseRepository.instance.getFolderById(folderId);
 
-      // userSelectedSort is true when the user taps on a tile in order options bottom sheet
-      // this distinguishes between the user navigating between folders and sorting in the options sheet
+      // userSelectedSort is only true when the user taps on a tile in order options bottom sheet
+      // this distinguishes between the user navigating between folders, sorting in the options sheet, or refreshing the folder view
       if (userSelectedSort && _isSameSort(order, column)) {
         // toggles order when the user has submitted the same sort
         order = order == 'ASC' ? 'DESC' : 'ASC';
       }
 
-      if (useCachedFiles) {
+      // If the last column is still the same, and the order is changing, just reverse the items in the list
+      // this saves refetching the files
+      if (lastColumn == column && lastOrder != order) {
+        await prefs.setLastOrder(order);
+        cachedCurrentlyDisplayedFiles = cachedCurrentlyDisplayedFiles.reversed.toList();
         emit(FolderViewLoadedSuccess(files: cachedCurrentlyDisplayedFiles, folder: folder, orderedBy: column, order: order));
         return;
       }
