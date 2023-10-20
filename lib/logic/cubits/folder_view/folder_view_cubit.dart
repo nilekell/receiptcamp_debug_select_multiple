@@ -62,6 +62,19 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
+      if (column == 'price') {
+        final List<FolderWithPrice> foldersWithPrice = await DatabaseRepository.instance.getFoldersByPrice(folderId, order);
+        final List<ReceiptWithPrice> receiptsWithPrices = await DatabaseRepository.instance.getReceiptsByPrice(folderId, order);
+        final List<Object> files = [...foldersWithPrice, ...receiptsWithPrices];
+        cachedCurrentlyDisplayedFiles = files;
+        emit(FolderViewLoadedSuccess(files: files, folder: folder, orderedBy: column, order: order));
+
+        // updating last column and last order
+        await prefs.setLastColumn(column);
+        await prefs.setLastOrder(order);
+        return;
+      }
+
       if (column == 'storageSize') {
         final List<FolderWithSize> foldersWithSize = await DatabaseRepository.instance.getFoldersByTotalReceiptSize(folderId, order);
         final List<ReceiptWithSize> receiptsWithSize =  await DatabaseRepository.instance.getReceiptsBySize(folderId, order);
