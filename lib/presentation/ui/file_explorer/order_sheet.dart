@@ -51,6 +51,15 @@ void showOrderOptions(BuildContext context, FolderViewCubit folderViewCubit, Str
             bottomSheetContext: context,
           ),
           OrderListTile(
+            title: 'Price',
+            currentColumn: currentColumn,
+            currentOrder: currentOrder,
+            columnValue: 'price',
+            folderViewCubit: folderViewCubit,
+            folderId: folderId,
+            bottomSheetContext: context,
+          ),
+          OrderListTile(
             title: 'Last modified',
             currentColumn: currentColumn,
             currentOrder: currentOrder,

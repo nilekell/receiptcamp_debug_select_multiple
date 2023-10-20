@@ -14,11 +14,13 @@ class FolderListTile extends StatelessWidget {
   final String displayName;
   final String displayDate;
   final String displaySize;
+  final String displayPrice;
   final String draggableName;
+  final String? price;
   final int? storageSize;
    // Optional storageSize parameter used to determine whether to show displaySize in subtitle & FolderListTileVisual
 
-  FolderListTile({Key? key, required this.folder, this.storageSize})
+  FolderListTile({Key? key, required this.folder, this.storageSize, this.price})
       : displayName = folder.name.length > 25
             ? "${folder.name.substring(0, 25)}..."
             : folder.name,
@@ -29,6 +31,7 @@ class FolderListTile extends StatelessWidget {
             Utility.formatDateTimeFromUnixTimestamp(folder.lastModified)),
         displaySize =
             storageSize != null ? Utility.bytesToSizeString(storageSize) : '',
+        displayPrice = price ?? '',
         super(key: key);
 
   final TextStyle displayNameStyle = const TextStyle(
@@ -70,7 +73,7 @@ class FolderListTile extends StatelessWidget {
                 Colors.black.withOpacity(0.3),
                 BlendMode.srcIn,
               ),
-              child: FolderListTileVisual(folder: folder, storageSize: storageSize),
+              child: price == '' ? FolderListTileVisual(folder: folder, storageSize: storageSize) : FolderListTileVisual(folder: folder, price: '--',),
             ),
             feedback: Material(
               color: Colors.transparent,
@@ -99,7 +102,7 @@ class FolderListTile extends StatelessWidget {
               padding: const EdgeInsets.only(left: 10),
               child: ListTile(
                 subtitle: Text(
-                  displaySize.isNotEmpty ? displaySize : 'Modified $displayDate',
+                  displaySize.isNotEmpty ? displaySize : displayPrice != '' ? displayPrice : 'Modified $displayDate',
                   style: displayDateStyle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -143,14 +146,16 @@ class FolderListTileVisual extends StatelessWidget {
   final String displayName;
   final String displayDate;
   final String displaySize;
+  final String displayPrice;
   final int? storageSize;
+  final String? price;
 
   final TextStyle displayNameStyle = const TextStyle(
       fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
   
   final TextStyle subTextStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
-  FolderListTileVisual({Key? key, required this.folder, this.storageSize})
+  FolderListTileVisual({Key? key, required this.folder, this.storageSize, this.price})
       : displayName = folder.name.length > 25
 
             ? "${folder.name.substring(0, 25)}..."
@@ -159,6 +164,7 @@ class FolderListTileVisual extends StatelessWidget {
             Utility.formatDateTimeFromUnixTimestamp(folder.lastModified)),
         displaySize =
             storageSize != null ? Utility.bytesToSizeString(storageSize) : '',
+        displayPrice = price ?? '',
         super(key: key);
 
   @override
@@ -167,7 +173,7 @@ class FolderListTileVisual extends StatelessWidget {
       padding: const EdgeInsets.only(left: 10),
       child: ListTile(
         subtitle: Text(
-          storageSize != null ? displaySize : 'Modified $displayDate',  // Ternary operator to decide displayed text
+          storageSize != null ? displaySize : displayPrice != '' ? displayPrice : 'Modified $displayDate',  // Ternary operator to decide displayed text
           style: subTextStyle,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

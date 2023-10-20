@@ -60,6 +60,14 @@ class ReceiptWithSize extends Receipt {
   ReceiptWithSize({required this.withSize, required this.receipt}) : super(id: receipt.id, name: receipt.name, fileName: receipt.fileName, dateCreated: receipt.dateCreated, lastModified: receipt.lastModified, storageSize: receipt.storageSize, parentId: receipt.parentId);
 }
 
+class ReceiptWithPrice extends Receipt {
+  final String priceString;
+  final double priceDouble;
+  final Receipt receipt;
+
+  ReceiptWithPrice({required this.receipt, required this.priceString, required this.priceDouble}) : super(id: receipt.id, name: receipt.name, fileName: receipt.fileName, dateCreated: receipt.dateCreated, lastModified: receipt.lastModified, storageSize: receipt.storageSize, parentId: receipt.parentId);
+}
+
 class ExcelReceipt extends Receipt {
   String price;
 

@@ -123,6 +123,14 @@ class DatabaseRepository {
     return await _databaseService.getReceiptByName(name);
   }
 
+  Future<List<ReceiptWithPrice>> getReceiptsByPrice(String folderId, String order) async {
+    return await _databaseService.getReceiptsByPrice(folderId, order);
+  }
+
+  Future<List<FolderWithPrice>> getFoldersByPrice(String folderId, String order) async {
+    return await _databaseService.getFoldersByPrice(folderId, order);
+  }
+
   Future<void> renameReceipt(String id, String newName) async {
     return await _databaseService.renameReceipt(id, newName);
   }
