@@ -281,8 +281,10 @@ Widget getSortDisplayWidget(String orderedBy, String order) {
               return 'Storage used';
             case 'lastModified':
               return 'Last modified';
+            case 'price':
+              return 'Price';
             default:
-              return 'name';
+              return 'Name';
           }
         }(),
         style: sortTextStyle,
@@ -432,7 +434,16 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                                         receipt: item,
                                         withSize: true,
                                       ));
-                                } else {
+                                } 
+                                if (item is ReceiptWithPrice) {
+                                  return SizedBox(
+                                      height: 60,
+                                      child: ReceiptListTile(
+                                        receipt: item,
+                                        price: item.priceString,
+                                      ));
+                                }
+                                else {
                                   return SizedBox(
                                       height: 60,
                                       child: ReceiptListTile(receipt: item));
@@ -445,7 +456,16 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                                         folder: item,
                                         storageSize: item.storageSize,
                                       ));
-                                } else {
+                                } 
+                                if (item is FolderWithPrice) {
+                                  return SizedBox(
+                                      height: 60,
+                                      child: FolderListTile(
+                                        folder: item,
+                                        price: item.price,
+                                      ));
+                                }
+                                else {
                                   return SizedBox(
                                       height: 60,
                                       child: FolderListTile(folder: item));
