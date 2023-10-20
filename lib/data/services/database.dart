@@ -1,5 +1,6 @@
 import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
+import 'package:receiptcamp/data/utils/text_recognition.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
@@ -145,6 +146,41 @@ class DatabaseService {
     }
 
     return receiptsWithSize;
+  }
+
+  Future<List<ReceiptWithPrice>> getReceiptsByPrice(
+      String folderId, String order) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT * FROM receipts WHERE parentId = ?',
+      [folderId],
+    );
+
+    final List<ReceiptWithPrice> receiptsWithPrice = [];
+
+    for (var map in maps) {
+      final Receipt receipt = Receipt.fromMap(map);
+      final String priceString =
+          await TextRecognitionService.extractPriceFromImage(receipt.localPath);
+      final double priceDouble =
+          double.tryParse(priceString.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
+      final ReceiptWithPrice receiptWithPrice = ReceiptWithPrice(
+          priceString: priceString, priceDouble: priceDouble, receipt: receipt);
+      receiptsWithPrice.add(receiptWithPrice);
+    }
+
+    // Sort the list based on price
+    receiptsWithPrice.sort((a, b) {
+      if (order == 'ASC') {
+        return a.priceDouble.compareTo(b.priceDouble);
+      } else if (order == 'DESC') {
+        return b.priceDouble.compareTo(a.priceDouble);
+      } else {
+        return 0; // Do not sort if the order parameter is invalid
+      }
+    });
+
+    return receiptsWithPrice;
   }
 
   Future<List<FolderWithSize>> getFoldersByTotalReceiptSize(
