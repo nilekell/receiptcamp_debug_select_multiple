@@ -183,6 +183,20 @@ class DatabaseService {
     return receiptsWithPrice;
   }
 
+  Future<List<FolderWithPrice>> getFoldersByPrice(
+      String folderId, String order) async {
+    final db = await database;
+    const String column = 'name';
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT * FROM folders WHERE parentId = ? ORDER BY $column $order',
+        [folderId]);
+
+    return List.generate(maps.length, (i) {
+      return FolderWithPrice(folder: Folder.fromMap(maps[i]), price: '--');
+    });
+  }
+
   Future<List<FolderWithSize>> getFoldersByTotalReceiptSize(
       String parentId, String order) async {
     final db = await database;
