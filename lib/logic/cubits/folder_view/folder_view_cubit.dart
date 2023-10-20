@@ -248,13 +248,18 @@ class FolderViewCubit extends Cubit<FolderViewState> {
 
       if (receiptImages.isEmpty) return;
 
-      // if (receiptImages.length > 10) {
-      //   return;
-      //   // use isolate service
-      // }
 
       bool someImagesFailed = false;
       ValidationError invalidImageReason = ValidationError.none;
+
+      const int maxNumOfImagesBeforeDelay = 0;
+
+      if (receiptImages.length > maxNumOfImagesBeforeDelay) {
+        emit(FolderViewLoading());
+      }
+
+      List<void Function()> emitQueue = [];
+      final imageCount = receiptImages.length;
 
       for (final image in receiptImages) {
         bool validImage;
@@ -277,8 +282,20 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         await DatabaseRepository.instance.insertReceipt(receipt);
         print('Image ${receipt.name} saved at ${receipt.localPath}');
 
-        emit(FolderViewUploadSuccess(
-            uploadedName: receipt.name, folderId: receipt.parentId));
+        if (imageCount <= maxNumOfImagesBeforeDelay) {
+          emit(FolderViewUploadSuccess(uploadedName: receipt.name, folderId: receipt.parentId));
+        } else {
+          emitQueue.add(() {
+            emit(FolderViewUploadSuccess(
+                uploadedName: receipt.name, folderId: receipt.parentId));
+          });
+        }
+      }
+
+      if (imageCount > maxNumOfImagesBeforeDelay) {
+        for (var emitAction in emitQueue) {
+          emitAction();
+        }
       }
 
       // notifying home bloc to reload when all receipts uploaded from gallery
@@ -374,9 +391,18 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       List<String> validatedImagePaths = [];
 
       final scannedImagePaths = await CunningDocumentScanner.getPictures();
-      if (scannedImagePaths == null) {
+      if (scannedImagePaths == null || scannedImagePaths.isEmpty) {
         return;
       }
+
+      const int maxNumOfImagesBeforeDelay = 0;
+
+      if (scannedImagePaths.length > maxNumOfImagesBeforeDelay) {
+        emit(FolderViewLoading());
+      }
+
+      List<void Function()> emitQueue = [];
+      final imageCount = scannedImagePaths.length;
 
       bool someImagesFailed = false;
       ValidationError invalidImageReason = ValidationError.none;
@@ -407,9 +433,22 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         await DatabaseRepository.instance.insertReceipt(receipt);
         print('Image ${receipt.name} saved at ${receipt.localPath}');
 
-        emit(FolderViewUploadSuccess(
-            uploadedName: receipt.name, folderId: receipt.parentId));
+        if (imageCount <= maxNumOfImagesBeforeDelay) {
+          emit(FolderViewUploadSuccess(
+              uploadedName: receipt.name, folderId: receipt.parentId));
+        } else {
+          emitQueue.add(() {
+            emit(FolderViewUploadSuccess(
+                uploadedName: receipt.name, folderId: receipt.parentId));
+          });
+        }
       }
+
+      if (imageCount > maxNumOfImagesBeforeDelay) {
+          for (var emitAction in emitQueue) {
+            emitAction();
+          }
+        }
 
       if (someImagesFailed) {
         print(invalidImageReason.name);
