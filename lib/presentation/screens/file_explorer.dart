@@ -387,7 +387,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
         switch (state) {
           case FolderViewInitial() || FolderViewLoading():
             return const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Center(child: CircularProgressIndicator()),
               ],
