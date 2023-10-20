@@ -56,3 +56,15 @@ class FolderWithSize extends Folder {
             lastModified: folder.lastModified,
             parentId: folder.parentId);
 }
+
+class FolderWithPrice extends Folder {
+  final Folder folder;
+  final String price;
+
+  FolderWithPrice({required this.price, required this.folder})
+      : super(
+            id: folder.id,
+            name: folder.name,
+            lastModified: folder.lastModified,
+            parentId: folder.parentId);
+}
