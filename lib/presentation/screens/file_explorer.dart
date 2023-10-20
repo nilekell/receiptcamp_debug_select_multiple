@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/data_constants.dart';
-import 'package:receiptcamp/logic/cubits/file_system/file_system_cubit.dart';
+import 'package:receiptcamp/logic/cubits/file_explorer/file_explorer_cubit.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
@@ -60,10 +60,10 @@ class _FileExplorerState extends State<FileExplorer> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocConsumer<FileSystemCubit, FileSystemCubitState>(
+      body: BlocConsumer<FileExplorerCubit, FileExplorerCubitState>(
           listener: (context, state) {
         switch (state) {
-          case FileSystemCubitFolderInformationSuccess():
+          case FileExplorerCubitFolderInformationSuccess():
           // listening to state here so RefreshableFolderView can be built with the new folder contents, whenever
           // a folder is navigated to
             print('FileExplorer: fetchFiles for ${state.folder.name}');
@@ -75,14 +75,14 @@ class _FileExplorerState extends State<FileExplorer> with SingleTickerProviderSt
         }
       }, builder: ((context, state) {
         switch (state) {
-          case FileSystemCubitInitial() || FileSystemCubitLoading():
+          case FileExplorerCubitInitial() || FileExplorerCubitLoading():
             return const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Center(child: CircularProgressIndicator()),
               ],
             );
-          case FileSystemCubitFolderInformationSuccess():
+          case FileExplorerCubitFolderInformationSuccess():
             _animationController.forward(from: 0.0);
             return FadeTransition(
               opacity: _animationController,
@@ -144,9 +144,9 @@ class _FileExplorerState extends State<FileExplorer> with SingleTickerProviderSt
                 ],
               ),
             );
-          case FileSystemCubitError():
+          case FileExplorerCubitError():
             print(
-                'FileSystemCubitError with state: ${state.runtimeType.toString()}');
+                'FileExplorerCubitError with state: ${state.runtimeType.toString()}');
             return const ErrorView();
           default:
             print(
@@ -206,7 +206,7 @@ class BackButton extends StatelessWidget {
         offset: const Offset(10, 6),
         child: IconButton(
             onPressed: () {
-              context.read<FileSystemCubit>().navigateBack(previousFolderId);
+              context.read<FileExplorerCubit>().navigateBack(previousFolderId);
             },
             icon: const Icon(
               Icons.arrow_back_ios_new,
@@ -387,7 +387,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
         switch (state) {
           case FolderViewInitial() || FolderViewLoading():
             return const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Center(child: CircularProgressIndicator()),
               ],

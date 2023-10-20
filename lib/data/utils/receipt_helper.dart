@@ -119,7 +119,7 @@ class ReceiptService {
     return imageFileType;
   }
 
-  static Future isValidImage(String imagePath) async {
+  static Future<(bool, ValidationError)> isValidImage(String imagePath) async {
     ValidationError validationError = ValidationError.none;
 
     try {
@@ -134,7 +134,7 @@ class ReceiptService {
       return (validSize && hasText, validationError);
     } on Exception catch (e) {
       print('Error in ReceiptService.imageHasText: $e');
-      return [false, validationError];
+      return (false, validationError);
     }
   }
 

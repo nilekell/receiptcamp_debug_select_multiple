@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'dart:io';
 import 'dart:isolate';
 import 'package:bloc/bloc.dart';
@@ -237,39 +239,74 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       }
     }
 
+    ValidationError invalidImageReason = ValidationError.none;
+
     try {
       final ImagePicker imagePicker = ImagePicker();
-      final XFile? receiptImage =
-          await imagePicker.pickImage(source: ImageSource.gallery);
-      if (receiptImage == null) {
-        return;
+
+      final List<XFile> receiptImages = await imagePicker.pickMultiImage();
+
+      if (receiptImages.isEmpty) return;
+
+
+      bool someImagesFailed = false;
+      ValidationError invalidImageReason = ValidationError.none;
+
+      const int maxNumOfImagesBeforeDelay = 0;
+
+      if (receiptImages.length > maxNumOfImagesBeforeDelay) {
+        emit(FolderViewLoading());
       }
 
-      final (validImage as bool, invalidImageReason as ValidationError) =
-          await ReceiptService.isValidImage(receiptImage.path);
-      if (!validImage) {
-        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
-        fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
-        return;
+      List<void Function()> emitQueue = [];
+      final imageCount = receiptImages.length;
+
+      for (final image in receiptImages) {
+        bool validImage;
+
+        (validImage, invalidImageReason) =
+            await ReceiptService.isValidImage(image.path);
+
+        if (!validImage) {
+          someImagesFailed = true;
+          continue;
+        }
+
+        final List<dynamic> results =
+            await ReceiptService.processingReceiptAndTags(
+                image, currentFolderId);
+        final Receipt receipt = results[0];
+        final List<Tag> tags = results[1];
+
+        await DatabaseRepository.instance.insertTags(tags);
+        await DatabaseRepository.instance.insertReceipt(receipt);
+        print('Image ${receipt.name} saved at ${receipt.localPath}');
+
+        if (imageCount <= maxNumOfImagesBeforeDelay) {
+          emit(FolderViewUploadSuccess(uploadedName: receipt.name, folderId: receipt.parentId));
+        } else {
+          emitQueue.add(() {
+            emit(FolderViewUploadSuccess(
+                uploadedName: receipt.name, folderId: receipt.parentId));
+          });
+        }
       }
 
-      final List<dynamic> results =
-          await ReceiptService.processingReceiptAndTags(
-              receiptImage, currentFolderId);
-      final Receipt receipt = results[0];
-      final List<Tag> tags = results[1];
+      if (imageCount > maxNumOfImagesBeforeDelay) {
+        for (var emitAction in emitQueue) {
+          emitAction();
+        }
+      }
 
-      await DatabaseRepository.instance.insertTags(tags);
-      await DatabaseRepository.instance.insertReceipt(receipt);
-      print('Image ${receipt.name} saved at ${receipt.localPath}');
-
-      emit(FolderViewUploadSuccess(
-          uploadedName: receipt.name, folderId: receipt.parentId));
-
-      // notifying home bloc to reload when a receipt is uploaded from gallery
+      // notifying home bloc to reload when all receipts uploaded from gallery
       homeBloc.add(HomeLoadReceiptsEvent());
 
-      fetchFilesInFolderSortedBy(receipt.parentId);
+      if (someImagesFailed) {
+        print(invalidImageReason.name);
+        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+      }
+
+      fetchFilesInFolderSortedBy(currentFolderId);
 
     } on Exception catch (e) {
       print('Error in uploadReceipt: $e');
@@ -291,6 +328,8 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       }
     }
 
+    ValidationError invalidImageReason = ValidationError.none;
+
     try {
       final ImagePicker imagePicker = ImagePicker();
       final XFile? receiptPhoto =
@@ -299,10 +338,13 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         return;
       }
 
-      final (validImage as bool, invalidImageReason as ValidationError) =
+      bool validImage;
+
+      (validImage, invalidImageReason) =
           await ReceiptService.isValidImage(receiptPhoto.path);
       if (!validImage) {
-        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
+        emit(FolderViewUploadFailure(
+            folderId: currentFolderId, validationType: invalidImageReason));
         fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
         return;
       }
@@ -349,19 +391,31 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       List<String> validatedImagePaths = [];
 
       final scannedImagePaths = await CunningDocumentScanner.getPictures();
-      if (scannedImagePaths == null) {
+      if (scannedImagePaths == null || scannedImagePaths.isEmpty) {
         return;
       }
 
+      const int maxNumOfImagesBeforeDelay = 0;
+
+      if (scannedImagePaths.length > maxNumOfImagesBeforeDelay) {
+        emit(FolderViewLoading());
+      }
+
+      List<void Function()> emitQueue = [];
+      final imageCount = scannedImagePaths.length;
+
+      bool someImagesFailed = false;
+      ValidationError invalidImageReason = ValidationError.none;
+
       // iterating over scanned images and checking image size and if they contain text
       for (final path in scannedImagePaths) {
-        final (validImage as bool, invalidImageReason as ValidationError) =
+        bool validImage;
+        (validImage, invalidImageReason)  =
             await ReceiptService.isValidImage(path);
         if (!validImage) {
-          // if a single image fails the validation, all images are discarded
-          emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
-          fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
-          return;
+          someImagesFailed = true;
+          // fetchFilesInFolderSortedBy(currentFolderId, useCachedFiles: true);
+          continue;
         }
         // only adding images that pass validations to list
         validatedImagePaths.add(path);
@@ -379,8 +433,27 @@ class FolderViewCubit extends Cubit<FolderViewState> {
         await DatabaseRepository.instance.insertReceipt(receipt);
         print('Image ${receipt.name} saved at ${receipt.localPath}');
 
-        emit(FolderViewUploadSuccess(
-            uploadedName: receipt.name, folderId: receipt.parentId));
+        if (imageCount <= maxNumOfImagesBeforeDelay) {
+          emit(FolderViewUploadSuccess(
+              uploadedName: receipt.name, folderId: receipt.parentId));
+        } else {
+          emitQueue.add(() {
+            emit(FolderViewUploadSuccess(
+                uploadedName: receipt.name, folderId: receipt.parentId));
+          });
+        }
+      }
+
+      if (imageCount > maxNumOfImagesBeforeDelay) {
+          for (var emitAction in emitQueue) {
+            emitAction();
+          }
+        }
+
+      if (someImagesFailed) {
+        print(invalidImageReason.name);
+        // if a single image fails the validation, show the upload failed
+        emit(FolderViewUploadFailure(folderId: currentFolderId, validationType: invalidImageReason));
       }
       
       // notifying home bloc to reload when a receipt is uploaded from document scan

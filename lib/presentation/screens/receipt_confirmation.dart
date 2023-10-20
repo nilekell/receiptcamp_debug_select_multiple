@@ -9,8 +9,8 @@ import 'package:receiptcamp/presentation/screens/image_view.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 // defining a custom route class to animate transition
-class SlidingTransitionRoute extends PageRouteBuilder {
-  SlidingTransitionRoute({required Folder folder})
+class SlidingReceiptConfirmationTransitionRoute extends PageRouteBuilder {
+  SlidingReceiptConfirmationTransitionRoute({required Folder folder})
       : super(
           opaque: false,
           pageBuilder: (BuildContext context, Animation<double> animation,

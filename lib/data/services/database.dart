@@ -441,13 +441,7 @@ class DatabaseService {
       }
 
       for (var receipt in receipts) {
-        final receiptPath = Receipt.fromMap(receipt).localPath;
-        // deleting receipt image in local storage
-        await FileService.deleteFileFromPath(receiptPath);
-
-        // deleting receipt record in db
-        await db
-            .rawDelete('DELETE FROM receipts WHERE id = ?', [receipt['id']]);
+        deleteReceipt(Receipt.fromMap(receipt).id);
       }
     }
 
