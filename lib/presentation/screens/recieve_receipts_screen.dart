@@ -298,15 +298,6 @@ class _ReceiveReceiptViewState extends State<ReceiveReceiptView>
                                           ),
                                         ),
                                       ),
-                                      // adding dividers between ListTiles
-                                      index != widget.receiptFiles.length - 1
-                                          ? const Divider(
-                                              thickness: 2,
-                                              height: 1,
-                                              indent: 25,
-                                              endIndent: 25,
-                                            )
-                                          : const SizedBox.shrink(),
                                       // adding padding after last ListTile
                                       index != widget.receiptFiles.length - 1
                                           ? const SizedBox.shrink()
