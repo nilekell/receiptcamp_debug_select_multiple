@@ -5,6 +5,7 @@ import 'package:receiptcamp/logic/cubits/file_explorer/file_explorer_cubit.dart'
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/screens/select_multiple_screen.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/folder_sheet.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
@@ -63,7 +64,7 @@ class FolderListTile extends StatelessWidget {
       builder: (context, candidateData, rejectedData) {
         return Container(
           color: candidateData.isNotEmpty ? Colors.grey : Colors.transparent,
-          child: LongPressDraggable<Folder>(
+          child: Draggable<Folder>(
             dragAnchorStrategy: (draggable, context, position) {
               return const Offset(50, 50);
             },
@@ -100,36 +101,43 @@ class FolderListTile extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.only(left: 10),
-              child: ListTile(
-                subtitle: Text(
-                  displaySize.isNotEmpty ? displaySize : displayPrice != '' ? displayPrice : 'Modified $displayDate',
-                  style: displayDateStyle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                leading: const Icon(
-                  Icons.folder,
-                  size: 50,
-                ),
-                trailing: IconButton(
-                  icon: const Icon(
-                    Icons.more_vert,
-                    color: Color(primaryGrey),
-                    size: 30,
-                  ),
-                  onPressed: () {
-                    showFolderOptions(
-                        context, context.read<FolderViewCubit>(), folder);
-                  },
-                ),
-                onTap: () {
-                  context.read<FileExplorerCubit>().selectFolder(folder.id);
+              child: GestureDetector(
+                onLongPress: () {
+                  Navigator.of(context).push(
+                    SlidingSelectMultipleTransitionRoute(
+                        item: folder));
                 },
-                title: Text(
-                  displayName,
-                  style: displayNameStyle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                child: ListTile(
+                  subtitle: Text(
+                    displaySize.isNotEmpty ? displaySize : displayPrice != '' ? displayPrice : 'Modified $displayDate',
+                    style: displayDateStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  leading: const Icon(
+                    Icons.folder,
+                    size: 50,
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(
+                      Icons.more_vert,
+                      color: Color(primaryGrey),
+                      size: 30,
+                    ),
+                    onPressed: () {
+                      showFolderOptions(
+                          context, context.read<FolderViewCubit>(), folder);
+                    },
+                  ),
+                  onTap: () {
+                    context.read<FileExplorerCubit>().selectFolder(folder.id);
+                  },
+                  title: Text(
+                    displayName,
+                    style: displayNameStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
             ),

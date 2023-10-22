@@ -5,6 +5,7 @@ import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/screens/image_view.dart';
+import 'package:receiptcamp/presentation/screens/select_multiple_screen.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/receipt/receipt_sheet.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
@@ -41,7 +42,7 @@ class ReceiptListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LongPressDraggable<Receipt>(
+    return Draggable<Receipt>(
       dragAnchorStrategy: (draggable, context, position) {
         return const Offset(50, 50);
       },
@@ -86,44 +87,51 @@ class ReceiptListTile extends StatelessWidget {
       ),
       child: Padding(
           padding: const EdgeInsets.only(left: 10),
-          child: ListTile(
-              leading: SizedBox(
-                height: 50,
-                width: 50,
-                child: ClipRRect(
-                  // square image corners
-                  borderRadius: const BorderRadius.all(Radius.zero),
-                  child: Image.file(
-                    File(receipt.localPath),
-                    fit: BoxFit.cover,
+          child: GestureDetector(
+            onLongPress: () {
+              Navigator.of(context).push(
+                    SlidingSelectMultipleTransitionRoute(
+                        item: receipt));
+            },
+            child: ListTile(
+                leading: SizedBox(
+                  height: 50,
+                  width: 50,
+                  child: ClipRRect(
+                    // square image corners
+                    borderRadius: const BorderRadius.all(Radius.zero),
+                    child: Image.file(
+                      File(receipt.localPath),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-              ),
-              subtitle: Text(
-                withSize
-                  ? displaySize
-                  : price != '' ? price : 'Modified $displayDate',
-                style: displayDateStyle,
-              ),
-              trailing: IconButton(
-                icon: const Icon(
-                  Icons.more_vert,
-                  color: Color(primaryGrey),
-                  size: 30,
+                subtitle: Text(
+                  withSize
+                    ? displaySize
+                    : price != '' ? price : 'Modified $displayDate',
+                  style: displayDateStyle,
                 ),
-                onPressed: () {
-                  showReceiptOptions(
-                      context, context.read<FolderViewCubit>(), receipt);
+                trailing: IconButton(
+                  icon: const Icon(
+                    Icons.more_vert,
+                    color: Color(primaryGrey),
+                    size: 30,
+                  ),
+                  onPressed: () {
+                    showReceiptOptions(
+                        context, context.read<FolderViewCubit>(), receipt);
+                  },
+                ),
+                onTap: () {
+                  Navigator.of(context)
+                      .push(SlidingImageTransitionRoute(receipt: receipt));
                 },
-              ),
-              onTap: () {
-                Navigator.of(context)
-                    .push(SlidingImageTransitionRoute(receipt: receipt));
-              },
-              title: Text(displayName,
-                  style: displayNameStyle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis))),
+                title: Text(displayName,
+                    style: displayNameStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis)),
+          )),
     );
   }
 }
