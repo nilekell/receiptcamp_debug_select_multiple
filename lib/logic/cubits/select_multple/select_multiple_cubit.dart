@@ -62,6 +62,7 @@ class SelectMultipleCubit extends Cubit<SelectMultipleState> {
             Receipt? removedReceipt;
               bool toBeRemoved = false;
               if (element is Receipt) {
+                removedReceipt = element;
                 toBeRemoved = element.id == selectedReceipt.id;
               }
               if (toBeRemoved) print('SelectMultipleCubit: removing ${removedReceipt!.name} from items'); 
