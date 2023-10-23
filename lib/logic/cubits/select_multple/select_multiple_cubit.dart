@@ -2,6 +2,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
+import 'package:receiptcamp/data/services/preferences.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/screens/select_multiple_screen.dart';
@@ -10,6 +11,8 @@ part 'select_multiple_state.dart';
 
 class SelectMultipleCubit extends Cubit<SelectMultipleState> {
   SelectMultipleCubit() : super(SelectMultipleInitial());
+
+  final _prefs = PreferencesService.instance;
 
   void init(ListItem selectedItem) {
     emit(SelectMultipleInitial());
@@ -35,9 +38,29 @@ class SelectMultipleCubit extends Cubit<SelectMultipleState> {
         return;
       }
 
-      // Fetch all items from the parent ID
-      List<Object> items =
-          await DatabaseRepository.instance.getFolderContents(parentId);
+      // setting last order & column values
+      final String lastColumn = _prefs.getLastColumn();
+      final String lastOrder = _prefs.getLastOrder();
+
+      List<Object> items;
+
+      switch (lastColumn) {
+        case 'price':
+          final List<FolderWithPrice> foldersWithPrice = await DatabaseRepository.instance.getFoldersByPrice(parentId, lastOrder);
+          final List<ReceiptWithPrice> receiptsWithPrices = await DatabaseRepository.instance.getReceiptsByPrice(parentId, lastOrder);
+          items = [...foldersWithPrice, ...receiptsWithPrices];
+          break;
+        case 'storageSize':
+          final List<FolderWithSize> foldersWithSize = await DatabaseRepository.instance.getFoldersByTotalReceiptSize(parentId, lastOrder);
+          final List<ReceiptWithSize> receiptsWithSize =  await DatabaseRepository.instance.getReceiptsBySize(parentId, lastOrder);
+          items = [...foldersWithSize, ...receiptsWithSize];
+          break;
+        default:
+          final List<Folder> folders = await DatabaseRepository.instance.getFoldersInFolderSortedBy(parentId, lastColumn, lastOrder);
+          final List<Receipt> receipts = await DatabaseRepository.instance.getReceiptsInFolderSortedBy(parentId, lastColumn, lastOrder);
+          items = [...folders, ...receipts];
+          break;
+      }
 
       // Remove the selected item from the list
       items.removeWhere((element) {
