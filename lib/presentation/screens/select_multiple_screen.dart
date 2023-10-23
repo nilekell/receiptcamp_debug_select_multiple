@@ -51,6 +51,14 @@ class SlidingSelectMultipleTransitionRoute extends PageRouteBuilder {
         );
 }
 
+class ListItem {
+  final String id;
+  final Object item;
+
+  ListItem({required this.item}) :
+  id = Utility.generateUid();
+}
+
 class SelectMultipleView extends StatefulWidget {
   const SelectMultipleView({Key? key, required this.initiallySelectedItem})
       : super(key: key);
