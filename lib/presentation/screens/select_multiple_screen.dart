@@ -1,5 +1,5 @@
 // defining a custom route class to animate transition
-// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, unused_element, prefer_final_fields, unused_field
+// ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors, unused_element, prefer_final_fields, unused_field, must_be_immutable
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -66,12 +66,15 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
 
+  List<Object> allItems = <Object>[];
+
   List<Object> currentlySelectedItems = <Object>[];
 
   List<Folder> foldersThatCanBeMovedTo = <Folder>[];
 
   bool _moveActionEnabled = true;
   bool _deleteActionEnabled = true;
+  bool allSelected = false;
 
   @override
   void initState() {
@@ -79,6 +82,9 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
+    setState(() {
+      currentlySelectedItems.add(widget.initiallySelectedItem);
+    });
     super.initState();
   }
 
@@ -90,12 +96,51 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
 
   void _getFoldersThatCanBeMovedTo(List<Folder> currentlySelectedFolders) async {}
 
-  void _showMoveMultipleDialog(List<Folder> destinationFolders) {}
+  void _showMoveMultipleDialog() async {}
 
   void _showDeleteMultipleDialog() {}
 
+  void addItem(Object item) {
+    currentlySelectedItems.add(item);
+    print('added ${item.runtimeType}');
+    print('num in currentlySelectedItems: ${currentlySelectedItems.length}');
+  }
+
+  void removeItem(Object item) {
+    allSelected = false;
+
+    if (item is Receipt) {
+      currentlySelectedItems.removeWhere((element) => (element as Receipt).id == item.id);
+      print('removed ${item.name}');
+    } else if (item is Folder) {
+      currentlySelectedItems.removeWhere((element) => (element as Folder).id == item.id);
+      print('removed ${item.name}');
+    }
+
+    print('num in currentlySelectedItems: ${currentlySelectedItems.length}');
+  }
+
+  void toggleItem(Object item, bool value) {
+      if (allSelected) allSelected = false;
+      if (!value) removeItem(item);
+      if (value) addItem(item);
+  }
+
   void _toggleSelectAll() {
-    
+    setState(() {
+      print('allSelected before toggle: $allSelected');
+      if (!allSelected) {
+        currentlySelectedItems = allItems;
+        print('allItems assigned to currentlySelectedItems');
+      } else if (allSelected) {
+        for (final item in currentlySelectedItems) {
+          removeItem(item);
+        }
+      }
+
+      allSelected = !allSelected;
+      print('allSelected after toggle: $allSelected');
+    });
   }
 
   Widget _buildItem(Object item) {
@@ -106,20 +151,33 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
             child: ReceiptCheckboxListTile(
               receipt: item,
               withSize: true,
+              isSelected: allSelected || currentlySelectedItems.contains(item),
+              onChanged: (newValue) {
+                toggleItem(item, newValue!);
+              },
             ));
-      } 
+      }
       if (item is ReceiptWithPrice) {
         return SizedBox(
             height: 60,
             child: ReceiptCheckboxListTile(
               receipt: item,
+              isSelected: allSelected || currentlySelectedItems.contains(item),
               price: item.priceString,
+              onChanged: (newValue) {
+                toggleItem(item, newValue!);
+              },
             ));
-      }
-      else {
+      } else {
         return SizedBox(
             height: 60,
-            child: ReceiptCheckboxListTile(receipt: item));
+            child: ReceiptCheckboxListTile(
+              receipt: item,
+              isSelected: allSelected || currentlySelectedItems.contains(item),
+              onChanged: (newValue) {
+                toggleItem(item, newValue!);
+              },
+            ));
       }
     } else if (item is Folder) {
       if (item is FolderWithSize) {
@@ -128,24 +186,36 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
             child: FolderCheckboxListTile(
               folder: item,
               storageSize: item.storageSize,
+              isSelected: allSelected || currentlySelectedItems.contains(item),
+              onChanged: (newValue) {
+                toggleItem(item, newValue!);
+              },
             ));
-      } 
+      }
       if (item is FolderWithPrice) {
         return SizedBox(
             height: 60,
             child: FolderCheckboxListTile(
               folder: item,
               price: item.price,
+              isSelected: allSelected || currentlySelectedItems.contains(item),
+              onChanged: (newValue) {
+                toggleItem(item, newValue!);
+              },
             ));
-      }
-      else {
+      } else {
         return SizedBox(
             height: 60,
-            child: FolderCheckboxListTile(folder: item));
+            child: FolderCheckboxListTile(
+              folder: item,
+              isSelected: allSelected || currentlySelectedItems.contains(item),
+              onChanged: (newValue) {
+                toggleItem(item, newValue!);
+              },
+            ));
       }
     } else {
-      return const ListTile(
-          title: Text('Unknown file type'));
+      return const ListTile(title: Text('Unknown file type'));
     }
   }
 
@@ -153,6 +223,11 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
   Widget build(BuildContext context) {
     return BlocListener<SelectMultipleCubit, SelectMultipleState>(
       listener: (context, state) {
+        if (state is SelectMultipleActivated) {
+          allItems = state.items;
+          print('allItems init with: $allItems');
+          print('currentlySelectedItems init with $currentlySelectedItems');
+        }
       },
       child: Scaffold(
           appBar: AppBar(
@@ -162,11 +237,11 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
             backgroundColor: const Color(primaryDarkBlue),
             actions: [
              // select all
-             IconButton(onPressed: () {}, icon: Icon(Icons.select_all)),
+             IconButton(onPressed: _toggleSelectAll, icon: Icon(Icons.select_all)),
              // delete selected items
-             IconButton(onPressed: () {}, icon: Icon(Icons.delete)),
+             IconButton(onPressed: _showDeleteMultipleDialog, icon: Icon(Icons.delete)),
              // move selected items
-             IconButton(onPressed: () {}, icon: Icon(Icons.drive_file_move))
+             IconButton(onPressed: _showMoveMultipleDialog, icon: Icon(Icons.drive_file_move))
             ],
           ),
           body: BlocBuilder<SelectMultipleCubit, SelectMultipleState>(
@@ -217,8 +292,10 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
   }
 }
 
-class FolderCheckboxListTile extends StatelessWidget {
+class FolderCheckboxListTile extends StatefulWidget {
   final Folder folder;
+  bool isSelected;
+  final ValueChanged<bool?> onChanged; 
   final String displayName;
   final String displayDate;
   final String displaySize;
@@ -227,7 +304,7 @@ class FolderCheckboxListTile extends StatelessWidget {
   final int? storageSize;
    // Optional storageSize parameter used to determine whether to show displaySize in subtitle & FolderListTileVisual
 
-  FolderCheckboxListTile({Key? key, required this.folder, this.storageSize, this.price})
+  FolderCheckboxListTile({Key? key, required this.folder, required this.onChanged, this.isSelected = false, this.storageSize, this.price})
       : displayName = folder.name.length > 25
             ? "${folder.name.substring(0, 25)}..."
             : folder.name,
@@ -238,22 +315,32 @@ class FolderCheckboxListTile extends StatelessWidget {
         displayPrice = price ?? '',
         super(key: key);
 
+  @override
+  State<FolderCheckboxListTile> createState() => _FolderCheckboxListTileState();
+}
+
+class _FolderCheckboxListTileState extends State<FolderCheckboxListTile> {
   final TextStyle displayNameStyle = const TextStyle(
       fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
+
   final TextStyle displayDateStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
+      
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 10),
       child: CheckboxListTile(
-        value: false,
+        value: widget.isSelected,
         onChanged: (value) {
-          
+          setState(() {
+              widget.isSelected = !widget.isSelected;
+              widget.onChanged(widget.isSelected);
+            });
         },
         subtitle: Text(
-          displaySize.isNotEmpty ? displaySize : displayPrice != '' ? displayPrice : 'Modified $displayDate',
+          widget.displaySize.isNotEmpty ? widget.displaySize : widget.displayPrice != '' ? widget.displayPrice : 'Modified ${widget.displayDate}',
           style: displayDateStyle,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -263,7 +350,7 @@ class FolderCheckboxListTile extends StatelessWidget {
           size: 50,
         ),
         title: Text(
-          displayName,
+          widget.displayName,
           style: displayNameStyle,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -273,15 +360,17 @@ class FolderCheckboxListTile extends StatelessWidget {
   }
 }
 
-class ReceiptCheckboxListTile extends StatelessWidget {
+class ReceiptCheckboxListTile extends StatefulWidget {
   final Receipt receipt;
+  final bool isSelected;
+  final ValueChanged<bool?> onChanged; 
   final String displayName;
   final String displayDate;
   final String displaySize;
   final String price;
   final bool withSize;
 
-  ReceiptCheckboxListTile({Key? key, required this.receipt, this.withSize = false, this.price = ''})
+  ReceiptCheckboxListTile({Key? key, required this.receipt, required this.onChanged, this.isSelected = false, this.withSize = false, this.price = ''})
       // displayName is the file name without the file extension and is cut off when the receipt name
       // is > 25 chars or would require 2 lines to be shown completely
       : displayName = receipt.name.length > 25
@@ -293,19 +382,30 @@ class ReceiptCheckboxListTile extends StatelessWidget {
           
         super(key: key);
 
+  @override
+  State<ReceiptCheckboxListTile> createState() => _ReceiptCheckboxListTileState();
+}
+
+class _ReceiptCheckboxListTileState extends State<ReceiptCheckboxListTile> {
   final TextStyle displayNameStyle = const TextStyle(
       fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
+
   final TextStyle displayDateStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
+
+  bool isSelected = false;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.only(left: 10),
         child: CheckboxListTile(
-          value: false,
+          value: isSelected,
           onChanged: (value) {
-            
+            setState(() {
+              isSelected = !isSelected;
+              widget.onChanged(isSelected);
+            });
           },
             secondary: SizedBox(
               height: 50,
@@ -314,18 +414,18 @@ class ReceiptCheckboxListTile extends StatelessWidget {
                 // square image corners
                 borderRadius: const BorderRadius.all(Radius.zero),
                 child: Image.file(
-                  File(receipt.localPath),
+                  File(widget.receipt.localPath),
                   fit: BoxFit.cover,
                 ),
               ),
             ),
             subtitle: Text(
-              withSize
-                ? displaySize
-                : price != '' ? price : 'Modified $displayDate',
+              widget.withSize
+                ? widget.displaySize
+                : widget.price != '' ? widget.price : 'Modified ${widget.displayDate}',
               style: displayDateStyle,
             ),
-            title: Text(displayName,
+            title: Text(widget.displayName,
                 style: displayNameStyle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis)));
