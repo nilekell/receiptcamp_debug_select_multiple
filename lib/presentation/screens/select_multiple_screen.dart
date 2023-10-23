@@ -76,13 +76,12 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
 
   List<ListItem> allItems = <ListItem>[];
 
-  List<ListItem> currentlySelectedListItems = <ListItem>[];
+  ValueNotifier<List<ListItem>> currentlySelectedListItemsNotifier = ValueNotifier<List<ListItem>>([]);
+  ValueNotifier<bool> allSelectedNotifier = ValueNotifier<bool>(false);
 
-  List<Folder> foldersThatCanBeMovedTo = <Folder>[];
 
   bool _moveActionEnabled = true;
   bool _deleteActionEnabled = true;
-  bool allSelected = false;
 
   @override
   void initState() {
@@ -96,6 +95,8 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
   @override
   void dispose() {
     super.dispose();
+    allSelectedNotifier.dispose();
+    currentlySelectedListItemsNotifier.dispose();
     _animationController.dispose();
   }
 
@@ -106,11 +107,11 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
   void _showDeleteMultipleDialog() {}
 
   void addItem(ListItem listItem) {
-    bool itemAlreadySelected = currentlySelectedListItems.any((element) => listItem.id == element.id);
+    bool itemAlreadySelected = currentlySelectedListItemsNotifier.value.any((element) => listItem.id == element.id);
     if (!itemAlreadySelected) {
-      currentlySelectedListItems.add(listItem);
+      currentlySelectedListItemsNotifier.value.add(listItem);
       print('added ${listItem.runtimeType}');
-      print('num in currentlySelectedListItems: ${currentlySelectedListItems.length}');
+      print('num in currentlySelectedListItems: ${currentlySelectedListItemsNotifier.value.length}');
     } else {
       print('cannot add item, item already in list');
     }
@@ -118,10 +119,10 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
   }
 
   void removeItem(ListItem listItem) {
-    bool itemAlreadySelected = currentlySelectedListItems.any((element) => listItem.id == element.id);
+    bool itemAlreadySelected = currentlySelectedListItemsNotifier.value.any((element) => listItem.id == element.id);
     if (itemAlreadySelected) {
-      currentlySelectedListItems.removeWhere((element) => element.id == listItem.id);
-      print('num in currentlySelectedListItems: ${currentlySelectedListItems.length}');
+      currentlySelectedListItemsNotifier.value.removeWhere((element) => element.id == listItem.id);
+      print('num in currentlySelectedListItems: ${currentlySelectedListItemsNotifier.value.length}');
     } else {
       print('cannot remove item, item not found in list');
     }
@@ -129,37 +130,36 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
 
   void toggleItem(ListItem listItem, bool value) {
     print('toggleItem');
-      if (!value) removeItem(listItem);
-      if (value) addItem(listItem);
+    if (!value) removeItem(listItem);
+    if (value) addItem(listItem);
 
-      allSelected = currentlySelectedListItems.length == allItems.length;
+    allSelectedNotifier.value =
+        currentlySelectedListItemsNotifier.value.length == allItems.length;
   }
 
   bool isItemSelected(ListItem listItem) {
     // Check if the ListItem is in the currentlySelectedListItems list
-    bool listItemIsCurrentlySelected = currentlySelectedListItems.any((element) => element.id == listItem.id);
+    bool listItemIsCurrentlySelected = currentlySelectedListItemsNotifier.value.any((element) => element.id == listItem.id);
 
     // Return true if either condition is met
-    return listItemIsCurrentlySelected || allSelected; 
+    return listItemIsCurrentlySelected || allSelectedNotifier.value; 
   }
 
   void _toggleSelectAll() {
-    setState(() {
-      print('allSelected before toggle: $allSelected');
-      print('currentlySelectedListItems before toggle: $currentlySelectedListItems');
-      if (!allSelected) {
-        // adding all items to currently selected list
-        currentlySelectedListItems = List.from(allItems);
-        print('allItems assigned to currentlySelectedListItems');
-      } else if (allSelected) {
-         // removing all items to currently selected list
-        currentlySelectedListItems.clear();
-      }
+    print('allSelected before toggle: ${allSelectedNotifier.value}');
+    print(
+        'currentlySelectedListItems before toggle: ${currentlySelectedListItemsNotifier.value}');
+    if (!allSelectedNotifier.value) {
+      currentlySelectedListItemsNotifier.value = List.from(allItems);
+      print('allItems assigned to currentlySelectedListItems');
+    } else {
+      currentlySelectedListItemsNotifier.value.clear();
+    }
 
-      allSelected = !allSelected;
-      print('allSelected after toggle: $allSelected');
-      print('currentlySelectedListItems after toggle: $currentlySelectedListItems');
-    });
+    allSelectedNotifier.value = !allSelectedNotifier.value;
+    print('allSelected after toggle: ${allSelectedNotifier.value}');
+    print(
+        'currentlySelectedListItems after toggle: ${currentlySelectedListItemsNotifier.value}');
   }
 
   Widget _buildItem(ListItem listItem) {
@@ -249,7 +249,7 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
           final initiallySelectedListItem = state.initiallySelectedItem;
           final restOfListItems = state.items;
           // adding initially selected item to currentlySelectedListItems
-          currentlySelectedListItems.add(initiallySelectedListItem);
+          currentlySelectedListItemsNotifier.value.add(initiallySelectedListItem);
           // adding initially selected item to allItems first
           allItems.add(initiallySelectedListItem);
           // adding rest of folder contents to allItems
@@ -309,7 +309,19 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
                             delegate: SliverChildBuilderDelegate(
                               childCount: allItems.length,
                               (context, index) {
-                                return _buildItem(allItems[index]);
+                                  return ValueListenableBuilder(
+                                    valueListenable: allSelectedNotifier,
+                                    builder: (context, bool value, child) {
+                                      return ValueListenableBuilder(
+                                      valueListenable:
+                                          currentlySelectedListItemsNotifier,
+                                      builder:
+                                          (context, List<ListItem> value, child) {
+                                        return _buildItem(allItems[index]);
+                                      },
+                                    );
+                                    },
+                                  );
                               },
                             ),
                           )
