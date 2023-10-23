@@ -4,13 +4,14 @@ import 'package:equatable/equatable.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/screens/select_multiple_screen.dart';
 
 part 'select_multiple_state.dart';
 
 class SelectMultipleCubit extends Cubit<SelectMultipleState> {
   SelectMultipleCubit() : super(SelectMultipleInitial());
 
-  void init(Object selectedItem) {
+  void init(ListItem selectedItem) {
     emit(SelectMultipleInitial());
     activate(selectedItem);
   }

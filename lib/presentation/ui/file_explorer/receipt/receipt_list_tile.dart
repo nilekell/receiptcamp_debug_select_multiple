@@ -91,7 +91,7 @@ class ReceiptListTile extends StatelessWidget {
             onLongPress: () {
               Navigator.of(context).push(
                     SlidingSelectMultipleTransitionRoute(
-                        item: receipt));
+                        item: ListItem(item: receipt)));
             },
             child: ListTile(
                 leading: SizedBox(

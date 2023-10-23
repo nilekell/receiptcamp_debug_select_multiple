@@ -105,7 +105,7 @@ class FolderListTile extends StatelessWidget {
                 onLongPress: () {
                   Navigator.of(context).push(
                     SlidingSelectMultipleTransitionRoute(
-                        item: folder));
+                        item: ListItem(item: folder)));
                 },
                 child: ListTile(
                   subtitle: Text(

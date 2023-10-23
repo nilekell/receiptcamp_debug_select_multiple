@@ -10,7 +10,7 @@ import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class SlidingSelectMultipleTransitionRoute extends PageRouteBuilder {
-  SlidingSelectMultipleTransitionRoute({required Object item})
+  SlidingSelectMultipleTransitionRoute({required ListItem item})
       : super(
           opaque: false,
           pageBuilder: (BuildContext context, Animation<double> animation,
