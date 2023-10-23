@@ -12,11 +12,10 @@ final class SelectMultipleInitial extends SelectMultipleState {}
 final class SelectMultipleLoading extends SelectMultipleState {}
 
 final class SelectMultipleActivated extends SelectMultipleState {
-  final Object initiallySelectedItem;
-  final List<Object> items;
-  final Folder selectedItemParentFolder;
+  final ListItem initiallySelectedItem;
+  final List<ListItem> items;
 
-  const SelectMultipleActivated({required this.initiallySelectedItem, required this.items, required this.selectedItemParentFolder});
+  const SelectMultipleActivated({required this.initiallySelectedItem, required this.items});
 
   @override
   List<Object> get props => [initiallySelectedItem, items];
