@@ -395,7 +395,7 @@ class _FolderCheckboxListTileState extends State<FolderCheckboxListTile> {
 
 class ReceiptCheckboxListTile extends StatefulWidget {
   final Receipt receipt;
-  final bool isSelected;
+  bool isSelected;
   final ValueChanged<bool?> onChanged; 
   final String displayName;
   final String displayDate;
@@ -426,18 +426,17 @@ class _ReceiptCheckboxListTileState extends State<ReceiptCheckboxListTile> {
   final TextStyle displayDateStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
-  bool isSelected = false;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.only(left: 10),
         child: CheckboxListTile(
-          value: isSelected,
+          value: widget.isSelected,
           onChanged: (value) {
             setState(() {
-              isSelected = !isSelected;
-              widget.onChanged(isSelected);
+               widget.isSelected = !widget.isSelected;
+              widget.onChanged(widget.isSelected);
             });
           },
             secondary: SizedBox(
