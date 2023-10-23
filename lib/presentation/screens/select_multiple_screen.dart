@@ -251,10 +251,17 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
                 return const Center(child: CircularProgressIndicator());
               case SelectMultipleError():
                 return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                        'Uh oh, an unexpected error occured. Please go back and/or report the error'),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: const Text(
+                            'Uh oh, an unexpected error occured. Please go back and/or report the error', textAlign: TextAlign.center, textScaleFactor: 1.2,),
+                      ),
+                    ),
                     ElevatedButton(
+                      style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Color(primaryDarkBlue))),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
