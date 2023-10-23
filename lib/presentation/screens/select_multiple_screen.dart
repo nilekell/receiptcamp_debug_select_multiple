@@ -80,8 +80,8 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
   ValueNotifier<bool> allSelectedNotifier = ValueNotifier<bool>(false);
 
 
-  bool _moveActionEnabled = true;
-  bool _deleteActionEnabled = true;
+  ValueNotifier<bool> _moveActionEnabled = ValueNotifier<bool>(true);
+  ValueNotifier<bool> _deleteActionEnabled = ValueNotifier<bool>(true);
 
   @override
   void initState() {
@@ -135,6 +135,18 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
 
     allSelectedNotifier.value =
         currentlySelectedListItemsNotifier.value.length == allItems.length;
+
+    isDeleteEnabled();
+    isMoveEnabled();
+  }
+
+  void isDeleteEnabled() {
+    _deleteActionEnabled.value = currentlySelectedListItemsNotifier.value.isNotEmpty;
+    print('_deleteActionEnabled.value: ${_deleteActionEnabled.value}');
+  }
+
+  void isMoveEnabled() {
+    _moveActionEnabled.value = currentlySelectedListItemsNotifier.value.isNotEmpty;
   }
 
   bool isItemSelected(ListItem listItem) {
@@ -160,6 +172,9 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
     print('allSelected after toggle: ${allSelectedNotifier.value}');
     print(
         'currentlySelectedListItems after toggle: ${currentlySelectedListItemsNotifier.value}');
+
+    isDeleteEnabled();
+    isMoveEnabled();
   }
 
   Widget _buildItem(ListItem listItem) {
@@ -259,16 +274,25 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
       child: Scaffold(
           appBar: AppBar(
             leading: IconButton(
-                icon: const Icon(Icons.close, size: 26,),
-                onPressed: () => Navigator.of(context).pop()),
+                  icon: const Icon(Icons.close, size: 26,),
+                  onPressed: () => Navigator.of(context).pop()
+            ),
             backgroundColor: const Color(primaryDarkBlue),
             actions: [
              // select all
              IconButton(onPressed: _toggleSelectAll, icon: Icon(Icons.select_all)),
              // delete selected items
-             IconButton(onPressed: _showDeleteMultipleDialog, icon: Icon(Icons.delete)),
+             ValueListenableBuilder(
+              valueListenable: _deleteActionEnabled,
+              builder: (context, bool value, child) {
+                return IconButton(onPressed: value ? _showDeleteMultipleDialog : null, icon: Icon(Icons.delete));}),
              // move selected items
-             IconButton(onPressed: _showMoveMultipleDialog, icon: Icon(Icons.drive_file_move))
+             ValueListenableBuilder(
+              valueListenable: _moveActionEnabled,
+               builder: (context, bool value, child) {
+                 return IconButton(onPressed: value? _showMoveMultipleDialog : null, icon: Icon(Icons.drive_file_move));
+               }
+             )
             ],
           ),
           body: BlocBuilder<SelectMultipleCubit, SelectMultipleState>(
