@@ -18,69 +18,43 @@ class SelectMultipleCubit extends Cubit<SelectMultipleState> {
 
   void activate(ListItem selectedItem) async {
     emit(SelectMultipleLoading());
+
     try {
-      List<Object> items = [];
-      List<ListItem> listItems = [];
-      
-      switch (selectedItem.item.runtimeType) {
-        // if the selected item is a folder, do this
-        case Folder:
-          Folder selectedFolder = selectedItem.item as Folder;
-          // getting all items including selected item
-          items = await DatabaseRepository.instance
-              .getFolderContents(selectedFolder.parentId);
+      // Get the parent ID and type of the selected item
+      String parentId;
+      dynamic selectedObject;
 
-          // removing selected folder
-          items.removeWhere((element) {
-            Folder? removedFolder;
-            bool toBeRemoved = false;
-            if (element is Folder) {
-              removedFolder = element;
-              toBeRemoved = element.id == selectedFolder.id;
-            }
-            if (toBeRemoved) print('SelectMultipleCubit: removing ${removedFolder!.name} from items');
-            return toBeRemoved;
-          });
-
-          // adding all items except the selected item
-          for (Object item in items) {
-            listItems.add(ListItem(item: item));
-          }
-
-          emit(SelectMultipleActivated(items: listItems, initiallySelectedItem: ListItem(item: selectedFolder)));
-          break;
-
-        // if the selected item is a receipt, do this
-        case Receipt:
-          Receipt selectedReceipt = selectedItem.item as Receipt;
-          final parentFolder = await DatabaseRepository.instance.getFolderById(selectedReceipt.parentId);
-          items = await DatabaseRepository.instance
-              .getFolderContents(selectedReceipt.parentId);
-
-          // removing selected receipt
-          items.removeWhere((element) {
-            Receipt? removedReceipt;
-              bool toBeRemoved = false;
-              if (element is Receipt) {
-                removedReceipt = element;
-                toBeRemoved = element.id == selectedReceipt.id;
-              }
-              if (toBeRemoved) print('SelectMultipleCubit: removing ${removedReceipt!.name} from items'); 
-              return toBeRemoved;
-            });
-
-          // adding all items except the selected item
-          for (Object item in items) {
-            listItems.add(ListItem(item: item));
-          }
-
-          emit(SelectMultipleActivated(items: listItems, initiallySelectedItem: ListItem(item: selectedReceipt)));
-          break;
-
-        default:
-          emit(SelectMultipleError());
+      if (selectedItem.item is Folder) {
+        parentId = (selectedItem.item as Folder).parentId;
+        selectedObject = selectedItem.item as Folder;
+      } else if (selectedItem.item is Receipt) {
+        parentId = (selectedItem.item as Receipt).parentId;
+        selectedObject = selectedItem.item as Receipt;
+      } else {
+        emit(SelectMultipleError());
+        return;
       }
 
+      // Fetch all items from the parent ID
+      List<Object> items =
+          await DatabaseRepository.instance.getFolderContents(parentId);
+
+      // Remove the selected item from the list
+      items.removeWhere((element) {
+        if (element is Folder && selectedObject is Folder) {
+          return element.id == selectedObject.id;
+        } else if (element is Receipt && selectedObject is Receipt) {
+          return element.id == selectedObject.id;
+        }
+        return false;
+      });
+
+      // Convert items to ListItems
+      List<ListItem> listItems =
+          items.map((item) => ListItem(item: item)).toList();
+
+      emit(SelectMultipleActivated(
+          items: listItems, initiallySelectedItem: selectedItem));
     } on Exception catch (e) {
       print(e.toString());
       emit(SelectMultipleError());
