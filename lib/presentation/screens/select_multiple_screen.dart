@@ -74,9 +74,9 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
 
-  List<Object> allItems = <Object>[];
+  List<ListItem> allItems = <ListItem>[];
 
-  List<Object> currentlySelectedItems = <Object>[];
+  List<ListItem> currentlySelectedListItems = <ListItem>[];
 
   List<Folder> foldersThatCanBeMovedTo = <Folder>[];
 
@@ -90,9 +90,6 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    setState(() {
-      currentlySelectedItems.add(widget.initiallySelectedItem);
-    });
     super.initState();
   }
 
@@ -108,117 +105,132 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
 
   void _showDeleteMultipleDialog() {}
 
-  void addItem(Object item) {
-    currentlySelectedItems.add(item);
-    print('added ${item.runtimeType}');
-    print('num in currentlySelectedItems: ${currentlySelectedItems.length}');
-  }
-
-  void removeItem(Object item) {
-    allSelected = false;
-
-    if (item is Receipt) {
-      currentlySelectedItems.removeWhere((element) => (element as Receipt).id == item.id);
-      print('removed ${item.name}');
-    } else if (item is Folder) {
-      currentlySelectedItems.removeWhere((element) => (element as Folder).id == item.id);
-      print('removed ${item.name}');
+  void addItem(ListItem listItem) {
+    bool itemAlreadySelected = currentlySelectedListItems.any((element) => listItem.id == element.id);
+    if (!itemAlreadySelected) {
+      currentlySelectedListItems.add(listItem);
+      print('added ${listItem.runtimeType}');
+      print('num in currentlySelectedListItems: ${currentlySelectedListItems.length}');
+    } else {
+      print('cannot add item, item already in list');
     }
-
-    print('num in currentlySelectedItems: ${currentlySelectedItems.length}');
+    
   }
 
-  void toggleItem(Object item, bool value) {
-      if (allSelected) allSelected = false;
-      if (!value) removeItem(item);
-      if (value) addItem(item);
+  void removeItem(ListItem listItem) {
+    bool itemAlreadySelected = currentlySelectedListItems.any((element) => listItem.id == element.id);
+    if (itemAlreadySelected) {
+      currentlySelectedListItems.removeWhere((element) => element.id == listItem.id);
+      print('num in currentlySelectedListItems: ${currentlySelectedListItems.length}');
+    } else {
+      print('cannot remove item, item not found in list');
+    }
+  }
+
+  void toggleItem(ListItem listItem, bool value) {
+    print('toggleItem');
+      if (!value) removeItem(listItem);
+      if (value) addItem(listItem);
+
+      allSelected = currentlySelectedListItems.length == allItems.length;
+  }
+
+  bool isItemSelected(ListItem listItem) {
+    // Check if the ListItem is in the currentlySelectedListItems list
+    bool listItemIsCurrentlySelected = currentlySelectedListItems.any((element) => element.id == listItem.id);
+
+    // Return true if either condition is met
+    return listItemIsCurrentlySelected || allSelected; 
   }
 
   void _toggleSelectAll() {
     setState(() {
       print('allSelected before toggle: $allSelected');
+      print('currentlySelectedListItems before toggle: $currentlySelectedListItems');
       if (!allSelected) {
-        currentlySelectedItems = allItems;
-        print('allItems assigned to currentlySelectedItems');
+        // adding all items to currently selected list
+        currentlySelectedListItems = List.from(allItems);
+        print('allItems assigned to currentlySelectedListItems');
       } else if (allSelected) {
-        for (final item in currentlySelectedItems) {
-          removeItem(item);
-        }
+         // removing all items to currently selected list
+        currentlySelectedListItems.clear();
       }
 
       allSelected = !allSelected;
       print('allSelected after toggle: $allSelected');
+      print('currentlySelectedListItems after toggle: $currentlySelectedListItems');
     });
   }
 
-  Widget _buildItem(Object item) {
-    if (item is Receipt) {
-      if (item is ReceiptWithSize) {
+  Widget _buildItem(ListItem listItem) {
+    Object itemProp = listItem.item;
+    if (itemProp is Receipt) {
+      if (itemProp is ReceiptWithSize) {
         return SizedBox(
             height: 60,
             child: ReceiptCheckboxListTile(
-              receipt: item,
+              receipt: itemProp,
               withSize: true,
-              isSelected: allSelected || currentlySelectedItems.contains(item),
+              isSelected: isItemSelected(listItem),
               onChanged: (newValue) {
-                toggleItem(item, newValue!);
+                toggleItem(listItem, newValue!);
               },
             ));
       }
-      if (item is ReceiptWithPrice) {
+      if (itemProp is ReceiptWithPrice) {
         return SizedBox(
             height: 60,
             child: ReceiptCheckboxListTile(
-              receipt: item,
-              isSelected: allSelected || currentlySelectedItems.contains(item),
-              price: item.priceString,
+              receipt: itemProp,
+              isSelected: isItemSelected(listItem),
+              price: itemProp.priceString,
               onChanged: (newValue) {
-                toggleItem(item, newValue!);
+                toggleItem(listItem, newValue!);
               },
             ));
       } else {
         return SizedBox(
             height: 60,
             child: ReceiptCheckboxListTile(
-              receipt: item,
-              isSelected: allSelected || currentlySelectedItems.contains(item),
+              receipt: itemProp,
+              isSelected: isItemSelected(listItem),
               onChanged: (newValue) {
-                toggleItem(item, newValue!);
+                toggleItem(listItem, newValue!);
               },
             ));
       }
-    } else if (item is Folder) {
-      if (item is FolderWithSize) {
+    } else if (itemProp is Folder) {
+      if (itemProp is FolderWithSize) {
         return SizedBox(
             height: 60,
             child: FolderCheckboxListTile(
-              folder: item,
-              storageSize: item.storageSize,
-              isSelected: allSelected || currentlySelectedItems.contains(item),
+              folder: itemProp,
+              storageSize: itemProp.storageSize,
+              isSelected: isItemSelected(listItem),
               onChanged: (newValue) {
-                toggleItem(item, newValue!);
+                toggleItem(listItem, newValue!);
               },
             ));
       }
-      if (item is FolderWithPrice) {
+      if (itemProp is FolderWithPrice) {
         return SizedBox(
             height: 60,
             child: FolderCheckboxListTile(
-              folder: item,
-              price: item.price,
-              isSelected: allSelected || currentlySelectedItems.contains(item),
+              folder: itemProp,
+              price: itemProp.price,
+              isSelected: isItemSelected(listItem),
               onChanged: (newValue) {
-                toggleItem(item, newValue!);
+                toggleItem(listItem, newValue!);
               },
             ));
       } else {
         return SizedBox(
             height: 60,
             child: FolderCheckboxListTile(
-              folder: item,
-              isSelected: allSelected || currentlySelectedItems.contains(item),
+              folder: itemProp,
+              isSelected: isItemSelected(listItem),
               onChanged: (newValue) {
-                toggleItem(item, newValue!);
+                toggleItem(listItem, newValue!);
               },
             ));
       }
@@ -232,9 +244,16 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
     return BlocListener<SelectMultipleCubit, SelectMultipleState>(
       listener: (context, state) {
         if (state is SelectMultipleActivated) {
-          allItems = state.items;
-          print('allItems init with: $allItems');
-          print('currentlySelectedItems init with $currentlySelectedItems');
+          // this code should only run once, when the SelectMultipleView is setup
+          // currently SelectMultipleActivated is only emitted once so it is fine
+          final initiallySelectedListItem = state.initiallySelectedItem;
+          final restOfListItems = state.items;
+          // adding initially selected item to currentlySelectedListItems
+          currentlySelectedListItems.add(initiallySelectedListItem);
+          // adding initially selected item to allItems first
+          allItems.add(initiallySelectedListItem);
+          // adding rest of folder contents to allItems
+          allItems.addAll(restOfListItems);
         }
       },
       child: Scaffold(
@@ -288,10 +307,9 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
                                       slivers: <Widget>[
                                         SliverList(
                             delegate: SliverChildBuilderDelegate(
-                              childCount: state.items.length,
+                              childCount: allItems.length,
                               (context, index) {
-                                var item = state.items[index];
-                                return _buildItem(item);
+                                return _buildItem(allItems[index]);
                               },
                             ),
                           )
