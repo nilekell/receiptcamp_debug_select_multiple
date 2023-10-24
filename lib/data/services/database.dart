@@ -434,6 +434,50 @@ class DatabaseService {
     });
   }
 
+   Future<List<Folder>> getMultiFoldersThatCanBeMovedTo(List<Object> filesToBeMoved) async {
+    final db = await database;
+    List<String> exceptionFolderIds = [];
+
+    print('filesToBeMoved.length: ${filesToBeMoved.length}');
+    for (final item in filesToBeMoved) {
+      if (item is Receipt) {
+        exceptionFolderIds.add(item.parentId);
+        print('exceptionFolderIds: added Receipt ${item.name}, ${item.id}');
+      } else if (item is Folder) {
+        exceptionFolderIds.add(item.parentId);
+        print('exceptionFolderIds: added Folder ${item.name}, ${item.id}');
+        final subFolderIds = await getRecursiveSubFolderIds(item.id);
+        exceptionFolderIds.add(item.id);
+        exceptionFolderIds.addAll(subFolderIds);
+      }
+    }
+
+    // removing duplicates
+    exceptionFolderIds = exceptionFolderIds.toSet().toList();
+    print('exceptionFolderIds: $exceptionFolderIds');
+
+    // Create a string of placeholders for sqlite query
+    String placeholders = exceptionFolderIds.map((_) => '?').join(',');
+
+    // querying for all folders except for those in [exceptionFolderIds]
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT *
+      FROM folders
+      WHERE id NOT IN ($placeholders)
+    ''', exceptionFolderIds);
+
+    // returning list of folders
+    return List.generate(maps.length, (i) {
+      print(maps[i]['name']);
+      return Folder(
+        id: maps[i]['id'],
+        name: maps[i]['name'],
+        lastModified: maps[i]['lastModified'],
+        parentId: maps[i]['parentId'],
+      );
+    });
+  }
+
   // method to retrieve ids for folders and their subfolders for a specific folder
   Future<List<String>> getRecursiveSubFolderIds(String folderId) async {
     final db = await database;
