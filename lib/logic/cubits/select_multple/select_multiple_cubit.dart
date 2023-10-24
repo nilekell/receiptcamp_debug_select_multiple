@@ -89,14 +89,32 @@ class SelectMultipleCubit extends Cubit<SelectMultipleState> {
   void moveMultiItems(String destinationFolderId, List<ListItem> items) async {
     emit(SelectMultipleActionLoading());
     try {
-      final Folder destinationFolder = await DatabaseRepository.instance.getFolderById(destinationFolderId);
 
       for (final listItem in items) {
         Object item = listItem.item;
         if (item is Receipt) {
-          folderViewCubit.moveReceipt(item, destinationFolder.id);
+          folderViewCubit.moveReceipt(item, destinationFolderId);
         } else if (item is Folder) {
-          folderViewCubit.moveFolder(item, destinationFolder.id);
+          folderViewCubit.moveFolder(item, destinationFolderId);
+        }
+      }
+
+      emit(SelectMultipleActionSuccess());
+    } on Exception catch (e) {
+      print(e.toString());
+      emit(SelectMultipleError());
+    }
+  }
+
+  void deleteMultiItems(List<ListItem> items) async {
+    try {
+      emit(SelectMultipleActionLoading());
+      for (final listItem in items) {
+        Object item = listItem.item;
+        if (item is Receipt) {
+          folderViewCubit.deleteReceipt(item.id);
+        } else if (item is Folder) {
+          folderViewCubit.deleteFolder(item.id);
         }
       }
 
