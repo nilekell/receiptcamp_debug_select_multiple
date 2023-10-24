@@ -100,6 +100,8 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
     super.dispose();
     allSelectedNotifier.dispose();
     currentlySelectedListItemsNotifier.dispose();
+    _moveActionEnabled.dispose();
+    _deleteActionEnabled.dispose();
     _animationController.dispose();
   }
 
