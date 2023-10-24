@@ -8,6 +8,7 @@ import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/logic/cubits/select_multple/select_multiple_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/ui/select_multiple/multi_delete_dialog.dart';
 import 'package:receiptcamp/presentation/ui/select_multiple/multi_move_dialog.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
@@ -106,7 +107,9 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
     await showMultiMoveDialog(context, context.read<SelectMultipleCubit>(), widget.initiallySelectedItem, currentlySelectedListItemsNotifier.value);
   }
 
-  void _showDeleteMultipleDialog() {}
+  void _showDeleteMultipleDialog() async {
+    await showMultiDeleteDialog(context, context.read<SelectMultipleCubit>(), widget.initiallySelectedItem, currentlySelectedListItemsNotifier.value);
+  }
 
   void addItem(ListItem listItem) {
     bool itemAlreadySelected = currentlySelectedListItemsNotifier.value.any((element) => listItem.id == element.id);
