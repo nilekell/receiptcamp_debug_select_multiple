@@ -103,7 +103,7 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
   }
 
   void _showMoveMultipleDialog() async {
-    await showMultiMoveDialog(context, context.read<SelectMultipleCubit>(), widget.initiallySelectedItem, currentlySelectedListItemsNotifier.value, ListItem(item: Object()));
+    await showMultiMoveDialog(context, context.read<SelectMultipleCubit>(), widget.initiallySelectedItem, currentlySelectedListItemsNotifier.value);
   }
 
   void _showDeleteMultipleDialog() {}

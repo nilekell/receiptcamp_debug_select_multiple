@@ -10,22 +10,21 @@ import 'package:receiptcamp/presentation/screens/select_multiple_screen.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 Future<void> showMultiMoveDialog(BuildContext context,
-    SelectMultipleCubit selectMultipleCubit, Object selectedObject, List<ListItem> itemsToBeMoved, ListItem initiallySelectedItem) async {
+    SelectMultipleCubit selectMultipleCubit, Object selectedObject, List<ListItem> itemsToBeMoved) async {
   return await showDialog(
       context: context,
       builder: (moveFolderDialogContext) {
         return BlocProvider.value(
             value: selectMultipleCubit,
-            child: MultiMoveDialog(selectedObject: selectedObject, itemsToBeMoved: itemsToBeMoved, initiallySelectedItem: initiallySelectedItem));
+            child: MultiMoveDialog(itemsToBeMoved: itemsToBeMoved, selectedObject: selectedObject,));
       });
 }
 
 class MultiMoveDialog extends StatefulWidget {
   Object selectedObject;
   final List<ListItem> itemsToBeMoved;
-  final ListItem initiallySelectedItem;
 
-  MultiMoveDialog({super.key, required this.selectedObject, required this.itemsToBeMoved, required this.initiallySelectedItem});
+  MultiMoveDialog({super.key, required this.selectedObject, required this.itemsToBeMoved});
 
   @override
   State<MultiMoveDialog> createState() => _MultiMoveDialogState();
