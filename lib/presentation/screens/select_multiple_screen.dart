@@ -4,9 +4,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/logic/cubits/select_multple/select_multiple_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
+import 'package:receiptcamp/presentation/ui/select_multiple/multi_move_dialog.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 class SlidingSelectMultipleTransitionRoute extends PageRouteBuilder {
@@ -43,7 +45,7 @@ class SlidingSelectMultipleTransitionRoute extends PageRouteBuilder {
               position: offsetAnimation,
               child: BlocProvider(
                   create: (BuildContext context) =>
-                      SelectMultipleCubit()..init(item),
+                      SelectMultipleCubit(context.read<FolderViewCubit>())..init(item),
                   child: child),
             );
           },
@@ -100,9 +102,9 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
     _animationController.dispose();
   }
 
-  void _getFoldersThatCanBeMovedTo(List<Folder> currentlySelectedFolders) async {}
-
-  void _showMoveMultipleDialog() async {}
+  void _showMoveMultipleDialog() async {
+    await showMultiMoveDialog(context, context.read<SelectMultipleCubit>(), widget.initiallySelectedItem, currentlySelectedListItemsNotifier.value, ListItem(item: Object()));
+  }
 
   void _showDeleteMultipleDialog() {}
 
@@ -270,6 +272,9 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
           // adding rest of folder contents to allItems
           allItems.addAll(restOfListItems);
         }
+        if (state is SelectMultipleActionSuccess) {
+          Navigator.of(context).pop();
+        }
       },
       child: Scaffold(
           appBar: AppBar(
@@ -296,6 +301,7 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
             ],
           ),
           body: BlocBuilder<SelectMultipleCubit, SelectMultipleState>(
+            buildWhen: (previous, current) => previous is! SelectMultipleActionState || current is! SelectMultipleActionState,
               builder: (context, state) {
             switch (state) {
               case SelectMultipleInitial() || SelectMultipleLoading():
@@ -355,6 +361,8 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
                     ],
                   ),
                 );
+              default:
+                return Container();
             }
           })),
     );

@@ -3,6 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/services/preferences.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/screens/select_multiple_screen.dart';
@@ -10,8 +11,9 @@ import 'package:receiptcamp/presentation/screens/select_multiple_screen.dart';
 part 'select_multiple_state.dart';
 
 class SelectMultipleCubit extends Cubit<SelectMultipleState> {
-  SelectMultipleCubit() : super(SelectMultipleInitial());
+  SelectMultipleCubit(this.folderViewCubit) : super(SelectMultipleInitial());
 
+  final FolderViewCubit folderViewCubit;
   final _prefs = PreferencesService.instance;
 
   void init(ListItem selectedItem) {
@@ -78,6 +80,27 @@ class SelectMultipleCubit extends Cubit<SelectMultipleState> {
 
       emit(SelectMultipleActivated(
           items: listItems, initiallySelectedItem: selectedItem));
+    } on Exception catch (e) {
+      print(e.toString());
+      emit(SelectMultipleError());
+    }
+  }
+
+  void moveMultiItems(String destinationFolderId, List<ListItem> items) async {
+    emit(SelectMultipleActionLoading());
+    try {
+      final Folder destinationFolder = await DatabaseRepository.instance.getFolderById(destinationFolderId);
+
+      for (final listItem in items) {
+        Object item = listItem.item;
+        if (item is Receipt) {
+          folderViewCubit.moveReceipt(item, destinationFolder.id);
+        } else if (item is Folder) {
+          folderViewCubit.moveFolder(item, destinationFolder.id);
+        }
+      }
+
+      emit(SelectMultipleActionSuccess());
     } on Exception catch (e) {
       print(e.toString());
       emit(SelectMultipleError());

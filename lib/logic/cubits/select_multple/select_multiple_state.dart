@@ -11,6 +11,8 @@ final class SelectMultipleInitial extends SelectMultipleState {}
 
 final class SelectMultipleLoading extends SelectMultipleState {}
 
+final class SelectMultipleError extends SelectMultipleState {}
+
 final class SelectMultipleActivated extends SelectMultipleState {
   final ListItem initiallySelectedItem;
   final List<ListItem> items;
@@ -21,4 +23,12 @@ final class SelectMultipleActivated extends SelectMultipleState {
   List<Object> get props => [initiallySelectedItem, items];
 }
 
-final class SelectMultipleError extends SelectMultipleState {}
+final class SelectMultipleActionState extends SelectMultipleState {}
+
+final class SelectMultipleActionLoading extends SelectMultipleActionState {}
+
+final class SelectMultipleActionSuccess extends SelectMultipleActionState {}
+
+final class SelectMultipleActionError extends SelectMultipleActionState {
+  SelectMultipleActionError();
+}
