@@ -173,3 +173,38 @@ final class FolderViewPermissionsFailure extends FolderViewActionState {
 
   const FolderViewPermissionsFailure({required super.folderId, required this.permissionResult});
 }
+
+final class FolderViewMultiMoveSuccess extends FolderViewActionState {
+  const FolderViewMultiMoveSuccess({required super.folderId, required this.numItemsMoved, required this.destinationFolderName});
+
+  final int numItemsMoved;
+  final String destinationFolderName;
+
+  @override
+  List<Object> get props => [numItemsMoved, destinationFolderName];
+   
+}
+
+final class FolderViewMultiMoveFailure extends FolderViewActionState {
+  const FolderViewMultiMoveFailure({required super.folderId});
+
+  @override
+  List<Object> get props => [folderId];
+}
+
+final class FolderViewMultiDeleteSuccess extends FolderViewActionState {
+  const FolderViewMultiDeleteSuccess({required super.folderId, required this.numItemsDeleted});
+
+  final int numItemsDeleted;
+
+  @override
+  List<Object> get props => [numItemsDeleted];
+
+}
+
+final class FolderViewMultiDeleteFailure extends FolderViewActionState {
+  const FolderViewMultiDeleteFailure({required super.folderId});
+
+  @override
+  List<Object> get props => [folderId];
+}

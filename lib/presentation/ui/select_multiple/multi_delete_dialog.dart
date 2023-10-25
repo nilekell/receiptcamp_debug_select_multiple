@@ -37,8 +37,8 @@ class MultiDeleteDialog extends StatelessWidget {
         style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
       ),
       content: Text(itemsToBeDeleted.length > 1 ?
-        'Move ${itemsToBeDeleted.length} items to...' :
-        'Move ${itemsToBeDeleted.length} item to...',
+        'Are you sure you want to delete ${itemsToBeDeleted.length} items?':
+        'Are you sure you want to delete ${itemsToBeDeleted.length} item?',
           style: const TextStyle(color: Colors.white)),
       actions: <Widget>[
         TextButton(

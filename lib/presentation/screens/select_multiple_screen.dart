@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
+import 'package:receiptcamp/logic/cubits/file_explorer/file_explorer_cubit.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/logic/cubits/select_multple/select_multiple_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
@@ -46,7 +47,7 @@ class SlidingSelectMultipleTransitionRoute extends PageRouteBuilder {
               position: offsetAnimation,
               child: BlocProvider(
                   create: (BuildContext context) =>
-                      SelectMultipleCubit(context.read<FolderViewCubit>())..init(item),
+                      SelectMultipleCubit(context.read<FolderViewCubit>(), context.read<FileExplorerCubit>())..init(item),
                   child: child),
             );
           },

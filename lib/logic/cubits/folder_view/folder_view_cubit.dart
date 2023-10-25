@@ -116,6 +116,62 @@ class FolderViewCubit extends Cubit<FolderViewState> {
     return currentOrder == prefs.getLastOrder() && currentColumn == prefs.getLastColumn();
   }
 
+  moveMultipleItems(List<Object> items, String destinationFolderId) async {
+    try {
+      final String targetFolderName =
+          (await DatabaseRepository.instance.getFolderById(destinationFolderId))
+              .name;
+
+      int numMoved = 0;
+
+      for (final item in items) {
+        if (item is Receipt) {
+          await DatabaseRepository.instance.moveReceipt(item, destinationFolderId);
+          numMoved++;
+        } else if (item is Folder) {
+          await DatabaseRepository.instance.moveFolder(item, destinationFolderId);
+          numMoved++;
+        }
+      }
+
+      emit(
+        FolderViewMultiMoveSuccess(
+            folderId: destinationFolderId,
+            numItemsMoved: numMoved,
+            destinationFolderName: targetFolderName),
+      );
+    } on Exception catch (e) {
+      print(e.toString());
+      emit(const FolderViewMultiMoveFailure(folderId: rootFolderId));
+    }
+  }
+
+  deleteMultiItems(List<Object> objectList) async {
+    int numDeleted = 0;
+    String parentId = '';
+    try {
+      for (final item in objectList) {
+        if (item is Receipt) {
+          await DatabaseRepository.instance.deleteReceipt(item.id);
+          numDeleted++;
+          parentId = item.id;
+        } else if (item is Folder) {
+          await DatabaseRepository.instance.deleteFolder(item.id);
+          numDeleted++;
+          parentId = item.id;
+        }
+      }
+
+      emit(
+        FolderViewMultiDeleteSuccess(
+            numItemsDeleted: numDeleted, folderId: parentId),
+      );
+    } on Exception catch (e) {
+      print(e.toString());
+      emit(FolderViewMultiDeleteFailure(folderId: parentId));
+    }
+  }
+
   // move folder
   moveFolder(Folder folder, String targetFolderId) async {
     final String targetFolderName =
