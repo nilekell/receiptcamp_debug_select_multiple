@@ -40,6 +40,16 @@ class ReceiptListTile extends StatelessWidget {
   final TextStyle displayDateStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
+  String calculateSubtitle(String price, bool withSize, String displayDate) {
+    if (withSize == true) {
+      return displaySize;
+    } else if (price != '') {
+      return price;
+    } else {
+      return displayDate;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Draggable<Receipt>(
@@ -52,7 +62,7 @@ class ReceiptListTile extends StatelessWidget {
           Colors.black.withOpacity(0.3),
           BlendMode.srcIn,
         ),
-        child: price == '' ? ReceiptListTileVisual(receipt: receipt, withSize: withSize) : ReceiptListTileVisual(receipt: receipt, price: (receipt as ReceiptWithPrice).priceString,),
+        child: ReceiptListTileVisual(receipt: receipt, subtitle: calculateSubtitle(price, withSize, displayDate),),
       ),
       feedback: Material(
         color: Colors.transparent,
@@ -107,9 +117,7 @@ class ReceiptListTile extends StatelessWidget {
                   ),
                 ),
                 subtitle: Text(
-                  withSize
-                    ? displaySize
-                    : price != '' ? price : 'Modified $displayDate',
+                  calculateSubtitle(price, withSize, displayDate),
                   style: displayDateStyle,
                 ),
                 trailing: IconButton(
@@ -140,20 +148,14 @@ class ReceiptListTile extends StatelessWidget {
 class ReceiptListTileVisual extends StatelessWidget {
   final Receipt receipt;
   final String displayName;
-  final String displayDate;
-  final String displaySize;
-  final String price;
-  final bool withSize;
+  final String subtitle;
 
-  ReceiptListTileVisual({Key? key, required this.receipt,  this.withSize = false, this.price = ''})
+  ReceiptListTileVisual({Key? key, required this.receipt, required this.subtitle})
       // displayName is the file name without the file extension and is cut off when the receipt name
       // is > 25 chars or would require 2 lines to be shown completely
       : displayName = receipt.name.length > 25
             ? "${receipt.name.substring(0, 25)}...".split('.').first
             : receipt.name.split('.').first,
-        displayDate = Utility.formatDisplayDateFromDateTime(
-            Utility.formatDateTimeFromUnixTimestamp(receipt.lastModified)),
-        displaySize = Utility.bytesToSizeString(receipt.storageSize),
         super(key: key);
 
   final TextStyle displayNameStyle = const TextStyle(
@@ -179,9 +181,7 @@ class ReceiptListTileVisual extends StatelessWidget {
               ),
             ),
             subtitle: Text(
-              withSize
-                  ? displaySize
-                  : price != '' ? price : 'Modified $displayDate', // Ternary operator to decide text
+              subtitle, // Ternary operator to decide text
               style: subTextStyle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
