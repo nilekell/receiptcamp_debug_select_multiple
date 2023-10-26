@@ -22,14 +22,6 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>$(FLUTTER_BUILD_NUMBER)</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>This permission is required to take photos of receipts</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This permission is required to access photos of receipts from the camera roll</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -42,6 +34,14 @@
 		</dict>
 		<dict/>
 	</array>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This permission is required to take photos of receipts</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This permission is required to access photos of receipts from the camera roll</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -64,7 +64,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
 </dict>
 </plist>
