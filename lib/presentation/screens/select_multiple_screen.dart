@@ -12,6 +12,7 @@ import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/ui/select_multiple/multi_delete_dialog.dart';
 import 'package:receiptcamp/presentation/ui/select_multiple/multi_move_dialog.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
+import 'package:roundcheckbox/roundcheckbox.dart';
 
 class SlidingSelectMultipleTransitionRoute extends PageRouteBuilder {
   SlidingSelectMultipleTransitionRoute({required ListItem item})
@@ -413,37 +414,75 @@ class _FolderCheckboxListTileState extends State<FolderCheckboxListTile> {
   final TextStyle displayNameStyle = const TextStyle(
       fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
 
-  final TextStyle displayDateStyle =
+  final TextStyle checkedDisplayNameeStyle = const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white);
+
+  final TextStyle subtitleStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
+
+  final TextStyle checkedSubtitleStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Colors.white);
       
+  String calculateSubtitle(
+      String displaySize, String displayPrice, String displayDate) {
+    if (displaySize.isNotEmpty) {
+      return displaySize;
+    } else if (displayPrice != '') {
+      return displayPrice;
+    } else {
+      return 'Modified $displayDate';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 10),
-      child: CheckboxListTile(
-        value: widget.isSelected,
-        onChanged: (value) {
-          setState(() {
-              widget.isSelected = !widget.isSelected;
-              widget.onChanged(widget.isSelected);
-            });
-        },
-        subtitle: Text(
-          widget.displaySize.isNotEmpty ? widget.displaySize : widget.displayPrice != '' ? widget.displayPrice : 'Modified ${widget.displayDate}',
-          style: displayDateStyle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        secondary: const Icon(
-          Icons.folder,
-          size: 50,
-        ),
-        title: Text(
-          widget.displayName,
-          style: displayNameStyle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+    return Container(
+      margin: EdgeInsets.only(right: 10),
+      decoration: widget.isSelected ? BoxDecoration(
+        color: Color(primaryDeepBlue),
+        borderRadius: BorderRadius.only(topRight: Radius.circular(25.0), bottomRight: Radius.circular(25.0))) : null,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16.0),
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+                  widget.isSelected = !widget.isSelected;
+                  widget.onChanged(widget.isSelected);
+                });
+          },
+          child: Transform.translate(
+            offset: Offset(0, -6.0),
+            child: ListTile(
+              leading: Icon(
+                Icons.folder,
+                size: 50,
+                color: widget.isSelected ? Colors.white : null,
+              ),
+              subtitle: Text(
+                calculateSubtitle(widget.displaySize, widget.displayPrice, widget.displayDate),
+                style: widget.isSelected ? checkedSubtitleStyle : subtitleStyle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: RoundCheckBox(
+                animationDuration: const Duration(microseconds: 0),
+                borderColor: widget.isSelected ? Colors.white : Color(primaryDarkBlue),
+                checkedColor: Color(primaryDarkBlue),
+                onTap: (selected) {
+                  setState(() {
+                    widget.isSelected = !widget.isSelected;
+                    widget.onChanged(widget.isSelected);
+                  });
+                },
+                size: 30,
+                isChecked: widget.isSelected,
+              ),
+              title: Text(
+                widget.displayName,
+                style: widget.isSelected ? checkedDisplayNameeStyle : displayNameStyle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -473,50 +512,89 @@ class ReceiptCheckboxListTile extends StatefulWidget {
         super(key: key);
 
   @override
-  State<ReceiptCheckboxListTile> createState() => _ReceiptCheckboxListTileState();
+  State<ReceiptCheckboxListTile> createState() =>
+      _ReceiptCheckboxListTileState();
 }
 
 class _ReceiptCheckboxListTileState extends State<ReceiptCheckboxListTile> {
   final TextStyle displayNameStyle = const TextStyle(
       fontSize: 20, fontWeight: FontWeight.w600, color: Color(primaryGrey));
 
-  final TextStyle displayDateStyle =
+  final TextStyle checkedDisplayNameeStyle = const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white);
+
+  final TextStyle subtitleStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
+
+  final TextStyle checkedSubtitleStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Colors.white);
+
+    String calculateSubtitle(
+      bool withSize, String displayPrice, String displayDate) {
+    if (withSize) {
+      return widget.displaySize;
+    } else if (displayPrice != '') {
+      return displayPrice;
+    } else {
+      return 'Modified $displayDate';
+    }
+  }
 
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.only(left: 10),
-        child: CheckboxListTile(
-          value: widget.isSelected,
-          onChanged: (value) {
-            setState(() {
-               widget.isSelected = !widget.isSelected;
-              widget.onChanged(widget.isSelected);
-            });
-          },
-            secondary: SizedBox(
-              height: 50,
-              width: 50,
-              child: ClipRRect(
-                // square image corners
-                borderRadius: const BorderRadius.all(Radius.zero),
-                child: Image.file(
-                  File(widget.receipt.localPath),
-                  fit: BoxFit.cover,
-                ),
-              ),
+    return Container(
+      margin: EdgeInsets.only(right: 10),
+      decoration: widget.isSelected ? BoxDecoration(
+        color: Color(primaryDeepBlue),
+        borderRadius: BorderRadius.only(topRight: Radius.circular(25.0), bottomRight: Radius.circular(25.0))) : null,
+      child: Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: GestureDetector(
+            onTap:() {
+              setState(() {
+                    widget.isSelected = !widget.isSelected;
+                    widget.onChanged(widget.isSelected);
+                  });
+            },
+            child: Transform.translate(
+              offset: Offset(0, -6.0),
+              child: ListTile(
+                  trailing: RoundCheckBox(
+                    animationDuration: const Duration(microseconds: 0),
+                    borderColor:
+                        widget.isSelected ? Colors.white : Color(primaryDarkBlue),
+                    checkedColor: Color(primaryDarkBlue),
+                    onTap: (selected) {
+                      setState(() {
+                        widget.isSelected = !widget.isSelected;
+                        widget.onChanged(widget.isSelected);
+                      });
+                    },
+                    size: 30,
+                    isChecked: widget.isSelected,
+                  ),
+                  leading: SizedBox(
+                    height: 50,
+                    width: 50,
+                    child: ClipRRect(
+                      // square image corners
+                      borderRadius: const BorderRadius.all(Radius.zero),
+                      child: Image.file(
+                        File(widget.receipt.localPath),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  subtitle: Text(
+                    calculateSubtitle(
+                        widget.withSize, widget.price, widget.displayDate),
+                    style: widget.isSelected ? checkedSubtitleStyle : subtitleStyle,
+                  ),
+                  title: Text(widget.displayName,
+                      style: widget.isSelected ? checkedDisplayNameeStyle : displayNameStyle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis)),
             ),
-            subtitle: Text(
-              widget.withSize
-                ? widget.displaySize
-                : widget.price != '' ? widget.price : 'Modified ${widget.displayDate}',
-              style: displayDateStyle,
-            ),
-            title: Text(widget.displayName,
-                style: displayNameStyle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis)));
+          )),
+    );
   }
 }
