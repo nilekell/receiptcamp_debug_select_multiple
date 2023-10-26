@@ -46,7 +46,7 @@ class ReceiptListTile extends StatelessWidget {
     } else if (price != '') {
       return price;
     } else {
-      return displayDate;
+      return 'Modified $displayDate';
     }
   }
 
