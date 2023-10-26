@@ -346,18 +346,24 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
                             delegate: SliverChildBuilderDelegate(
                               childCount: allItems.length,
                               (context, index) {
-                                  return ValueListenableBuilder(
-                                    valueListenable: allSelectedNotifier,
-                                    builder: (context, bool value, child) {
-                                      return ValueListenableBuilder(
-                                      valueListenable:
-                                          currentlySelectedListItemsNotifier,
-                                      builder:
-                                          (context, List<ListItem> value, child) {
-                                        return _buildItem(allItems[index]);
-                                      },
-                                    );
-                                    },
+                                  return Column(
+                                    children: [
+                                      index == 0 ? SizedBox(height: 4.0,) : SizedBox.shrink(),
+                                      SizedBox(height: 4.0,),
+                                      ValueListenableBuilder(
+                                        valueListenable: allSelectedNotifier,
+                                        builder: (context, bool value, child) {
+                                          return ValueListenableBuilder(
+                                          valueListenable:
+                                              currentlySelectedListItemsNotifier,
+                                          builder:
+                                              (context, List<ListItem> value, child) {
+                                            return _buildItem(allItems[index]);
+                                          },
+                                        );
+                                        },
+                                      ),
+                                    ],
                                   );
                               },
                             ),
