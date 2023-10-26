@@ -176,4 +176,8 @@ class DatabaseRepository {
   Future<void> printAllReceipts() async {
     await _databaseService.printAllReceipts();
   }
+
+  Future<List<Folder>> getMultiFoldersThatCanBeMovedTo(List<Object> filesToBeMoved) async {
+    return await _databaseService.getMultiFoldersThatCanBeMovedTo(filesToBeMoved);
+  }
 }

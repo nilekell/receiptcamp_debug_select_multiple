@@ -5,6 +5,7 @@ import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/screens/image_view.dart';
+import 'package:receiptcamp/presentation/screens/select_multiple_screen.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/receipt/receipt_sheet.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
@@ -39,9 +40,19 @@ class ReceiptListTile extends StatelessWidget {
   final TextStyle displayDateStyle =
       const TextStyle(fontSize: 16, fontWeight: FontWeight.w400);
 
+  String calculateSubtitle(String price, bool withSize, String displayDate) {
+    if (withSize == true) {
+      return displaySize;
+    } else if (price != '') {
+      return price;
+    } else {
+      return 'Modified $displayDate';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return LongPressDraggable<Receipt>(
+    return Draggable<Receipt>(
       dragAnchorStrategy: (draggable, context, position) {
         return const Offset(50, 50);
       },
@@ -51,7 +62,7 @@ class ReceiptListTile extends StatelessWidget {
           Colors.black.withOpacity(0.3),
           BlendMode.srcIn,
         ),
-        child: price == '' ? ReceiptListTileVisual(receipt: receipt, withSize: withSize) : ReceiptListTileVisual(receipt: receipt, price: (receipt as ReceiptWithPrice).priceString,),
+        child: ReceiptListTileVisual(receipt: receipt, subtitle: calculateSubtitle(price, withSize, displayDate),),
       ),
       feedback: Material(
         color: Colors.transparent,
@@ -86,44 +97,49 @@ class ReceiptListTile extends StatelessWidget {
       ),
       child: Padding(
           padding: const EdgeInsets.only(left: 10),
-          child: ListTile(
-              leading: SizedBox(
-                height: 50,
-                width: 50,
-                child: ClipRRect(
-                  // square image corners
-                  borderRadius: const BorderRadius.all(Radius.zero),
-                  child: Image.file(
-                    File(receipt.localPath),
-                    fit: BoxFit.cover,
+          child: GestureDetector(
+            onLongPress: () {
+              Navigator.of(context).push(
+                    SlidingSelectMultipleTransitionRoute(
+                        item: ListItem(item: receipt)));
+            },
+            child: ListTile(
+                leading: SizedBox(
+                  height: 50,
+                  width: 50,
+                  child: ClipRRect(
+                    // square image corners
+                    borderRadius: const BorderRadius.all(Radius.zero),
+                    child: Image.file(
+                      File(receipt.localPath),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-              ),
-              subtitle: Text(
-                withSize
-                  ? displaySize
-                  : price != '' ? price : 'Modified $displayDate',
-                style: displayDateStyle,
-              ),
-              trailing: IconButton(
-                icon: const Icon(
-                  Icons.more_vert,
-                  color: Color(primaryGrey),
-                  size: 30,
+                subtitle: Text(
+                  calculateSubtitle(price, withSize, displayDate),
+                  style: displayDateStyle,
                 ),
-                onPressed: () {
-                  showReceiptOptions(
-                      context, context.read<FolderViewCubit>(), receipt);
+                trailing: IconButton(
+                  icon: const Icon(
+                    Icons.more_vert,
+                    color: Color(primaryGrey),
+                    size: 30,
+                  ),
+                  onPressed: () {
+                    showReceiptOptions(
+                        context, context.read<FolderViewCubit>(), receipt);
+                  },
+                ),
+                onTap: () {
+                  Navigator.of(context)
+                      .push(SlidingImageTransitionRoute(receipt: receipt));
                 },
-              ),
-              onTap: () {
-                Navigator.of(context)
-                    .push(SlidingImageTransitionRoute(receipt: receipt));
-              },
-              title: Text(displayName,
-                  style: displayNameStyle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis))),
+                title: Text(displayName,
+                    style: displayNameStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis)),
+          )),
     );
   }
 }
@@ -132,20 +148,14 @@ class ReceiptListTile extends StatelessWidget {
 class ReceiptListTileVisual extends StatelessWidget {
   final Receipt receipt;
   final String displayName;
-  final String displayDate;
-  final String displaySize;
-  final String price;
-  final bool withSize;
+  final String subtitle;
 
-  ReceiptListTileVisual({Key? key, required this.receipt,  this.withSize = false, this.price = ''})
+  ReceiptListTileVisual({Key? key, required this.receipt, required this.subtitle})
       // displayName is the file name without the file extension and is cut off when the receipt name
       // is > 25 chars or would require 2 lines to be shown completely
       : displayName = receipt.name.length > 25
             ? "${receipt.name.substring(0, 25)}...".split('.').first
             : receipt.name.split('.').first,
-        displayDate = Utility.formatDisplayDateFromDateTime(
-            Utility.formatDateTimeFromUnixTimestamp(receipt.lastModified)),
-        displaySize = Utility.bytesToSizeString(receipt.storageSize),
         super(key: key);
 
   final TextStyle displayNameStyle = const TextStyle(
@@ -171,9 +181,7 @@ class ReceiptListTileVisual extends StatelessWidget {
               ),
             ),
             subtitle: Text(
-              withSize
-                  ? displaySize
-                  : price != '' ? price : 'Modified $displayDate', // Ternary operator to decide text
+              subtitle, // Ternary operator to decide text
               style: subTextStyle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

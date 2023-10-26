@@ -34,28 +34,37 @@ class _HomeState extends State<Home> {
         case HomeErrorState():
           return const Text('Error showing receipts');
         case HomeEmptyReceiptsState():
-          return ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: const [
-                SizedBox(height: 300),
-                // provide some space between image and text
-                Text(
-                  "No recent receipts",
-                  style: TextStyle(
-                      color: Color(primaryGrey),
-                      fontSize: 25,
-                      fontWeight: FontWeight.w400),
-                  textAlign: TextAlign.center,
+          return Column(
+            children: [
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async => context.read<HomeBloc>().add(HomeLoadReceiptsEvent()),
+                  child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        SizedBox(height: 300),
+                        // provide some space between image and text
+                        Text(
+                          "No recent receipts",
+                          style: TextStyle(
+                              color: Color(primaryGrey),
+                              fontSize: 25,
+                              fontWeight: FontWeight.w400),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          "To see recents, add receipts to ReceiptCamp",
+                          style: TextStyle(
+                              color: Color(primaryGrey),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w100),
+                          textAlign: TextAlign.center,
+                        ),
+                      ]),
                 ),
-                Text(
-                  "To see recents, add receipts to ReceiptCamp",
-                  style: TextStyle(
-                      color: Color(primaryGrey),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w100),
-                  textAlign: TextAlign.center,
-                ),
-              ]);
+              ),
+            ],
+          );
         case HomeLoadedSuccessState():
           return Column(
             children: [

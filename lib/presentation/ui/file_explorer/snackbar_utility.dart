@@ -59,6 +59,18 @@ abstract class SnackBarUtility {
           message = 'Failed to open photo library - please check app settings';
           break;
         }
+      case FolderViewMultiDeleteSuccess():
+        message = state.numItemsDeleted > 1 ? 'Successfully deleted ${state.numItemsDeleted} items' :  'Successfully deleted ${state.numItemsDeleted} item';
+        break;
+      case FolderViewMultiDeleteFailure():
+        message = 'Uh oh, an unexpcted error occured while deleting those items';
+        break;
+      case FolderViewMultiMoveSuccess():
+        message = state.numItemsMoved > 1 ? 'Successfully moved ${state.numItemsMoved} items' :  'Successfully moved ${state.numItemsMoved} item';
+        break;
+      case FolderViewMultiMoveFailure():
+        message = 'Uh oh, an unexpcted error occured while moving those items';
+        break;
       default:
         print('Unknown state in showSnackBar: ${state.runtimeType}');
         return;

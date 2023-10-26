@@ -354,6 +354,59 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
           );
         }));
   }
+
+  Widget _buildItem(FolderViewLoadedSuccess state, int index) {
+    var item = state.files[index];
+    if (item is Receipt) {
+      if (item is ReceiptWithSize) {
+        return SizedBox(
+            height: 60,
+            child: ReceiptListTile(
+              receipt: item,
+              withSize: true,
+            ));
+      } 
+      if (item is ReceiptWithPrice) {
+        return SizedBox(
+            height: 60,
+            child: ReceiptListTile(
+              receipt: item,
+              price: item.priceString,
+            ));
+      }
+      else {
+        return SizedBox(
+            height: 60,
+            child: ReceiptListTile(receipt: item));
+      }
+    } else if (item is Folder) {
+      if (item is FolderWithSize) {
+        return SizedBox(
+            height: 60,
+            child: FolderListTile(
+              folder: item,
+              storageSize: item.storageSize,
+            ));
+      } 
+      if (item is FolderWithPrice) {
+        return SizedBox(
+            height: 60,
+            child: FolderListTile(
+              folder: item,
+              price: item.price,
+            ));
+      }
+      else {
+        return SizedBox(
+            height: 60,
+            child: FolderListTile(folder: item));
+      }
+    } else {
+      return const ListTile(
+          title: Text('Unknown file type'));
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<FolderViewCubit, FolderViewState>(
@@ -425,83 +478,38 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                       ? SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
-                              var item = state.files[index];
-                              if (item is Receipt) {
-                                if (item is ReceiptWithSize) {
-                                  return SizedBox(
-                                      height: 60,
-                                      child: ReceiptListTile(
-                                        receipt: item,
-                                        withSize: true,
-                                      ));
-                                } 
-                                if (item is ReceiptWithPrice) {
-                                  return SizedBox(
-                                      height: 60,
-                                      child: ReceiptListTile(
-                                        receipt: item,
-                                        price: item.priceString,
-                                      ));
-                                }
-                                else {
-                                  return SizedBox(
-                                      height: 60,
-                                      child: ReceiptListTile(receipt: item));
-                                }
-                              } else if (item is Folder) {
-                                if (item is FolderWithSize) {
-                                  return SizedBox(
-                                      height: 60,
-                                      child: FolderListTile(
-                                        folder: item,
-                                        storageSize: item.storageSize,
-                                      ));
-                                } 
-                                if (item is FolderWithPrice) {
-                                  return SizedBox(
-                                      height: 60,
-                                      child: FolderListTile(
-                                        folder: item,
-                                        price: item.price,
-                                      ));
-                                }
-                                else {
-                                  return SizedBox(
-                                      height: 60,
-                                      child: FolderListTile(folder: item));
-                                }
-                              } else {
-                                return const ListTile(
-                                    title: Text('Unknown file type'));
-                              }
+                              return _buildItem(state, index);
                             },
                             childCount: state.files
                                 .length, // specifies the number of children this delegate will build
                           ),
                         )
                       : SliverFillRemaining(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              SizedBox(
-                                height: 200,
-                                width: 200,
-                                child: Image.asset('assets/x2_retina_receipt_icon.png')),
-                              const SizedBox(
-                                height: 12,
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.all(24.0),
-                                child: Text(
-                                  'To add receipts, tap the + button below',
-                                  style: TextStyle(
-                                      color: Color(primaryGrey),
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w100),
-                                  textAlign: TextAlign.center,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                const SizedBox(height: 80,),
+                                SizedBox(
+                                  height: 200,
+                                  width: 200,
+                                  child: Image.asset('assets/x2_retina_receipt_icon.png')),
+                                const SizedBox(
+                                  height: 12,
                                 ),
-                              ),
-                            ],
+                                const Padding(
+                                  padding: EdgeInsets.all(24.0),
+                                  child: Text(
+                                    'To add receipts, tap the + button below',
+                                    style: TextStyle(
+                                        color: Color(primaryGrey),
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w100),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                 ],
