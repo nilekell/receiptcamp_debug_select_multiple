@@ -486,8 +486,9 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                         )
                       : SliverFillRemaining(
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: <Widget>[
+                              const SizedBox(height: 100,),
                               SizedBox(
                                 height: 200,
                                 width: 200,
