@@ -485,29 +485,31 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                           ),
                         )
                       : SliverFillRemaining(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              const SizedBox(height: 100,),
-                              SizedBox(
-                                height: 200,
-                                width: 200,
-                                child: Image.asset('assets/x2_retina_receipt_icon.png')),
-                              const SizedBox(
-                                height: 12,
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.all(24.0),
-                                child: Text(
-                                  'To add receipts, tap the + button below',
-                                  style: TextStyle(
-                                      color: Color(primaryGrey),
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w100),
-                                  textAlign: TextAlign.center,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                const SizedBox(height: 80,),
+                                SizedBox(
+                                  height: 200,
+                                  width: 200,
+                                  child: Image.asset('assets/x2_retina_receipt_icon.png')),
+                                const SizedBox(
+                                  height: 12,
                                 ),
-                              ),
-                            ],
+                                const Padding(
+                                  padding: EdgeInsets.all(24.0),
+                                  child: Text(
+                                    'To add receipts, tap the + button below',
+                                    style: TextStyle(
+                                        color: Color(primaryGrey),
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w100),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                 ],
