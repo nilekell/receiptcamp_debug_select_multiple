@@ -437,7 +437,7 @@ class _FolderCheckboxListTileState extends State<FolderCheckboxListTile> {
     return Container(
       margin: EdgeInsets.only(right: 10),
       decoration: widget.isSelected ? BoxDecoration(
-        color: Color(primaryDeepBlue),
+        color: Color(primaryDarkBlue),
         borderRadius: BorderRadius.only(topRight: Radius.circular(25.0), bottomRight: Radius.circular(25.0))) : null,
       child: Padding(
         padding: const EdgeInsets.only(left: 16.0),
@@ -544,7 +544,7 @@ class _ReceiptCheckboxListTileState extends State<ReceiptCheckboxListTile> {
     return Container(
       margin: EdgeInsets.only(right: 10),
       decoration: widget.isSelected ? BoxDecoration(
-        color: Color(primaryDeepBlue),
+        color: Color(primaryDarkBlue),
         borderRadius: BorderRadius.only(topRight: Radius.circular(25.0), bottomRight: Radius.circular(25.0))) : null,
       child: Padding(
           padding: const EdgeInsets.only(left: 16),
