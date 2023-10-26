@@ -284,6 +284,7 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
       },
       child: Scaffold(
           appBar: AppBar(
+            elevation: 0.0,
             leading: IconButton(
                   icon: const Icon(Icons.close, size: 26,),
                   onPressed: () => Navigator.of(context).pop()
