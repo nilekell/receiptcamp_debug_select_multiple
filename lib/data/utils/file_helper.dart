@@ -207,8 +207,9 @@ class FileService {
           build: ((context) {
             return pw.Image(pdfImage);
           })));
-          
-      final pdfFile = File('${DirectoryPathProvider.instance.tempDirPath}/${receipt.name}.pdf');
+
+      final String fixedReceiptName = Utility.concatenateWithUnderscore(receipt.name);    
+      final pdfFile = File('${DirectoryPathProvider.instance.tempDirPath}/$fixedReceiptName.pdf');
 
       return pdfFile.writeAsBytes(await pdf.save());
     } on Exception catch (e) {
