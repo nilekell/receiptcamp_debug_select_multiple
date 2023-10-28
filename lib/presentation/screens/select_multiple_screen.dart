@@ -349,7 +349,6 @@ class _SelectMultipleViewState extends State<SelectMultipleView>
                               (context, index) {
                                   return Column(
                                     children: [
-                                      index == 0 ? SizedBox(height: 4.0,) : SizedBox.shrink(),
                                       SizedBox(height: 4.0,),
                                       ValueListenableBuilder(
                                         valueListenable: allSelectedNotifier,
