@@ -75,12 +75,14 @@ class _SettingsViewState extends State<SettingsView> {
             content: Row(
               children: [
                 const CircularProgressIndicator(),
-                Container(
-                    margin: const EdgeInsets.only(left: 16),
-                    child: const Text(
-                      "Creating archive of all receipts...",
-                      style: TextStyle(color: Colors.white),
-                    )),
+                Expanded(
+                  child: Container(
+                      margin: const EdgeInsets.only(left: 16),
+                      child: const Text(
+                        "Creating archive of all receipts...",
+                        style: TextStyle(color: Colors.white),
+                      )),
+                ),
               ],
             ),
           );
@@ -129,17 +131,33 @@ class _SettingsViewState extends State<SettingsView> {
                       Text('Uh oh, an error occured, please try again later.'),
                 );
               case SettingsSuccess():
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: ListTile(
-                        title: Text('Export all receipts'),
-                        onTap: () =>
-                            context.read<SettingsCubit>().generateZipFile(),
-                      ),
-                    )
-                  ],
+                return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: 300,
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ListTile(
+                            title: Text('Export all receipts',
+                                style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(primaryGrey))),
+                            onTap: () =>
+                                context.read<SettingsCubit>().generateZipFile(),
+                          ),
+                        ),
+                        const Divider(
+                          thickness: 2,
+                          height: 1,
+                          indent: 25,
+                          endIndent: 25,
+                        ),
+                      ],
+                    ),
+                  ),
                 );
             }
           },
