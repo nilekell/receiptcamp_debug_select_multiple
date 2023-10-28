@@ -45,7 +45,7 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
           if (await _sharedFileIsZipFile(sharedFiles)) {
               File zipFile = sharedFiles[0];
               // print('SharingIntentCubit: zip file recieved');
-              emit(SharingIntentZipFileRecieved(zipFile: zipFile));
+              emit(SharingIntentZipFileReceived(zipFile: zipFile));
               return;
           }
 
@@ -72,7 +72,7 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
       if (await _sharedFileIsZipFile(initialSharedFiles)) {
         File zipFile = initialSharedFiles[0];
         // print('SharingIntentCubit: zip file recieved');
-        emit(SharingIntentZipFileRecieved(zipFile: zipFile));
+        emit(SharingIntentZipFileReceived(zipFile: zipFile));
         return;
       }
 

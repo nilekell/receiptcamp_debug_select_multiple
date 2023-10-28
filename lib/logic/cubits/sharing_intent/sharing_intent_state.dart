@@ -19,10 +19,10 @@ final class SharingIntentFilesRecieved extends SharingIntentState {
   
 }
 
-final class SharingIntentZipFileRecieved extends SharingIntentState {
+final class SharingIntentZipFileReceived extends SharingIntentState {
   final File zipFile;
 
-  const SharingIntentZipFileRecieved({required this.zipFile});
+  const SharingIntentZipFileReceived({required this.zipFile});
 
   @override
   List<Object> get props => [zipFile];
