@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:path/path.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/utils/receipt_helper.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
@@ -34,17 +35,25 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
       List<File> files = <File>[];
 
       mediaStream.listen(
-        (sharedFiles) {
-          for (final f in sharedFiles) {
-            files.add(f);
-          }
-
-          emit(SharingIntentFilesRecieved(files: files));
+        (sharedFiles) async {
 
           if (sharedFiles.isEmpty) {
             emit(SharingIntentNoValidFiles());
             return;
           }
+
+          if (await _sharedFileIsZipFile(sharedFiles)) {
+              File zipFile = sharedFiles[0];
+              // print('SharingIntentCubit: zip file recieved');
+              emit(SharingIntentZipFileRecieved(zipFile: zipFile));
+              return;
+          }
+
+          for (final f in sharedFiles) {
+            files.add(f);
+          }
+
+          emit(SharingIntentFilesRecieved(files: files));
 
           // print("Received shared stream files: $sharedFiles");
           getFolders();
@@ -59,16 +68,39 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
       );
 
       List<File> initialSharedFiles = await initialMedia;
+
+      if (await _sharedFileIsZipFile(initialSharedFiles)) {
+        File zipFile = initialSharedFiles[0];
+        // print('SharingIntentCubit: zip file recieved');
+        emit(SharingIntentZipFileRecieved(zipFile: zipFile));
+        return;
+      }
+
       if (initialSharedFiles.isNotEmpty) {
         // print("Received shared initial files: $initialSharedFiles");
         files = initialSharedFiles;
         emit(SharingIntentFilesRecieved(files: files));
         getFolders();
         return;
+      } else {
+        return;
       }
     } on Exception catch (e) {
       print(e.toString());
       emit(SharingIntentError());
+    }
+  }
+
+  Future<bool> _sharedFileIsZipFile(List<File> sharedFiles) async {
+    if (sharedFiles.length == 1) {
+      final File sharedFile = File(sharedFiles.first.path);
+      if (extension(sharedFile.path) == '.zip') {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
     }
   }
 
