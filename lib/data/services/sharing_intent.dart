@@ -33,6 +33,13 @@ class SharingIntentService {
     // print('sharedMediaFiles count: ${sharedMediaFiles.length}');
     List<File> sharedFiles = [];
 
+    if (await _sharedFileIsZipFile(sharedMediaFiles)) {
+      final File zipFile = await _processZipMediaFile(sharedMediaFiles[0]);
+      sharedFiles = List.from([zipFile]);
+      ReceiveSharingIntent.reset();
+      return sharedFiles;
+    }
+
     File tempImage;
 
     ValidationError invalidImageReason = ValidationError.none;
@@ -71,5 +78,39 @@ class SharingIntentService {
     ReceiveSharingIntent.reset();
 
     return sharedFiles;
+  }
+
+  Future<bool> _sharedFileIsZipFile(
+      List<SharedMediaFile> sharedMediaFiles) async {
+    try {
+      if (sharedMediaFiles.length == 1) {
+        final File sharedFile = File(sharedMediaFiles.first.path);
+
+        if (extension(sharedFile.path) == '.zip') {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } on Exception catch (e) {
+      print(e.toString());
+      return false;
+    }
+  }
+
+  Future<File> _processZipMediaFile(SharedMediaFile sharedMediaFile) async {
+    // removing URI scheme from path
+    // this URI scheme is only present for zip files
+    final String filePath = sharedMediaFile.path.replaceFirst('file://', '');
+    final File sharedZipFile = File(filePath);
+
+    // copying file to temporary directory folder
+    File tempZipFile;
+    String newTempPath =
+        '${DirectoryPathProvider.instance.tempDirPath}/imported_receipts.zip';
+    tempZipFile = await sharedZipFile.copy(newTempPath);
+    return tempZipFile;
   }
 }
