@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/logic/cubits/settings/settings_cubit.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
@@ -155,6 +156,11 @@ class _SettingsViewState extends State<SettingsView> {
                           indent: 25,
                           endIndent: 25,
                         ),
+                        SizedBox(height: 50,),
+                        Text(appVersion, style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,),)
                       ],
                     ),
                   ),
