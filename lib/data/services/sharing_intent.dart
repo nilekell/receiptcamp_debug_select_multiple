@@ -111,6 +111,8 @@ class SharingIntentService {
     String newTempPath =
         '${DirectoryPathProvider.instance.tempDirPath}/imported_receipts.zip';
     tempZipFile = await sharedZipFile.copy(newTempPath);
+
+    sharedZipFile.delete();
     return tempZipFile;
   }
 }
