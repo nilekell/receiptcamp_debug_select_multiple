@@ -80,7 +80,7 @@ class _SettingsViewState extends State<SettingsView> {
                   child: Container(
                       margin: const EdgeInsets.only(left: 16),
                       child: const Text(
-                        "Creating archive of all receipts...",
+                        "Exporting...",
                         style: TextStyle(color: Colors.white),
                       )),
                 ),
@@ -110,8 +110,9 @@ class _SettingsViewState extends State<SettingsView> {
         }
       },
       child: Scaffold(
+        backgroundColor: Color(primaryLightBlue),
         appBar: AppBar(
-          backgroundColor: Color(primaryDarkBlue),
+          backgroundColor: Color(primaryLightBlue),
           elevation: 0.0,
           title: Text('Settings'),
           leading: IconButton(
@@ -145,12 +146,13 @@ class _SettingsViewState extends State<SettingsView> {
                                 style: const TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(primaryGrey))),
+                                    color: Colors.white,)),
                             onTap: () =>
                                 context.read<SettingsCubit>().generateZipFile(),
                           ),
                         ),
                         const Divider(
+                          color: Colors.white,
                           thickness: 2,
                           height: 1,
                           indent: 25,
