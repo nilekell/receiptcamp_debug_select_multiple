@@ -15,10 +15,14 @@ import 'package:receiptcamp/models/tag.dart';
 import 'package:share_plus/share_plus.dart';
 part 'sharing_intent_state.dart';
 
-
 class SharingIntentCubit extends Cubit<SharingIntentState> {
-
-  SharingIntentCubit({required this.homeBloc, required this.fileExplorerCubit, required this.mediaStream, required this.initialMedia, required this.landingCubit}) : super(SharingIntentFilesInitial());
+  SharingIntentCubit(
+      {required this.homeBloc,
+      required this.fileExplorerCubit,
+      required this.mediaStream,
+      required this.initialMedia,
+      required this.landingCubit})
+      : super(SharingIntentFilesInitial());
 
   final HomeBloc homeBloc;
   final FileExplorerCubit fileExplorerCubit;
@@ -36,17 +40,16 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
 
       mediaStream.listen(
         (sharedFiles) async {
-
           if (sharedFiles.isEmpty) {
             emit(SharingIntentNoValidFiles());
             return;
           }
 
           if (await _sharedFileIsZipFile(sharedFiles)) {
-              File zipFile = sharedFiles[0];
-              // print('SharingIntentCubit: zip file recieved');
-              emit(SharingIntentZipFileReceived(zipFile: zipFile));
-              return;
+            File zipFile = sharedFiles[0];
+            // print('SharingIntentCubit: zip file recieved');
+            emit(SharingIntentZipFileReceived(zipFile: zipFile));
+            return;
           }
 
           for (final f in sharedFiles) {
@@ -115,12 +118,13 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
     }
   }
 
-  void insertReceiptsIntoFolder(String folderId, List<File> receiptFiles) async {
+  void insertReceiptsIntoFolder(
+      String folderId, List<File> receiptFiles) async {
     emit(const SharingIntentSavingReceipts(folders: []));
 
     List<Receipt> savedReceipts = [];
 
-    try{
+    try {
       // iterating over images and uploading them as receipts consecutively
       // REFACTOR TO PROCESS IN BACKGROUND USING ISOLATE depending on number of files
       for (final file in receiptFiles) {
