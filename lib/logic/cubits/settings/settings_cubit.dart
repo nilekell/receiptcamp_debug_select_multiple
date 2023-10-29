@@ -94,31 +94,49 @@ class SettingsCubit extends Cubit<SettingsState> {
         print('added Images/${basename(file.path)} to archive');
       }
 
+      final String newRootFolderId = Utility.generateUid();
+
       // adding all receipt json object files to zip file
       for (final receipt in allReceipts) {
-        String receiptJson = receipt.toJson();
-        final bytes = utf8.encode(receiptJson);  // Convert JSON string to bytes
-        archive.addFile(ArchiveFile('Objects/Receipts/${receipt.fileName.split('.').first}.json', bytes.length, bytes));
-        print('added Objects/Receipts/${receipt.fileName.split('.').first}.json to archive');
+        if (receipt.parentId == rootFolderId) {
+            Receipt adjustedReceipt = Receipt(id: receipt.id, name: receipt.name, fileName: receipt.fileName, dateCreated: receipt.dateCreated, lastModified: receipt.lastModified, storageSize: receipt.storageSize, parentId: newRootFolderId);
+            String receiptJson = adjustedReceipt.toJson();
+            final bytes = utf8.encode(receiptJson);  // Convert JSON string to bytes
+            archive.addFile(ArchiveFile('Objects/Receipts/${adjustedReceipt.fileName.split('.').first}.json', bytes.length, bytes));
+            print('added Objects/Receipts/${adjustedReceipt.fileName.split('.').first}.json to archive');
+          } else {
+            String receiptJson = receipt.toJson();
+            final bytes = utf8.encode(receiptJson);  // Convert JSON string to bytes
+            archive.addFile(ArchiveFile('Objects/Receipts/${receipt.fileName.split('.').first}.json', bytes.length, bytes));
+            print('added Objects/Receipts/${receipt.fileName.split('.').first}.json to archive');
+          }
       }
 
       // adding all folder json object files to zip file
       for (final folder in allFolders) {
         if (folder.id == rootFolderId) {
-          // changing id of root folder id
-          final Folder rootFolder = Folder(id: Utility.generateUid(), name: 'Imported_Expenses', lastModified: folder.lastModified, parentId: folder.parentId);
+          // changing name and id of root folder
+          final Folder rootFolder = Folder(id: newRootFolderId, name: 'Imported_Expenses', lastModified: folder.lastModified, parentId: rootFolderId);
           String folderJson = rootFolder.toJson();
           final bytes = utf8.encode(folderJson);
           archive.addFile(ArchiveFile('Objects/Folders/${rootFolder.name}.json', bytes.length, bytes));
           print('added Objects/Folders/${rootFolder.name}.json to archive');
-        } else {
-          String folderJson = folder.toJson();
-          String fixedFolderName = Utility.concatenateWithUnderscore(folder.name);
-          final bytes = utf8.encode(folderJson);   // Convert JSON string to bytes
-          archive.addFile(ArchiveFile('Objects/Folders/${Utility.concatenateWithUnderscore(fixedFolderName)}.json', bytes.length, bytes));
-          print('added Objects/Folders/${Utility.concatenateWithUnderscore(fixedFolderName)}.json to archive');
+        } else if (folder.parentId == rootFolderId) {
+            // changing parent id of folders whose parent id is rootFolderId, as the folder
+            Folder adjustedFolder = Folder(id: folder.id, name: folder.name, lastModified: folder.lastModified, parentId: newRootFolderId);
+            String folderJson = adjustedFolder.toJson();
+            String fixedFolderName = Utility.concatenateWithUnderscore(adjustedFolder.name);
+            final bytes = utf8.encode(folderJson);   // Convert JSON string to bytes
+            archive.addFile(ArchiveFile('Objects/Folders/$fixedFolderName.json', bytes.length, bytes));
+            print('added Objects/Folders/$fixedFolderName.json to archive');
+          } else {
+            String folderJson = folder.toJson();
+            String fixedFolderName = Utility.concatenateWithUnderscore(folder.name);
+            final bytes = utf8.encode(folderJson);   // Convert JSON string to bytes
+            archive.addFile(ArchiveFile('Objects/Folders/$fixedFolderName.json', bytes.length, bytes));
+            print('added Objects/Folders/$fixedFolderName.json to archive');
+          }
         }
-      }
 
       // Check if there are any files to share
       if (archive.isEmpty) {
