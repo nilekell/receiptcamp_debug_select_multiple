@@ -270,6 +270,12 @@ class FileService {
       return excelReceipts;
     }
 
+  static Future<void> shareZipFile(File zipFile) async {
+    await Share.shareXFiles([XFile(zipFile.path)], subject: basename(zipFile.path).split('.').first, sharePositionOrigin: iPadSharePositionOrigin);
+
+    // delete zip file from local temp directory
+    await FileService.deleteFileFromPath(zipFile.path);
+  }
 
   static Future<List<File>> getAllReceiptImages() async {
     List<File> receiptImages = [];
