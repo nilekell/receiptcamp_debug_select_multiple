@@ -136,7 +136,7 @@ class _SettingsViewState extends State<SettingsView> {
                 return SingleChildScrollView(
                   physics: AlwaysScrollableScrollPhysics(),
                   child: SizedBox(
-                    height: 300,
+                    height: MediaQuery.of(context).size.height * 0.8,
                     child: Column(
                       children: [
                         Padding(
