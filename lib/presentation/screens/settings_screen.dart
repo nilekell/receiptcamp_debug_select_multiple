@@ -100,11 +100,15 @@ class _SettingsViewState extends State<SettingsView> {
             _showProcessingDialog(context);
             return;
           case SettingsFileErrorState():
+            Navigator.of(context).pop();
             _showSettingsSnackBar(context, 'Uh oh, an error occured, please try again later');
             return;
           case SettingsFileLoadedState():
             Navigator.of(context).pop(); // hiding loading dialog
             context.read<SettingsCubit>().shareFolder(state.folder, state.file);
+          case SettingsFileArchiveLoadedState():
+            Navigator.of(context).pop(); 
+            context.read<SettingsCubit>().shareArchive(state.file);
           default:
             return;
         }
