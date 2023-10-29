@@ -158,6 +158,25 @@ class _SettingsViewState extends State<SettingsView> {
                           indent: 25,
                           endIndent: 25,
                         ),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ListTile(
+                            title: Text('Export archive',
+                                style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,)),
+                            onTap: () =>
+                                context.read<SettingsCubit>().generateArchive(),
+                          ),
+                        ),
+                        const Divider(
+                          color: Colors.white,
+                          thickness: 2,
+                          height: 1,
+                          indent: 25,
+                          endIndent: 25,
+                        ),
                         SizedBox(height: 50,),
                         Text(appVersion, style: const TextStyle(
                                     fontSize: 16,
