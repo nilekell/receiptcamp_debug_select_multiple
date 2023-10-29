@@ -270,6 +270,27 @@ class FileService {
       return excelReceipts;
     }
 
+
+  static Future<List<File>> getAllReceiptImages() async {
+    List<File> receiptImages = [];
+
+    String dirPath = '${DirectoryPathProvider.instance.appDocDirPath}/';
+
+    Directory directory = Directory(dirPath);
+
+    List<FileSystemEntity> files = directory.listSync();
+
+    for (FileSystemEntity file in files) {
+      String fileName = basename(file.path);
+      if (fileName.startsWith('RCPT_')) {
+        receiptImages.add(File(file.path));
+      }
+    }
+
+    return receiptImages;
+  }
+
+
   static Future<String> tempFilePathGenerator(String fileName) async {
     final tempFileFullPath = '${DirectoryPathProvider.instance.tempDirPath}/$fileName';
     return tempFileFullPath;
