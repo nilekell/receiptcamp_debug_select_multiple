@@ -43,6 +43,18 @@ final class SharingIntentSuccess extends SharingIntentState {
   List<Object> get props => [folders];
 }
 
+final class SharingIntentArchiveSuccess extends SharingIntentState {
+  final List<Object> items;
+  final List<File> imageFiles;
+
+  const SharingIntentArchiveSuccess({required this.items, required this.imageFiles});
+
+  @override
+  List<Object> get props => [items, imageFiles];
+}
+
+final class SharingIntentInvalidArchive extends SharingIntentState {}
+
 final class SharingIntentSavingReceipts extends SharingIntentSuccess {
   const SharingIntentSavingReceipts({required super.folders});
 }

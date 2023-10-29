@@ -1,10 +1,13 @@
 // ignore_for_file: unused_local_variable
 
+import 'dart:convert';
 import 'dart:io';
+import 'package:archive/archive_io.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:path/path.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
+import 'package:receiptcamp/data/services/directory_path_provider.dart';
 import 'package:receiptcamp/data/utils/receipt_helper.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/logic/cubits/file_explorer/file_explorer_cubit.dart';
@@ -49,6 +52,7 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
             File zipFile = sharedFiles[0];
             // print('SharingIntentCubit: zip file recieved');
             emit(SharingIntentZipFileReceived(zipFile: zipFile));
+            extractItemsFromArchiveFile(zipFile);
             return;
           }
 
@@ -76,6 +80,7 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
         File zipFile = initialSharedFiles[0];
         // print('SharingIntentCubit: zip file recieved');
         emit(SharingIntentZipFileReceived(zipFile: zipFile));
+        extractItemsFromArchiveFile(zipFile);
         return;
       }
 
@@ -155,4 +160,49 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
     }
   }
 
+  extractItemsFromArchiveFile(File zipFile) async {
+    try {
+      // Use an InputFileStream to access the zip file without storing it in memory.
+      final inputStream = InputFileStream(zipFile.path);
+      // Decode the zip from the InputFileStream. The archive will have the contents of the
+      // zip, without having stored the data in memory.
+      final archive = ZipDecoder().decodeBuffer(inputStream);
+      // convert zip file to folder file
+      final String extractedZipFilePath =
+          '${DirectoryPathProvider.instance.tempDirPath}/';
+      extractArchiveToDisk(archive, extractedZipFilePath);
+
+      // Initialize lists to hold Folder and Receipt objects
+      final List<Folder> extractedFolders = [];
+      final List<Receipt> extractedReceipts = [];
+      final List<File> extractedImages = [];
+      // iterate over archive to extract folders and zip files
+      for (final file in archive) {
+        // Check if this is a folder JSON
+        if (file.name.contains('Objects/Folders/')) {
+          final String folderJson = utf8.decode(file.content);
+          final Folder folder = Folder.fromJson(folderJson);
+          extractedFolders.add(folder);
+        } // Check if this is a receipt JSON
+        else if (file.name.contains('Objects/Receipts/')) {
+          final String receiptJson = utf8.decode(file.content);
+          final Receipt receipt = Receipt.fromJson(receiptJson);
+          extractedReceipts.add(receipt);
+        } // Check if this is an image file in the zip
+        else if (file.name.contains('Images/')) {
+          final File imageFile = File('$extractedZipFilePath${file.name}');
+          extractedImages.add(imageFile);
+        }
+      }
+
+      final List<Object> items =
+          List.from([...extractedFolders, ...extractedReceipts]);
+      // emit list of items and images
+      emit(SharingIntentArchiveSuccess(
+          items: items, imageFiles: extractedImages));
+    } catch (e) {
+      emit(SharingIntentError());
+      print(e);
+    }
+  }
 }
