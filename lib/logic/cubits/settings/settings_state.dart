@@ -29,5 +29,13 @@ final class SettingsFileLoadedState extends SettingsFileState {
   List<Object> get props => [file, folder];
 }
 
+final class SettingsFileArchiveLoadedState extends SettingsFileState {
+  final File file;
+  SettingsFileArchiveLoadedState({required this.file});
+
+  @override
+  List<Object> get props => [file];
+}
+
 final class SettingsFileErrorState extends SettingsFileState {}
 
