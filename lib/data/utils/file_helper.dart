@@ -296,6 +296,23 @@ class FileService {
     return receiptImages;
   }
 
+  static Future<void> deleteAllReceiptImages() async {
+    String dirPath = '${DirectoryPathProvider.instance.appDocDirPath}/';
+
+    Directory directory = Directory(dirPath);
+
+    List<FileSystemEntity> files = directory.listSync();
+
+    for (FileSystemEntity file in files) {
+      String fileName = basename(file.path);
+      if (fileName.startsWith('RCPT_')) {
+        await file.delete();
+      } else {
+        continue;
+      }
+    }
+  }
+
 
   static Future<String> tempFilePathGenerator(String fileName) async {
     final tempFileFullPath = '${DirectoryPathProvider.instance.tempDirPath}/$fileName';
