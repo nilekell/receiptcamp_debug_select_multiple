@@ -39,3 +39,5 @@ final class SettingsFileArchiveLoadedState extends SettingsFileState {
 
 final class SettingsFileErrorState extends SettingsFileState {}
 
+final class SettingsFileEmptyState extends SettingsFileState {}
+

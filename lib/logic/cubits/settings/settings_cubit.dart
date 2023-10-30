@@ -81,6 +81,11 @@ class SettingsCubit extends Cubit<SettingsState> {
       final List<Folder> allFolders = await DatabaseRepository.instance.getFolders();
       final List<File> allImages = await FileService.getAllReceiptImages();
 
+      if (allReceipts.isEmpty || allImages.isEmpty) {
+        emit(SettingsFileEmptyState());
+        return;
+      }
+
       // print('allReceipts.length: ${allReceipts.length}');
       // print('allFolders.length: ${allFolders.length}');
       // print('allImages.length: ${allImages.length}');
