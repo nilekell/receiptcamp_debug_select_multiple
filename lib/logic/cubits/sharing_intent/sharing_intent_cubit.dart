@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:json_schema/json_schema.dart';
 import 'package:path/path.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/services/directory_path_provider.dart';
@@ -164,9 +165,21 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
     try {
       // Use an InputFileStream to access the zip file without storing it in memory.
       final inputStream = InputFileStream(zipFile.path);
+      final zipDecoder = ZipDecoder();
       // Decode the zip from the InputFileStream. The archive will have the contents of the
       // zip, without having stored the data in memory.
       final archive = ZipDecoder().decodeBuffer(inputStream);
+
+
+      // Validate zip file structure before processing
+      if (!isValidArchiveStructure(zipDecoder, inputStream)) {
+        emit(SharingIntentInvalidArchive());
+        return;
+      }
+
+      // Reset stream position after validation
+      inputStream.reset();
+
       // convert zip file to folder file
       final String extractedZipFilePath =
           '${DirectoryPathProvider.instance.tempDirPath}/';
@@ -192,6 +205,9 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
         else if (file.name.contains('Images/')) {
           final File imageFile = File('$extractedZipFilePath${file.name}');
           extractedImages.add(imageFile);
+        } else {
+          emit(SharingIntentInvalidArchive());
+          return;
         }
       }
 
@@ -239,5 +255,88 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
       print(e.toString());
       emit(SharingIntentInvalidArchive());
     }
+  }
+  
+  bool isValidArchiveStructure(
+      ZipDecoder zipDecoder, InputFileStream inputStream) {
+    final archive = zipDecoder.decodeBuffer(inputStream);
+
+    bool hasImages = false;
+    bool hasReceipts = false;
+    bool hasFolders = false;
+
+    // Regular expression to match image file extensions: .jpg, .jpeg, .png
+    final RegExp imageRegex =
+        RegExp(r"\.(jpg|jpeg|png)$", caseSensitive: false);
+
+    final String folderJsonSchemaString = jsonEncode({
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "parentId": {"type": "string"},
+        "lastModified": {"type": "integer"}
+      },
+      "required": ["id", "name", "parentId", "lastModified"],
+    });
+
+    final String receiptJsonSchemaString = jsonEncode({
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "fileName": {"type": "string"},
+        "dateCreated": {"type": "integer"},
+        "lastModified": {"type": "integer"},
+        "storageSize": {"type": "integer"},
+        "parentId": {"type": "string"}
+      },
+      "required": [
+        "id",
+        "name",
+        "fileName",
+        "dateCreated",
+        "lastModified",
+        "storageSize",
+        "parentId"
+      ]
+    });
+
+    final JsonSchema folderJsonSchema =
+        JsonSchema.create(json.decode(folderJsonSchemaString));
+    final JsonSchema receiptJsonSchema = JsonSchema.create(
+        json.decode(receiptJsonSchemaString));
+
+    for (final file in archive) {
+      if (file.name.contains('Images/') && imageRegex.hasMatch(file.name)) {
+        hasImages = true;
+      } else if (file.name.contains('Objects/Receipts/') &&
+          file.name.endsWith('.json')) {
+          final String receiptJson = utf8.decode(file.content);
+          final validationResult =
+              receiptJsonSchema.validate(jsonDecode(receiptJson));
+          print('${file.name} is valid');
+        if (validationResult.isValid) {
+          print('${file.name} is valid');
+          hasReceipts = true;
+        } else if (!validationResult.isValid) {
+          return false;
+        }
+      } else if (file.name.contains('Objects/Folders/') &&
+          file.name.endsWith('.json')) {
+        final String folderJson = utf8.decode(file.content);
+        final validationResult =
+            folderJsonSchema.validate(jsonDecode(folderJson));
+        if (validationResult.isValid) {
+          print('${file.name} is valid');
+          hasFolders = true;
+        } else if (!validationResult.isValid) {
+          return false;
+        }
+      }
+    }
+
+    return hasImages && hasReceipts && hasFolders;
+
   }
 }
