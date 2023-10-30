@@ -207,8 +207,9 @@ class FileService {
           build: ((context) {
             return pw.Image(pdfImage);
           })));
-          
-      final pdfFile = File('${DirectoryPathProvider.instance.tempDirPath}/${receipt.name}.pdf');
+
+      final String fixedReceiptName = Utility.concatenateWithUnderscore(receipt.name);    
+      final pdfFile = File('${DirectoryPathProvider.instance.tempDirPath}/$fixedReceiptName.pdf');
 
       return pdfFile.writeAsBytes(await pdf.save());
     } on Exception catch (e) {
@@ -268,6 +269,50 @@ class FileService {
 
       return excelReceipts;
     }
+
+  static Future<void> shareZipFile(File zipFile) async {
+    await Share.shareXFiles([XFile(zipFile.path)], subject: basename(zipFile.path).split('.').first, sharePositionOrigin: iPadSharePositionOrigin);
+
+    // delete zip file from local temp directory
+    await FileService.deleteFileFromPath(zipFile.path);
+  }
+
+  static Future<List<File>> getAllReceiptImages() async {
+    List<File> receiptImages = [];
+
+    String dirPath = '${DirectoryPathProvider.instance.appDocDirPath}/';
+
+    Directory directory = Directory(dirPath);
+
+    List<FileSystemEntity> files = directory.listSync();
+
+    for (FileSystemEntity file in files) {
+      String fileName = basename(file.path);
+      if (fileName.startsWith('RCPT_')) {
+        receiptImages.add(File(file.path));
+      }
+    }
+
+    return receiptImages;
+  }
+
+  static Future<void> deleteAllReceiptImages() async {
+    String dirPath = '${DirectoryPathProvider.instance.appDocDirPath}/';
+
+    Directory directory = Directory(dirPath);
+
+    List<FileSystemEntity> files = directory.listSync();
+
+    for (FileSystemEntity file in files) {
+      String fileName = basename(file.path);
+      if (fileName.startsWith('RCPT_')) {
+        await file.delete();
+      } else {
+        continue;
+      }
+    }
+  }
+
 
   static Future<String> tempFilePathGenerator(String fileName) async {
     final tempFileFullPath = '${DirectoryPathProvider.instance.tempDirPath}/$fileName';

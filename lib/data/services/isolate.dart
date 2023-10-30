@@ -165,7 +165,8 @@ abstract class IsolateService {
       // Check if the folder is empty and a path is provided (i.e., it's not the root folder)
       if (contents.isEmpty && path != null) {
         // Add a directory entry to the archive
-        final directoryPath = '$path/'; // Ensured it ends with a '/'
+        String fixedFolderPath = Utility.concatenateWithUnderscore(path);
+        final directoryPath = '$fixedFolderPath/'; // Ensured it ends with a '/'
         // Instead of passing an empty list as content, we pass a list with a single byte (which is ignored for directories)
         final directoryEntry = ArchiveFile(directoryPath, 0, [0]);
         archive.addFile(directoryEntry);
@@ -189,7 +190,14 @@ abstract class IsolateService {
           // Determine the path for the archive. If a path is provided, prepend it to the file name.
           // This is where the ternary operator is used: it checks if 'path' is not null, and if so,
           // it uses the provided path and appends the file name. Otherwise, it just uses the file name.
-          final archivePath = path != null ? '$path/${file.name}' : file.name;
+          String archivePath;
+          String fixedFolderPath;
+          if (path != null) {
+            fixedFolderPath = Utility.concatenateWithUnderscore(path);
+            archivePath = '$fixedFolderPath/${file.name}';
+          } else {
+            archivePath = file.name;
+          }
           // Create an archive file instance with the determined path, file size, and file bytes.
           final archiveFile = ArchiveFile(archivePath, bytes.length, bytes);
           // Add the archive file to the main archive.
@@ -228,7 +236,8 @@ abstract class IsolateService {
     final encodedArchive = zipEncoder.encode(archive);
 
     // create temporary path to store zip file
-    String tempZipFileFullPath = '${DirectoryPathProvider.instance.appDocDirPath}/${folder.name}.zip';
+    final String fixedFolderName = Utility.concatenateWithUnderscore(folder.name); 
+    String tempZipFileFullPath = '${DirectoryPathProvider.instance.appDocDirPath}/$fixedFolderName.zip';
 
     // create a .zip file from the encoded bytes
     final zipFile =

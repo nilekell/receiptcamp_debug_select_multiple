@@ -20,6 +20,8 @@
 			<!--TODO: Add this flag, if you want to support sharing images into your app-->
 			<key>NSExtensionActivationSupportsImageWithMaxCount</key>
 			<integer>100</integer>
+			<key>NSExtensionActivationSupportsFileWithMaxCount</key>
+			<integer>1</integer>
 		</dict>
 	</dict>
 		<key>NSExtensionMainStoryboard</key>

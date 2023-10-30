@@ -72,5 +72,10 @@ class Utility {
       rethrow;
     }
   }
+
+  static String concatenateWithUnderscore(String name) {
+    name = name.trim();
+    return name.replaceAll(' ', '_');
+  }
 }
 

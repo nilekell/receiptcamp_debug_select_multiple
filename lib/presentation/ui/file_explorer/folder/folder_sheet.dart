@@ -164,6 +164,7 @@ void showFolderOptions(
               ),
             ),
             onTap: () {
+              Navigator.of(bottomSheetContext).pop();
               folderViewCubit.generateZipFile(folder, true);
             },
           ),
