@@ -63,7 +63,7 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
 
           emit(SharingIntentFilesRecieved(files: files));
 
-          // print("Received shared stream files: $sharedFiles");
+          print("Received shared stream files: $sharedFiles");
           getFolders();
           return;
         },
@@ -79,14 +79,14 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
 
       if (await _sharedFileIsZipFile(initialSharedFiles)) {
         File zipFile = initialSharedFiles[0];
-        // print('SharingIntentCubit: zip file recieved');
+        print('SharingIntentCubit: zip file recieved');
         emit(SharingIntentZipFileReceived(zipFile: zipFile));
         extractItemsFromArchiveFile(zipFile);
         return;
       }
 
       if (initialSharedFiles.isNotEmpty) {
-        // print("Received shared initial files: $initialSharedFiles");
+        print("Received shared initial files: $initialSharedFiles");
         files = initialSharedFiles;
         emit(SharingIntentFilesRecieved(files: files));
         getFolders();
@@ -173,6 +173,7 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
 
       // Validate zip file structure before processing
       if (!isValidArchiveStructure(zipDecoder, inputStream)) {
+        print('isValidArchiveStructure Emitting SharingIntentInvalidArchive');
         emit(SharingIntentInvalidArchive());
         return;
       }
@@ -216,6 +217,7 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
       // emit list of items and images
       emit(SharingIntentArchiveSuccess(
           items: items, imageFiles: extractedImages));
+      print('Emitting SharingIntentArchiveSuccess');
     } catch (e) {
       print(e.toString());
       emit(SharingIntentInvalidArchive());
@@ -261,9 +263,11 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
       ZipDecoder zipDecoder, InputFileStream inputStream) {
     final archive = zipDecoder.decodeBuffer(inputStream);
 
-    bool hasImages = false;
-    bool hasReceipts = false;
-    bool hasFolders = false;
+    // this method returns false when there is either no folders, or no receipts within the archive
+
+    bool areAllReceiptsValid = true;
+    bool areAllFoldersValid = true;
+    bool areAllImagesValid = true;
 
     // Regular expression to match image file extensions: .jpg, .jpeg, .png
     final RegExp imageRegex =
@@ -307,39 +311,48 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
     final JsonSchema receiptJsonSchema = JsonSchema.create(
         json.decode(receiptJsonSchemaString));
 
+    final Set<String> imageNames = {};
+    final Set<String> receiptNames = {};
+
     for (final file in archive) {
       if (file.name.contains('Images/') && imageRegex.hasMatch(file.name)) {
-        hasImages = true;
-      } else if (file.name.contains('Objects/Receipts/') &&
-          file.name.endsWith('.json')) {
+        final imageNameWithoutExtension = basename(file.name).split('.').first;
+        imageNames.add(imageNameWithoutExtension);
+
+      } else if (file.name.contains('Objects/Receipts/') && file.name.endsWith('.json')) {
+          final receiptNameWithoutExtension = basename(file.name).split('.').first;
+          receiptNames.add(receiptNameWithoutExtension);
+          // checking if receipt json doesn't deviate from schema
           final String receiptJson = utf8.decode(file.content);
           final validationResult =
               receiptJsonSchema.validate(jsonDecode(receiptJson));
           // print('${file.name} is valid');
-        if (validationResult.isValid) {
-          // print('${file.name} is valid');
-          hasReceipts = true;
-        } else if (!validationResult.isValid) {
-          // print('${file.name} is invalid');
-          return false;
-        }
-      } else if (file.name.contains('Objects/Folders/') &&
-          file.name.endsWith('.json')) {
-        final String folderJson = utf8.decode(file.content);
-        final validationResult =
-            folderJsonSchema.validate(jsonDecode(folderJson));
-        if (validationResult.isValid) {
-          // print('${file.name} is valid');
-          print('${file.name} is valid');
-          hasFolders = true;
-        } else if (!validationResult.isValid) {
-          // print('${file.name} is invalid');
-          return false;
-        }
+          if (!validationResult.isValid) {
+            // print('${file.name} is valid');
+            areAllReceiptsValid = false;
+          }
+
+      } else if (file.name.contains('Objects/Folders/') && file.name.endsWith('.json')) {
+          // checking if folder json doesn't deviate from schema
+          final String folderJson = utf8.decode(file.content);
+          final validationResult =
+              folderJsonSchema.validate(jsonDecode(folderJson));
+          if (!validationResult.isValid) {
+            // print('${file.name} is invalid');
+            areAllFoldersValid = false;
+          }
       }
     }
 
-    return hasImages && hasReceipts && hasFolders;
+    // Validate that each image has a corresponding receipt
+    for (final imageName in imageNames) {
+      if (!receiptNames.contains(imageName)) {
+        areAllImagesValid = false;
+        break;
+      }
+    }
+
+    return areAllImagesValid && areAllReceiptsValid && areAllFoldersValid;
 
   }
 }
