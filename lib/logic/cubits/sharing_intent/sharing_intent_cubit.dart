@@ -315,11 +315,12 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
           final String receiptJson = utf8.decode(file.content);
           final validationResult =
               receiptJsonSchema.validate(jsonDecode(receiptJson));
-          print('${file.name} is valid');
+          // print('${file.name} is valid');
         if (validationResult.isValid) {
-          print('${file.name} is valid');
+          // print('${file.name} is valid');
           hasReceipts = true;
         } else if (!validationResult.isValid) {
+          // print('${file.name} is invalid');
           return false;
         }
       } else if (file.name.contains('Objects/Folders/') &&
@@ -328,9 +329,11 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
         final validationResult =
             folderJsonSchema.validate(jsonDecode(folderJson));
         if (validationResult.isValid) {
+          // print('${file.name} is valid');
           print('${file.name} is valid');
           hasFolders = true;
         } else if (!validationResult.isValid) {
+          // print('${file.name} is invalid');
           return false;
         }
       }
