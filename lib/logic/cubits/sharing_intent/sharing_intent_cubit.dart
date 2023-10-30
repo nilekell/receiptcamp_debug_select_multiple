@@ -201,8 +201,43 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
       emit(SharingIntentArchiveSuccess(
           items: items, imageFiles: extractedImages));
     } catch (e) {
-      emit(SharingIntentError());
-      print(e);
+      print(e.toString());
+      emit(SharingIntentInvalidArchive());
+    }
+  }
+
+  importItemsFromArchiveFile(List<Object> extractedItems,
+      List<File> extractedImages, File zipFile) async {
+    emit(SharingIntentSavingArchive(
+        imageFiles: extractedImages, items: extractedItems));
+    try {
+
+      await DatabaseRepository.instance.deleteAllFoldersExceptRoot();
+
+      for (final item in extractedItems) {
+        if (item is Folder) {
+          await DatabaseRepository.instance.insertFolder(item);
+        } else if (item is Receipt) {
+          await DatabaseRepository.instance.insertReceipt(item);
+        }
+      }
+
+      for (final image in extractedImages) {
+        await image.copy(
+            '${DirectoryPathProvider.instance.appDocDirPath}/${basename(image.path)}');
+      }
+
+      // deleting temp zip file and folder
+      await zipFile.delete(recursive: true);
+
+      // resetting file explorer
+      fileExplorerCubit.initializeFileExplorerCubit();
+
+      // closing screen
+      emit(SharingIntentArchiveClose(imageFiles: extractedImages, items: extractedItems));
+    } on Exception catch (e) {
+      print(e.toString());
+      emit(SharingIntentInvalidArchive());
     }
   }
 }
