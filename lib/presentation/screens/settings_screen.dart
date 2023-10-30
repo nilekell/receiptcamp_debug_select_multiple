@@ -99,6 +99,9 @@ class _SettingsViewState extends State<SettingsView> {
           case SettingsFileLoadingState():
             _showProcessingDialog(context);
             return;
+          case SettingsFileEmptyState():
+            Navigator.of(context).pop();
+            _showSettingsSnackBar(context, 'Cannot create an archive with no expenses');
           case SettingsFileErrorState():
             Navigator.of(context).pop();
             _showSettingsSnackBar(context, 'Uh oh, an error occured, please try again later');
