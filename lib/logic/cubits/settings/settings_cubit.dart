@@ -91,7 +91,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       for (final file in allImages) {
         final bytes = await file.readAsBytes();
         archive.addFile(ArchiveFile('Images/${basename(file.path)}', bytes.length, bytes));
-        print('added Images/${basename(file.path)} to archive');
+        // print('added Images/${basename(file.path)} to archive');
       }
 
       final String newRootFolderId = Utility.generateUid();
@@ -103,12 +103,12 @@ class SettingsCubit extends Cubit<SettingsState> {
             String receiptJson = adjustedReceipt.toJson();
             final bytes = utf8.encode(receiptJson);  // Convert JSON string to bytes
             archive.addFile(ArchiveFile('Objects/Receipts/${adjustedReceipt.fileName.split('.').first}.json', bytes.length, bytes));
-            print('added Objects/Receipts/${adjustedReceipt.fileName.split('.').first}.json to archive');
+            // print('added Objects/Receipts/${adjustedReceipt.fileName.split('.').first}.json to archive');
           } else {
             String receiptJson = receipt.toJson();
             final bytes = utf8.encode(receiptJson);  // Convert JSON string to bytes
             archive.addFile(ArchiveFile('Objects/Receipts/${receipt.fileName.split('.').first}.json', bytes.length, bytes));
-            print('added Objects/Receipts/${receipt.fileName.split('.').first}.json to archive');
+            // print('added Objects/Receipts/${receipt.fileName.split('.').first}.json to archive');
           }
       }
 
@@ -120,7 +120,7 @@ class SettingsCubit extends Cubit<SettingsState> {
           String folderJson = rootFolder.toJson();
           final bytes = utf8.encode(folderJson);
           archive.addFile(ArchiveFile('Objects/Folders/${rootFolder.name}.json', bytes.length, bytes));
-          print('added Objects/Folders/${rootFolder.name}.json to archive');
+          // print('added Objects/Folders/${rootFolder.name}.json to archive');
         } else if (folder.parentId == rootFolderId) {
             // changing parent id of folders whose parent id is rootFolderId, as the folder
             Folder adjustedFolder = Folder(id: folder.id, name: folder.name, lastModified: folder.lastModified, parentId: newRootFolderId);
@@ -128,13 +128,13 @@ class SettingsCubit extends Cubit<SettingsState> {
             String fixedFolderName = Utility.concatenateWithUnderscore(adjustedFolder.name);
             final bytes = utf8.encode(folderJson);   // Convert JSON string to bytes
             archive.addFile(ArchiveFile('Objects/Folders/$fixedFolderName.json', bytes.length, bytes));
-            print('added Objects/Folders/$fixedFolderName.json to archive');
+            // print('added Objects/Folders/$fixedFolderName.json to archive');
           } else {
             String folderJson = folder.toJson();
             String fixedFolderName = Utility.concatenateWithUnderscore(folder.name);
             final bytes = utf8.encode(folderJson);   // Convert JSON string to bytes
             archive.addFile(ArchiveFile('Objects/Folders/$fixedFolderName.json', bytes.length, bytes));
-            print('added Objects/Folders/$fixedFolderName.json to archive');
+            // print('added Objects/Folders/$fixedFolderName.json to archive');
           }
         }
 
