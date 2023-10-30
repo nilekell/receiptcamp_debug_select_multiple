@@ -622,6 +622,8 @@ class DatabaseService {
   // delete all receipts and tags because they reference folders that no longer exist
   await db.delete('receipts');
   await db.delete('tags');
+
+  FileService.deleteAllReceiptImages();
 }
 
   // Add Receipt operations
