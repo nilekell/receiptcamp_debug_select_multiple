@@ -14,7 +14,6 @@ class PurchasesService {
   Offering? get proSubscriptionoffering => _proSubscriptionOffering;
 
   Package? _lifetimePackage;
-
   Package? _subscriptionPackage;
 
   bool _userIsPro = false;
@@ -24,8 +23,11 @@ class PurchasesService {
   final String _revenueCatAndroidApiKey = 'goog_iKvfzRIURBzwgXzXBRNnPkqPODo';
 
   final String _receiptCampProEntitlementId = 'ReceiptCamp Pro';
-
   final String _receiptCampProSubscriptionEntitlementId = '';
+
+  // ios: receiptcamp_pro_purchase
+  // android: receiptcamp_pro_v1
+  final List<String> _productsList = ['receiptcamp_pro_purchase', 'receiptcamp_pro_v1'];
 
   Future<void> initPlatformState() async {
     try {
@@ -45,7 +47,7 @@ class PurchasesService {
 
       await Purchases.configure(configuration);
 
-      await _fetchAvailableProducts();
+      await _fetchAvailableOfferings();
 
       _outputPurchaseServiceInfo();
       _outputLifetimePackageDetails();
@@ -84,12 +86,15 @@ class PurchasesService {
     print('package type: ${_lifetimePackage!.packageType}');
   }
 
-  Future<void> _fetchAvailableProducts() async {
+  Future<void> _fetchAvailableOfferings() async {
     try {
+      // final List<StoreProduct> products = await Purchases.getProducts(['receiptcamp_pro_purchase', 'receiptcamp_pro_v1']);
+      // print(products);
       Offerings offerings = await Purchases.getOfferings();
       if (offerings.current != null) {
-        _lifetimePackage = offerings.all['pro-offering']!.availablePackages[0];
         _proOffering = offerings.all['pro-offering'];
+        _lifetimePackage = offerings.all['pro-offering']!.availablePackages[0];
+        // add code to get __subscriptionPackage, when subscription is implemented
       }
     } on PlatformException catch (e) {
       print(e.toString());
@@ -132,8 +137,10 @@ class PurchasesService {
   Future<void> _checkCustomerPurchaseStatus() async {
     try {
       CustomerInfo customerInfo = await Purchases.getCustomerInfo();
-      print(customerInfo.entitlements.all);
-      if (customerInfo.entitlements.all['ReceiptCamp Pro']!.isActive) {
+      // customerInfo.entitlements.all will be null when the user
+      // has not purchased a product that’s attached to an entitlement yet, the EntitlementInfo object 
+      print('customerInfo.allPurchasedProductIdentifiers: ${customerInfo.allPurchasedProductIdentifiers}');
+      if (customerInfo.allPurchasedProductIdentifiers.isNotEmpty) {
         _userIsPro = true;
       } else {
         _userIsPro = false;
@@ -147,7 +154,7 @@ class PurchasesService {
   Future<List<String>> restorePurchases() async {
     try {
       CustomerInfo restoredInfo = await Purchases.restorePurchases();
-      if (restoredInfo.entitlements.all['']!.isActive) {
+      if (restoredInfo.entitlements.all['ReceiptCamp Pro']!.isActive) {
         // ... check restored customerInfo to see if entitlement is now active
         return restoredInfo.allPurchasedProductIdentifiers;
       } else {
