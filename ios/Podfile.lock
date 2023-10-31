@@ -149,8 +149,14 @@ PODS:
   - permission_handler_apple (9.1.1):
     - Flutter
   - PromisesObjC (2.3.1)
+  - purchases_flutter (6.1.0):
+    - Flutter
+    - PurchasesHybridCommon (= 7.1.0)
+  - PurchasesHybridCommon (7.1.0):
+    - RevenueCat (= 4.28.0)
   - receive_sharing_intent (0.0.1):
     - Flutter
+  - RevenueCat (4.28.0)
   - SDWebImage (5.18.3):
     - SDWebImage/Core (= 5.18.3)
   - SDWebImage/Core (5.18.3)
@@ -185,6 +191,7 @@ DEPENDENCIES:
   - in_app_review (from `.symlinks/plugins/in_app_review/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - purchases_flutter (from `.symlinks/plugins/purchases_flutter/ios`)
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -215,6 +222,8 @@ SPEC REPOS:
     - MLKitVision
     - nanopb
     - PromisesObjC
+    - PurchasesHybridCommon
+    - RevenueCat
     - SDWebImage
     - SDWebImageWebPCoder
 
@@ -243,6 +252,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
+  purchases_flutter:
+    :path: ".symlinks/plugins/purchases_flutter/ios"
   receive_sharing_intent:
     :path: ".symlinks/plugins/receive_sharing_intent/ios"
   share_plus:
@@ -289,7 +300,10 @@ SPEC CHECKSUMS:
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
   permission_handler_apple: e76247795d700c14ea09e3a2d8855d41ee80a2e6
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
+  purchases_flutter: 3ecf4b3263d84a7badb1c4090a09f9db711cc821
+  PurchasesHybridCommon: 67d4953cf72b5c493426521fbe6481a3f80902e4
   receive_sharing_intent: c0d87310754e74c0f9542947e7cbdf3a0335a3b1
+  RevenueCat: 211ea3859e2ed3008152ea666054d1843355ce2f
   SDWebImage: 96e0c18ef14010b7485210e92fac888587ebb958
   SDWebImageWebPCoder: 3027af94522d94df79c21c070894c8a2128927ff
   share_plus: 599aa54e4ea31d4b4c0e9c911bcc26c55e791028
