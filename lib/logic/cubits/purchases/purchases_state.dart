@@ -28,4 +28,6 @@ final class PurchasesRestoreSuccess extends PurchasesState {}
 
 final class PurchasesRestoreFailed extends PurchasesState {}
 
+final class UserIsAlreadyPro extends PurchasesState {}
+
 

@@ -5,6 +5,7 @@ import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
 
 class PaywallView extends StatelessWidget {
+  const PaywallView({super.key});
 
   Future<void> _showDialog(BuildContext context, String message) async {
     showAdaptiveDialog(
@@ -53,8 +54,7 @@ class PaywallView extends StatelessWidget {
         listener: (context, state) async {
           if (state is PurchasesPending) {
             _showPurchasePendingDialog(context);
-          }
-          else if (state is PurchasesSuccess) {
+          } else if (state is PurchasesSuccess) {
             _showDialog(context, 'Purchase successful. Welcome to ReceiptCamp Pro!');
             Navigator.of(context).pop();
           } else if (state is PurchasesFailed) {
@@ -64,6 +64,8 @@ class PaywallView extends StatelessWidget {
             await _showDialog(context, 'Purchases Successfully restored. Welcome back.');
           } else if (state is PurchasesRestoreFailed) {
             await _showDialog(context, 'Purchase restore failed. Please contact receiptcamp@gmail.com');
+          } else if (state is UserIsAlreadyPro) {
+            await _showDialog(context, 'User is already pro');
           } else {
             print(state.toString());
           }
