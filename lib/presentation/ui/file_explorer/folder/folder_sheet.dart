@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:receiptcamp/extensions/user_status_handler.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/presentation/screens/receipt_confirmation.dart';
@@ -190,9 +191,11 @@ void showFolderOptions(
               ),
             ),
             onTap: () {
-              Navigator.of(bottomSheetContext).pop();
-              Navigator.of(context)
-            .push(SlidingReceiptConfirmationTransitionRoute(folder: folder));
+              context.handleUserStatus((context) {
+                Navigator.of(bottomSheetContext).pop();
+                Navigator.of(context).push(
+                    SlidingReceiptConfirmationTransitionRoute(folder: folder));
+              });
             },
           ),
         ],
