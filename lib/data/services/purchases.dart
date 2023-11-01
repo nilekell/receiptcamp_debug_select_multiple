@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -17,7 +19,8 @@ class PurchasesService {
   Package? _subscriptionPackage;
 
   bool _userIsPro = false;
-  bool get userIsPro => _userIsPro;
+  // bool get userIsPro => false, when testing to always show PayWall and payment flow
+  bool get userIsPro => false;
 
   final String _revenueCatiOSApiKey = 'appl_FKvwuFnkweReYdMSvRjUCQqGZFs';
   final String _revenueCatAndroidApiKey = 'goog_iKvfzRIURBzwgXzXBRNnPkqPODo';
@@ -52,7 +55,7 @@ class PurchasesService {
       _outputPurchaseServiceInfo();
       _outputLifetimePackageDetails();
 
-      await _checkCustomerPurchaseStatus();
+      await checkCustomerPurchaseStatus();
 
     } on Exception catch (e) {
       print(e.toString());
@@ -102,19 +105,20 @@ class PurchasesService {
     }
   }
 
-  void makeProPurchase() async {
+  Future<bool> makeProPurchase() async {
     try {
       CustomerInfo purchaserInfo =
           await Purchases.purchasePackage(_lifetimePackage!);
       EntitlementInfo? entitlement =
           purchaserInfo.entitlements.all[_receiptCampProEntitlementId];
       if (entitlement!.isActive) {
-        // Handle successful purchase
+        return true;
       } else {
-        // Handle failed purchase
+        return false;
       }
     } on PlatformException catch (e) {
       print('Purchase failed: $e');
+      return false;
     }
   }
 
@@ -134,7 +138,7 @@ class PurchasesService {
     }
   }
 
-  Future<void> _checkCustomerPurchaseStatus() async {
+  Future<void> checkCustomerPurchaseStatus() async {
     try {
       CustomerInfo customerInfo = await Purchases.getCustomerInfo();
       // customerInfo.entitlements.all will be null when the user
@@ -151,18 +155,17 @@ class PurchasesService {
     }
   }
 
-  Future<List<String>> restorePurchases() async {
+  Future<void> restorePurchases() async {
     try {
       CustomerInfo restoredInfo = await Purchases.restorePurchases();
+      // checking restored customerInfo to see if entitlement is now active
       if (restoredInfo.entitlements.all['ReceiptCamp Pro']!.isActive) {
-        // ... check restored customerInfo to see if entitlement is now active
-        return restoredInfo.allPurchasedProductIdentifiers;
+        _userIsPro = true;
       } else {
-        return <String>[];
+        _userIsPro = false;
       }
     } on PlatformException catch (e) {
       print(e.toString());
-      return <String>[];
     }
   }
 }
