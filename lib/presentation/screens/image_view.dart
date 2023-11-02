@@ -99,6 +99,12 @@ class _ImageViewScreenState extends State<ImageViewScreen> {
     });
   }
 
+  void _hideAppBar() {
+    setState(() {
+      _isAppBarInitiallyVisible = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,6 +113,13 @@ class _ImageViewScreenState extends State<ImageViewScreen> {
       body: Stack(
         children: [
         GestureDetector(
+          onVerticalDragEnd: (details) {
+            print(details.primaryVelocity);
+            if (details.primaryVelocity! >= 10.0) {
+              _hideAppBar();
+              Navigator.of(context).pop();
+            }
+          },
           onTap: _toggleAppBar,
           onDoubleTap: _toggleAppBar,
           child: PhotoView(
