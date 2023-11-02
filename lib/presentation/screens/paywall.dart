@@ -7,7 +7,7 @@ import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 class PaywallView extends StatelessWidget {
   const PaywallView({super.key});
 
-  Future<void> _showDialog(BuildContext context, String message) async {
+  void _showOkDialog(BuildContext context, String message) async {
     showAdaptiveDialog(
         context: context,
         builder: (context) {
@@ -37,7 +37,7 @@ class PaywallView extends StatelessWidget {
                 Container(
                     margin: const EdgeInsets.only(left: 16),
                     child: const Text(
-                      "pending",
+                      "Purchase is pending...",
                       style: TextStyle(color: Colors.white),
                     )),
               ],
@@ -46,29 +46,51 @@ class PaywallView extends StatelessWidget {
         }));
   }
 
+  void _closePendingDialogAndBottomSheet(BuildContext context) {
+    Navigator.of(context).pop(); // hiding dialog
+    Navigator.of(context).pop(); // hiding bottom sheet
+  }
+
+  void _paywallPurchasesListener(BuildContext context, PurchasesState state) {
+    switch (state) {
+            case PurchasesPending():
+              _showPurchasePendingDialog(context);
+              break;
+            case PurchasesSuccess():
+              _closePendingDialogAndBottomSheet(context);
+              _showOkDialog(
+                  context, 'Purchase successful. Welcome to ReceiptCamp Pro!');
+              break;
+            case PurchasesFailed():
+              _closePendingDialogAndBottomSheet(context);
+              _showOkDialog(
+                  context, 'Uh oh, purchase failed. Please try again later.');
+              break;
+            case PurchasesRestoreSuccess():
+              _closePendingDialogAndBottomSheet(context);
+              _showOkDialog(
+                  context, 'Purchases Successfully restored. Welcome back.');
+              break;
+            case PurchasesRestoreFailed():
+              _closePendingDialogAndBottomSheet(context);
+              _showOkDialog(context,
+                  'Purchase restore failed. Please contact receiptcamp@gmail.com');
+              break;
+            case UserIsAlreadyPro():
+              _showOkDialog(context, 'User is already pro');
+              break;
+            default:
+              print(state.toString());
+          }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: context.read<PurchasesCubit>(),
       child: BlocConsumer<PurchasesCubit, PurchasesState>(
-        listener: (context, state) async {
-          if (state is PurchasesPending) {
-            _showPurchasePendingDialog(context);
-          } else if (state is PurchasesSuccess) {
-            _showDialog(context, 'Purchase successful. Welcome to ReceiptCamp Pro!');
-            Navigator.of(context).pop();
-          } else if (state is PurchasesFailed) {
-            await _showDialog(context, 'Uh oh, purchase failed. Please try again later.');
-            if (context.mounted) Navigator.of(context).pop();
-          } else if (state is PurchasesRestoreSuccess) {
-            await _showDialog(context, 'Purchases Successfully restored. Welcome back.');
-          } else if (state is PurchasesRestoreFailed) {
-            await _showDialog(context, 'Purchase restore failed. Please contact receiptcamp@gmail.com');
-          } else if (state is UserIsAlreadyPro) {
-            await _showDialog(context, 'User is already pro');
-          } else {
-            print(state.toString());
-          }
+        listener: (context, state) {
+          _paywallPurchasesListener(context, state);
         },
         builder: (context, state) {
           return GestureDetector(
