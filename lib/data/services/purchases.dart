@@ -18,9 +18,11 @@ class PurchasesService {
   Package? _lifetimePackage;
   Package? _subscriptionPackage;
 
+  CustomerInfo? _customerInfo;
+
   bool _userIsPro = false;
   // bool get userIsPro => false, when testing to always show PayWall and payment flow
-  bool get userIsPro => false;
+  bool get userIsPro => _userIsPro;
 
   final String _revenueCatiOSApiKey = 'appl_FKvwuFnkweReYdMSvRjUCQqGZFs';
   final String _revenueCatAndroidApiKey = 'goog_iKvfzRIURBzwgXzXBRNnPkqPODo';
@@ -51,15 +53,28 @@ class PurchasesService {
       await Purchases.configure(configuration);
 
       await _fetchAvailableOfferings();
+      await checkCustomerPurchaseStatus();
 
       _outputPurchaseServiceInfo();
       _outputLifetimePackageDetails();
+      _outputCustomerInfo();
 
-      await checkCustomerPurchaseStatus();
+      print('_userIsPro = $_userIsPro');
 
     } on Exception catch (e) {
       print(e.toString());
     }
+  }
+
+   void _outputCustomerInfo() {
+    if (_customerInfo != null) {
+      print('customerInfo.originalAppUserId: ${_customerInfo!.originalAppUserId}');
+      print('customerInfo.activeSubscriptions: ${_customerInfo!.activeSubscriptions}');
+      print('customerInfo.allPurchasedProductIdentifiers: ${_customerInfo!.allPurchasedProductIdentifiers}');
+    } else {
+      print('customer info is null');
+    }
+    
   }
 
   void _outputPurchaseServiceInfo() {
@@ -140,11 +155,11 @@ class PurchasesService {
 
   Future<void> checkCustomerPurchaseStatus() async {
     try {
-      CustomerInfo customerInfo = await Purchases.getCustomerInfo();
+      CustomerInfo latestCustomerInfo = await Purchases.getCustomerInfo();
+      _customerInfo = latestCustomerInfo;
       // customerInfo.entitlements.all will be null when the user
       // has not purchased a product that’s attached to an entitlement yet, the EntitlementInfo object 
-      print('customerInfo.allPurchasedProductIdentifiers: ${customerInfo.allPurchasedProductIdentifiers}');
-      if (customerInfo.allPurchasedProductIdentifiers.isNotEmpty) {
+      if (latestCustomerInfo.allPurchasedProductIdentifiers.isNotEmpty) {
         _userIsPro = true;
       } else {
         _userIsPro = false;
