@@ -376,10 +376,7 @@ class DatabaseService {
   // Method to insert a Folder object into the database.
   Future<void> insertFolder(Folder folder) async {
     final db = await database;
-    if (folder.name == rootFolderName) {
-      throw Exception('folder cannot have same name as default folder');
-      // function ends after throw statement
-    }
+    // folders can have the same name
     await db.insert('folders', folder.toMap());
   }
 
