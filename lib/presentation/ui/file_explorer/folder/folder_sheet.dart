@@ -165,8 +165,10 @@ void showFolderOptions(
               ),
             ),
             onTap: () {
-              Navigator.of(bottomSheetContext).pop();
+              context.handleUserStatus((context) {
+                Navigator.of(bottomSheetContext).pop();
               folderViewCubit.generateZipFile(folder, true);
+              });
             },
           ),
           ListTile(
