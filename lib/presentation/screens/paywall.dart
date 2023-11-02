@@ -47,7 +47,7 @@ class PaywallView extends StatelessWidget {
   }
 
   void _closePendingDialogAndBottomSheet(BuildContext context) {
-    Navigator.of(context).pop(); // hiding dialog
+    Navigator.of(context).pop(); // hiding pending dialog
     Navigator.of(context).pop(); // hiding bottom sheet
   }
 
@@ -62,7 +62,7 @@ class PaywallView extends StatelessWidget {
                   context, 'Purchase successful. Welcome to ReceiptCamp Pro!');
               break;
             case PurchasesFailed():
-              _closePendingDialogAndBottomSheet(context);
+              Navigator.pop(context); // hiding pending dialog
               _showOkDialog(
                   context, 'Uh oh, purchase failed. Please try again later.');
               break;
