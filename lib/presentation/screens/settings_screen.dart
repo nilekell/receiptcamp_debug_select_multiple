@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/data_constants.dart';
+import 'package:receiptcamp/extensions/user_status_handler.dart';
 import 'package:receiptcamp/logic/cubits/settings/settings_cubit.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
@@ -173,8 +174,85 @@ class _SettingsViewState extends State<SettingsView> {
                                     fontSize: 20,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white,)),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text('Create a backup of all your expenses to import to another device.', style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,)),
+                            ),
                             onTap: () =>
                                 context.read<SettingsCubit>().generateArchive(),
+                          ),
+                        ),
+                        const Divider(
+                          color: Colors.white,
+                          thickness: 2,
+                          height: 1,
+                          indent: 25,
+                          endIndent: 25,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ListTile(
+                            title: Text('Get ReceiptCamp Pro',
+                                style: const TextStyle(
+                                    fontSize: 20,
+                                  fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  )),
+                              onTap: () {
+                                context.handleUserStatus((context) {
+                                  showAdaptiveDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog.adaptive(
+                                          content: const Text(
+                                              'You are already a pro member.'),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () =>
+                                                    Navigator.of(context).pop(),
+                                                child: const Text('Ok')),
+                                          ],
+                                        );
+                                      });
+                                });
+                              }),
+                        ),
+                        const Divider(
+                          color: Colors.white,
+                          thickness: 2,
+                          height: 1,
+                          indent: 25,
+                          endIndent: 25,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ListTile(
+                            title: Text('Restore purchases',
+                                style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,)),
+                            onTap: () {
+                              context.handleUserStatus((context) {
+                                  showAdaptiveDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog.adaptive(
+                                          content: const Text(
+                                              'You are already a pro member.'),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () =>
+                                                    Navigator.of(context).pop(),
+                                                child: const Text('Ok')),
+                                          ],
+                                        );
+                                      });
+                                });
+                            }
                           ),
                         ),
                         const Divider(

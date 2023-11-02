@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/services/directory_path_provider.dart';
 import 'package:receiptcamp/data/services/preferences.dart';
+import 'package:receiptcamp/data/services/purchases.dart';
 import 'package:receiptcamp/data/services/sharing_intent.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/bloc_observer.dart';
@@ -30,6 +31,7 @@ void main() async {
   await DirectoryPathProvider.instance.initialize();
   await DatabaseRepository.instance.init();
   await PreferencesService.instance.init();
+  await PurchasesService.instance.initPlatformState();
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);

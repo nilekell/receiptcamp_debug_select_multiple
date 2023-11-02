@@ -6,6 +6,8 @@ import 'package:photo_view/photo_view.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/ui/image_view/image_sheet.dart';
 
+final GlobalKey<_ImageViewScreenState> _imageViewScreenKey = GlobalKey<_ImageViewScreenState>();
+
 // defining a custom route class to animate transition to ImageViewScreen
 class SlidingImageTransitionRoute extends PageRouteBuilder {
   final Receipt receipt;
@@ -24,6 +26,7 @@ class SlidingImageTransitionRoute extends PageRouteBuilder {
               key: UniqueKey(),
               direction: DismissDirection.down,
               child: ImageViewScreen(
+                key: _imageViewScreenKey,
                 imageProvider: Image.file(File(receipt.localPath)).image,
                 receipt: receipt,
               ),
@@ -99,17 +102,34 @@ class _ImageViewScreenState extends State<ImageViewScreen> {
     });
   }
 
+  void _hideAppBar() {
+    setState(() {
+      _isAppBarInitiallyVisible = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
-      body: Stack(children: [
+      body: Stack(
+        children: [
         GestureDetector(
+          onVerticalDragEnd: (details) {
+            if (details.primaryVelocity! >= 10.0) {
+              _hideAppBar();
+              Navigator.of(context).pop();
+            }
+          },
           onTap: _toggleAppBar,
+          onDoubleTap: _toggleAppBar,
           child: PhotoView(
-            maxScale: PhotoViewComputedScale.contained * 6,
-            minScale: PhotoViewComputedScale.contained * 0.5,
+            scaleStateChangedCallback: (value) {
+              _toggleAppBar();
+            },
+            maxScale: PhotoViewComputedScale.contained * 3,
+            minScale: PhotoViewComputedScale.contained * 0.8,
             backgroundDecoration: const BoxDecoration(
               color: Colors.black,
             ),
@@ -162,6 +182,7 @@ class ImageViewAppBar extends StatelessWidget {
         ),
         leading: IconButton(
             onPressed: () {
+              _imageViewScreenKey.currentState!._hideAppBar();
               Navigator.of(context).pop();
             },
             icon: Transform.translate(

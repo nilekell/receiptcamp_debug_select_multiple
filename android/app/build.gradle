@@ -18,7 +18,7 @@ if (flutterRoot == null) {
     throw new FileNotFoundException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
-def flutterVersionCode = 5
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
     throw new Exception("versionCode not found. Define flutter.versionCode in the local.properties file.")
 }

@@ -376,10 +376,7 @@ class DatabaseService {
   // Method to insert a Folder object into the database.
   Future<void> insertFolder(Folder folder) async {
     final db = await database;
-    if (folder.name == rootFolderName) {
-      throw Exception('folder cannot have same name as default folder');
-      // function ends after throw statement
-    }
+    // folders can have the same name
     await db.insert('folders', folder.toMap());
   }
 
@@ -590,27 +587,34 @@ class DatabaseService {
 
   Future<bool> folderIsEmpty(String folderId) async {
     final db = await database;
-    final countReceiptsResult = await db.rawQuery('''
-    SELECT COUNT (*)
-    FROM receipts
-    WHERE parentId = ?
-    ''', [folderId]);
 
-    final countFolderResult = await db.rawQuery('''
-    SELECT COUNT (*)
-    FROM folders
-    WHERE parentId = ?
-    ''', [folderId]);
+    int totalSubReceipts = 0;
 
-    // Using Sqflite.firstIntValue to extract the count of receipts and folders from the query results.
-    int numReceipts = Sqflite.firstIntValue(countReceiptsResult) ?? 0;
-    print('numReceipts: $numReceipts');
-    int numFolders = Sqflite.firstIntValue(countFolderResult) ?? 0;
-    print('numFolders: $numFolders');
+    // getting list of ids for all sub folders within selected folder
+    final List<String> subFolderIds = await getRecursiveSubFolderIds(folderId);
 
-    final int total = numReceipts + numFolders;
+    // getting number of receipts within selected folder (not-recursive)
+    getReceiptCountInFolder(String folderId) async {
+      final countReceiptsResult = await db.rawQuery('''
+     SELECT COUNT (*)
+     FROM receipts
+     WHERE parentId = ?
+     ''', [folderId]);
 
-    return total < 1;
+      //adding number of receipts found directly in a folder to [totalSubReceipts]
+      int numReceipts = Sqflite.firstIntValue(countReceiptsResult) ?? 0;
+      totalSubReceipts = totalSubReceipts + numReceipts;
+    }
+
+    // getting number of receipts in selected subfolder
+    await getReceiptCountInFolder(folderId);
+
+    for (final id in subFolderIds) {
+      // getting number of receipts in each subfolder
+      await getReceiptCountInFolder(id);
+      }
+
+    return totalSubReceipts < 1;
   }
 
   Future<void> deleteAllFoldersExceptRoot() async {
