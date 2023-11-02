@@ -6,6 +6,8 @@ import 'package:photo_view/photo_view.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/ui/image_view/image_sheet.dart';
 
+final GlobalKey<_ImageViewScreenState> _imageViewScreenKey = GlobalKey<_ImageViewScreenState>();
+
 // defining a custom route class to animate transition to ImageViewScreen
 class SlidingImageTransitionRoute extends PageRouteBuilder {
   final Receipt receipt;
@@ -24,6 +26,7 @@ class SlidingImageTransitionRoute extends PageRouteBuilder {
               key: UniqueKey(),
               direction: DismissDirection.down,
               child: ImageViewScreen(
+                key: _imageViewScreenKey,
                 imageProvider: Image.file(File(receipt.localPath)).image,
                 receipt: receipt,
               ),
@@ -114,7 +117,6 @@ class _ImageViewScreenState extends State<ImageViewScreen> {
         children: [
         GestureDetector(
           onVerticalDragEnd: (details) {
-            print(details.primaryVelocity);
             if (details.primaryVelocity! >= 10.0) {
               _hideAppBar();
               Navigator.of(context).pop();
@@ -180,6 +182,7 @@ class ImageViewAppBar extends StatelessWidget {
         ),
         leading: IconButton(
             onPressed: () {
+              _imageViewScreenKey.currentState!._hideAppBar();
               Navigator.of(context).pop();
             },
             icon: Transform.translate(
