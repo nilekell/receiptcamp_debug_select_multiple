@@ -69,7 +69,7 @@ class PaywallView extends StatelessWidget {
             case PurchasesRestoreSuccess():
               _closePendingDialogAndBottomSheet(context);
               _showOkDialog(
-                  context, 'Purchases Successfully restored. Welcome back.');
+                  context, 'Purchases successfully restored. Welcome back.');
               break;
             case PurchasesRestoreFailed():
               _closePendingDialogAndBottomSheet(context);
