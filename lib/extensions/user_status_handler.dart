@@ -5,10 +5,9 @@ import 'package:receiptcamp/logic/cubits/purchases/purchases_cubit.dart';
 import 'package:receiptcamp/presentation/screens/paywall.dart';
 
 extension UserStatusHandler on BuildContext {
-  void handleUserStatus(Function onPro) {
-    print('handleUserStatus');
+  Future<void> handleUserStatus(Function onPro) async {
     final PurchasesService purchasesService = PurchasesService.instance;
-    purchasesService.checkCustomerPurchaseStatus();
+    await purchasesService.checkCustomerPurchaseStatus();
     if (purchasesService.userIsPro) {
       // callback to whatever pro feature the user was trying to accomplish
       onPro(this);

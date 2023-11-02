@@ -125,10 +125,12 @@ class PurchasesService {
       CustomerInfo purchaserInfo =
           await Purchases.purchasePackage(_lifetimePackage!);
       EntitlementInfo? entitlement =
-          purchaserInfo.entitlements.all[_receiptCampProEntitlementId];
+          purchaserInfo.entitlements.active[_receiptCampProEntitlementId];
       if (entitlement!.isActive) {
+        _userIsPro = true;
         return true;
       } else {
+        _userIsPro = false;
         return false;
       }
     } on PlatformException catch (e) {
@@ -142,7 +144,7 @@ class PurchasesService {
       CustomerInfo purchaserInfo =
           await Purchases.purchasePackage(_subscriptionPackage!);
       EntitlementInfo? entitlement = purchaserInfo
-          .entitlements.all[_receiptCampProSubscriptionEntitlementId];
+          .entitlements.active[_receiptCampProSubscriptionEntitlementId];
       if (entitlement!.isActive) {
         // Handle successful purchase
       } else {
@@ -158,7 +160,7 @@ class PurchasesService {
       CustomerInfo latestCustomerInfo = await Purchases.getCustomerInfo();
       _customerInfo = latestCustomerInfo;
       // customerInfo.entitlements.all will be null when the user
-      // has not purchased a product that’s attached to an entitlement yet, the EntitlementInfo object 
+      // has not purchased a product that’s attached to an entitlement yet, the EntitlementInfo object
       if (latestCustomerInfo.allPurchasedProductIdentifiers.isNotEmpty) {
         _userIsPro = true;
       } else {
@@ -174,7 +176,7 @@ class PurchasesService {
     try {
       CustomerInfo restoredInfo = await Purchases.restorePurchases();
       // checking restored customerInfo to see if entitlement is now active
-      if (restoredInfo.entitlements.all['ReceiptCamp Pro']!.isActive) {
+      if (restoredInfo.entitlements.active[_receiptCampProEntitlementId]!.isActive) {
         _userIsPro = true;
       } else {
         _userIsPro = false;

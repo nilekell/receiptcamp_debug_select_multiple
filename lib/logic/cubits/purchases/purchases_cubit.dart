@@ -19,11 +19,13 @@ class PurchasesCubit extends Cubit<PurchasesState> {
   }
 
   makeProPurchase() async {
+    emit(PurchasesPending());
     try {
       if (_purchasesService.userIsPro) {
         emit(UserIsAlreadyPro());
         return;
       }
+      
       final bool isPurchaseSuccessful =
           await _purchasesService.makeProPurchase();
       if (isPurchaseSuccessful) {
@@ -40,6 +42,7 @@ class PurchasesCubit extends Cubit<PurchasesState> {
   makeProSubscriptionPurchase() async {}
 
   restorePurchases() async {
+    emit(PurchasesPending());
     try {
       if (_purchasesService.userIsPro) {
         emit(UserIsAlreadyPro());
