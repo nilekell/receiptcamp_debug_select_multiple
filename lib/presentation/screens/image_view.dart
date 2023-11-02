@@ -104,10 +104,15 @@ class _ImageViewScreenState extends State<ImageViewScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
-      body: Stack(children: [
+      body: Stack(
+        children: [
         GestureDetector(
           onTap: _toggleAppBar,
+          onDoubleTap: _toggleAppBar,
           child: PhotoView(
+            scaleStateChangedCallback: (value) {
+              _toggleAppBar();
+            },
             maxScale: PhotoViewComputedScale.contained * 3,
             minScale: PhotoViewComputedScale.contained * 0.8,
             backgroundDecoration: const BoxDecoration(
