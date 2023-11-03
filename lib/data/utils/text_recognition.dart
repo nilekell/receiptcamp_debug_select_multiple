@@ -196,7 +196,7 @@ class TextRecognitionService {
 
   // getting words to discard in receipt when scanning for price
   // only for latin languages
-  static Future<RegExp> getDiscardRegExp(String textToAnalyze) async {
+  Future<RegExp> getDiscardRegExp(String textToAnalyze) async {
     final languageIdentifier = LanguageIdentifier(confidenceThreshold: 0.5);
     final String detectedLanguage =
         await languageIdentifier.identifyLanguage(textToAnalyze);
@@ -250,5 +250,19 @@ class TextRecognitionService {
     languageIdentifier.close();
 
     return discardRegExp;
+  }
+
+  static Future<String> getCurrencySymbol(String textToAnalyse) async {
+    Set<String> currencySymbols = {'\$', '€', '¥', '£', '₹'};
+    String currencySign = '£'; // Default currency symbol
+
+    for (String symbol in currencySymbols) {
+      if (textToAnalyse.contains(symbol)) {
+        currencySign = symbol;
+        break;
+      }
+    }
+
+    return currencySign;
   }
 }
