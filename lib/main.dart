@@ -23,20 +23,23 @@ import 'presentation/ui/ui_constants.dart';
 // import 'package:flutter/scheduler.dart' show timeDilation;
 
 void main() async {
-  Bloc.observer = AppBlocObserver();
   WidgetsFlutterBinding.ensureInitialized();
-  // Initializing DirectoryPathProvider.instance in `main()` ensures that the documents directory path is
-  // fetched and set as soon as the application starts, making the path
-  // immediately available to any part of the application that requires it.
-  await DirectoryPathProvider.instance.initialize();
-  await DatabaseRepository.instance.init();
-  await PreferencesService.instance.init();
-  await PurchasesService.instance.initPlatformState();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
-  // timeDilation = 8;
-  runApp(MultiBlocProvider(
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  try {
+    // Initializing DirectoryPathProvider.instance in `main()` ensures that the documents directory path is
+    // fetched as soon as the application starts, making the path
+    // immediately available to any part of the application that requires it.
+    await DirectoryPathProvider.instance.initialize();
+    await DatabaseRepository.instance.init();
+    await PreferencesService.instance.init();
+    Bloc.observer = AppBlocObserver();
+    await PurchasesService.instance.initPlatformState();
+  } on Exception catch (e) {
+    print(e.toString());
+  }
+
+  final appMultiBlocProvider = MultiBlocProvider(
     providers: [
       BlocProvider(
         create: (context) => SettingsCubit()..init(),
@@ -71,8 +74,10 @@ void main() async {
               SearchBloc(databaseRepository: DatabaseRepository.instance)
                 ..add(const SearchInitialEvent()))
     ],
-    child: const MyApp(),
-  ));
+    child: const MyApp());
+
+  runApp(appMultiBlocProvider);
+
 }
 
 class MyApp extends StatefulWidget {

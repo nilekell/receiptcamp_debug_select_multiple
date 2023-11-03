@@ -27,7 +27,7 @@ class PurchasesCubit extends Cubit<PurchasesState> {
       }
       
       final bool isPurchaseSuccessful =
-          await _purchasesService.makeProPurchase();
+          await _purchasesService.makeProSubscriptionPurchase();
       if (isPurchaseSuccessful) {
         emit(PurchasesSuccess());
       } else {
@@ -38,8 +38,6 @@ class PurchasesCubit extends Cubit<PurchasesState> {
       emit(PurchasesFailed());
     }
   }
-
-  makeProSubscriptionPurchase() async {}
 
   restorePurchases() async {
     emit(PurchasesPending());

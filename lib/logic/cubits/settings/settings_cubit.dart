@@ -33,6 +33,7 @@ class SettingsCubit extends Cubit<SettingsState> {
     final folderIsEmpty = await DatabaseRepository.instance.folderIsEmpty(rootFolderId);
     
     if (folderIsEmpty) {
+      emit(SettingsFileEmptyState());
       return;
     }
       Map<String, dynamic> serializedFolder = folder.toMap();

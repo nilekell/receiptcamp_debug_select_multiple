@@ -13,7 +13,7 @@ extension UserStatusHandler on BuildContext {
       onPro(this);
     } else {
       // show paywall when user is not a pro user
-      Navigator.of(this).pop();
+      // Navigator.of(this).pop();
       showModalBottomSheet(
         context: this,
         backgroundColor: Colors.transparent,
