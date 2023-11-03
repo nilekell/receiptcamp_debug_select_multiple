@@ -74,13 +74,14 @@ class PaywallView extends StatelessWidget {
             case PurchasesRestoreFailed():
               _closePendingDialogAndBottomSheet(context);
               _showOkDialog(context,
-                  'Purchase restore failed. Please contact receiptcamp@gmail.com');
+                  'Purchase restore failed. Please try again later');
               break;
             case UserIsAlreadyPro():
               _showOkDialog(context, 'User is already pro');
               break;
             default:
-              print(state.toString());
+              _closePendingDialogAndBottomSheet(context);
+              _showOkDialog(context, 'Uh oh, unexpected error occured');
           }
   }
 
