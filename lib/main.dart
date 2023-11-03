@@ -25,6 +25,7 @@ import 'presentation/ui/ui_constants.dart';
 void main() async {
   Bloc.observer = AppBlocObserver();
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   // Initializing DirectoryPathProvider.instance in `main()` ensures that the documents directory path is
   // fetched and set as soon as the application starts, making the path
   // immediately available to any part of the application that requires it.
@@ -32,9 +33,6 @@ void main() async {
   await DatabaseRepository.instance.init();
   await PreferencesService.instance.init();
   await PurchasesService.instance.initPlatformState();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
   // timeDilation = 8;
   runApp(MultiBlocProvider(
     providers: [
