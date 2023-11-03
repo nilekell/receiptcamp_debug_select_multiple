@@ -98,57 +98,54 @@ class PaywallView extends StatelessWidget {
             onTap: () => Navigator.pop(context),
             child: Container(
               color: Colors.transparent,
-              child: GestureDetector(
-                onTap: () {},
-                child: DraggableScrollableSheet(
-                  initialChildSize: 0.9,
-                  minChildSize: 0.8,
-                  maxChildSize: 1.0,
-                  builder: (BuildContext context, ScrollController scrollController) {
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: const BoxDecoration(
-                        color:Color(primaryLightBlue),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
+              child: DraggableScrollableSheet(
+                initialChildSize: 0.9,
+                minChildSize: 0.5,
+                maxChildSize: 1.0,
+                builder: (BuildContext context, ScrollController scrollController) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      color:Color(primaryDeepBlue),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: ListView(
+                      controller: scrollController,
+                      children: [
+                        const Text(
+                          'Upgrade to Pro',
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white), textAlign: TextAlign.center,
                         ),
-                      ),
-                      child: ListView(
-                        controller: scrollController,
-                        children: [
-                          const Text(
-                            'Upgrade to Pro',
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white), textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 32),
-                          const Column(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text('Unlock premium features', style: TextStyle(fontSize: 24,color: Colors.white, fontWeight: FontWeight.bold)),
-                              )
-                              
-                            ],
-                          ),
-                            ElevatedButton(
-                              onPressed: () {
-                                context.read<PurchasesCubit>().makeProPurchase();
-                              },
-                              child: const Text('Upgrade to Pro', style: TextStyle(color: Colors.white),),
+                        const SizedBox(height: 32),
+                        const Column(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('Unlock premium features', style: TextStyle(fontSize: 24,color: Colors.white, fontWeight: FontWeight.bold)),
                             ),
-                          const SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: () {
-                                context.read<PurchasesCubit>().restorePurchases();
-                              },
-                              child: const Text('Restore Purchases'),
-                            ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                            SizedBox(height: 30,)
+                          ],
+                        ),
+                          ElevatedButton(
+                            onPressed: () {
+                              context.read<PurchasesCubit>().makeProPurchase();
+                            },
+                            child: const Text('Upgrade to Pro', style: TextStyle(color: Colors.white),),
+                          ),
+                        const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              context.read<PurchasesCubit>().restorePurchases();
+                            },
+                            child: const Text('Restore Purchases'),
+                          ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           );
