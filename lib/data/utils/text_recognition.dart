@@ -141,6 +141,7 @@ class TextRecognitionService {
         await textRecognizer.processImage(inputImage);
 
     final textToAnalyse = recognizedText.text;
+    final String currencySign = await getCurrencySymbol(textToAnalyse);
     RegExp discardRegExp = await getDiscardRegExp(textToAnalyse);
 
     RegExp priceRegExp = RegExp(
