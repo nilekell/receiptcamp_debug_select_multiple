@@ -20,6 +20,11 @@ class SlidingImageTransitionRoute extends PageRouteBuilder {
           pageBuilder: (BuildContext context, Animation<double> animation,
               Animation<double> secondaryAnimation) {
             return Dismissible(
+              onUpdate: (details) {
+                if (details.direction == DismissDirection.down) {
+                  _imageViewScreenKey.currentState!._hideAppBar();
+                }
+              },
               onDismissed: (direction) {
                 Navigator.of(context).pop();
               },
