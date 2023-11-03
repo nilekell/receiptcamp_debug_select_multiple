@@ -15,7 +15,6 @@ class PurchasesService {
   Offering? _proSubscriptionOffering;
   Offering? get proSubscriptionoffering => _proSubscriptionOffering;
 
-  Package? _lifetimePackage;
   Package? _subscriptionPackage;
 
   CustomerInfo? _customerInfo;
@@ -28,11 +27,10 @@ class PurchasesService {
   final String _revenueCatAndroidApiKey = 'goog_iKvfzRIURBzwgXzXBRNnPkqPODo';
 
   final String _receiptCampProEntitlementId = 'ReceiptCamp Pro';
-  final String _receiptCampProSubscriptionEntitlementId = '';
 
-  // ios: receiptcamp_pro_purchase
-  // android: receiptcamp_pro_v1
-  final List<String> _productsList = ['receiptcamp_pro_purchase', 'receiptcamp_pro_v1'];
+  // ios: rcpro_499_1m
+  // android: rcpro_499_1m:monthly-autorenewing
+  final List<String> _productsList = ['rcpro_499_1m', 'rcpro_499_1m:monthly-autorenewing'];
 
   Future<void> initPlatformState() async {
     try {
@@ -56,12 +54,76 @@ class PurchasesService {
       await checkCustomerPurchaseStatus();
 
       _outputPurchaseServiceInfo();
-      _outputLifetimePackageDetails();
+      _outputSubscriptionPackageDetails();
       _outputCustomerInfo();
 
       print('_userIsPro = $_userIsPro');
 
     } on Exception catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future<void> _fetchAvailableOfferings() async {
+    try {
+      Offerings offerings = await Purchases.getOfferings();
+      if (offerings.current != null) {
+        _proOffering = offerings.current;
+        _subscriptionPackage = _proOffering!.monthly;
+      }
+    } on PlatformException catch (e) {
+      print(e.toString());
+      print('Failed to fetch products');
+    }
+  }
+
+   Future<void> checkCustomerPurchaseStatus() async {
+    try {
+      CustomerInfo latestCustomerInfo = await Purchases.getCustomerInfo();
+      _customerInfo = latestCustomerInfo;
+      // customerInfo.entitlements.all will be null when the user
+      // has not purchased a product that’s attached to an entitlement yet, the EntitlementInfo object
+      if (latestCustomerInfo.allPurchasedProductIdentifiers.isNotEmpty) {
+        _userIsPro = true;
+      } else {
+        _userIsPro = false;
+      }
+    } on PlatformException catch (e) {
+      print(e.toString());
+      _userIsPro = false;
+    }
+  }
+
+  Future<bool> makeProSubscriptionPurchase() async {
+    try {
+      CustomerInfo purchaserInfo =
+          await Purchases.purchasePackage(_subscriptionPackage!);
+      EntitlementInfo? entitlement = purchaserInfo
+          .entitlements.active[_receiptCampProEntitlementId];
+      if (entitlement!.isActive) {
+        _userIsPro = true;
+        return true;
+      } else {
+        _userIsPro = false;
+        return false;
+      }
+    } on PlatformException catch (e) {
+      print('Purchase failed: $e');
+      return false;
+    }
+  }
+
+  Future<void> restorePurchases() async {
+    try {
+      CustomerInfo restoredInfo = await Purchases.restorePurchases();
+      print(restoredInfo.activeSubscriptions);
+      // checking restored customerInfo to see if entitlement is now active
+      if (restoredInfo.entitlements.active[_receiptCampProEntitlementId]!.isActive) {
+        _userIsPro = true;
+      } else {
+        _userIsPro = false;
+      }
+    } on PlatformException catch (e) {
       print(e.toString());
     }
   }
@@ -97,92 +159,10 @@ class PurchasesService {
     }
   }
 
-  void _outputLifetimePackageDetails() {
-    print('Lifeime Package details');
-    print('identifier: ${_lifetimePackage!.identifier}');
-    print('offering identifier: ${_lifetimePackage!.offeringIdentifier}');
-    print('package type: ${_lifetimePackage!.packageType}');
-  }
-
-  Future<void> _fetchAvailableOfferings() async {
-    try {
-      // final List<StoreProduct> products = await Purchases.getProducts(['receiptcamp_pro_purchase', 'receiptcamp_pro_v1']);
-      // print(products);
-      Offerings offerings = await Purchases.getOfferings();
-      if (offerings.current != null) {
-        _proOffering = offerings.all['pro-offering'];
-        _lifetimePackage = offerings.all['pro-offering']!.availablePackages[0];
-        // add code to get __subscriptionPackage, when subscription is implemented
-      }
-    } on PlatformException catch (e) {
-      print(e.toString());
-      print('Failed to fetch products');
-    }
-  }
-
-  Future<bool> makeProPurchase() async {
-    try {
-      CustomerInfo purchaserInfo =
-          await Purchases.purchasePackage(_lifetimePackage!);
-      EntitlementInfo? entitlement =
-          purchaserInfo.entitlements.active[_receiptCampProEntitlementId];
-      if (entitlement!.isActive) {
-        _userIsPro = true;
-        return true;
-      } else {
-        _userIsPro = false;
-        return false;
-      }
-    } on PlatformException catch (e) {
-      print('Purchase failed: $e');
-      return false;
-    }
-  }
-
-  void makeProSubscriptionPurchase() async {
-    try {
-      CustomerInfo purchaserInfo =
-          await Purchases.purchasePackage(_subscriptionPackage!);
-      EntitlementInfo? entitlement = purchaserInfo
-          .entitlements.active[_receiptCampProSubscriptionEntitlementId];
-      if (entitlement!.isActive) {
-        // Handle successful purchase
-      } else {
-        // Handle failed purchase
-      }
-    } on PlatformException catch (e) {
-      print('Purchase failed: $e');
-    }
-  }
-
-  Future<void> checkCustomerPurchaseStatus() async {
-    try {
-      CustomerInfo latestCustomerInfo = await Purchases.getCustomerInfo();
-      _customerInfo = latestCustomerInfo;
-      // customerInfo.entitlements.all will be null when the user
-      // has not purchased a product that’s attached to an entitlement yet, the EntitlementInfo object
-      if (latestCustomerInfo.allPurchasedProductIdentifiers.isNotEmpty) {
-        _userIsPro = true;
-      } else {
-        _userIsPro = false;
-      }
-    } on PlatformException catch (e) {
-      print(e.toString());
-      _userIsPro = false;
-    }
-  }
-
-  Future<void> restorePurchases() async {
-    try {
-      CustomerInfo restoredInfo = await Purchases.restorePurchases();
-      // checking restored customerInfo to see if entitlement is now active
-      if (restoredInfo.entitlements.active[_receiptCampProEntitlementId]!.isActive) {
-        _userIsPro = true;
-      } else {
-        _userIsPro = false;
-      }
-    } on PlatformException catch (e) {
-      print(e.toString());
-    }
+  void _outputSubscriptionPackageDetails() {
+    print('Subscription Package details');
+    print('identifier: ${_subscriptionPackage!.identifier}');
+    print('offering identifier: ${_subscriptionPackage!.offeringIdentifier}');
+    print('package type: ${_subscriptionPackage!.packageType}');
   }
 }
