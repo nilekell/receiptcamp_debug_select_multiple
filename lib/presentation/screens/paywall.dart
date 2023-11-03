@@ -93,131 +93,131 @@ class PaywallView extends StatelessWidget {
           _paywallPurchasesListener(context, state);
         },
         builder: (context, state) {
-          return GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: DraggableScrollableSheet(
-              initialChildSize: 0.6,
-              minChildSize: 0.5,
-              maxChildSize: 1.0,
-              builder: (BuildContext context, ScrollController scrollController) {
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(primaryDeepBlue),
-                        Color(primaryDarkBlue)
-                      ], // Gradient colors
-                    ),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
+          return DraggableScrollableSheet(
+            initialChildSize: 0.95,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(primaryDeepBlue),
+                      Color(primaryDarkBlue)
+                    ], // Gradient colors
                   ),
-                  child: ListView(
-                    controller: scrollController,
-                    children: [
-                      const Text(
-                        'Upgrade to Pro',
-                        style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 32),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Column(
-                          children: [
-                            const Text(
-                              'Unlock these premium features:',
-                              style: TextStyle(fontSize: 20, color: Colors.white),
-                              textAlign: TextAlign.center,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
+                child: ListView(
+                  controller: scrollController,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close, color: Colors.white,)),
+                      ]),
+                    const Text(
+                      'Upgrade to Pro',
+                      style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Unlock these premium features:',
+                            style: TextStyle(fontSize: 20, color: Colors.white),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          ...[
+                            'Export expenses with excel spreadsheets',
+                            'Share folders as PDFs',
+                            'Backup all your expenses'
+                          ].map((feature) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.check,
+                                        color: Color(primaryLightBlue)),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      feature,
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 16),
+                                    )
+                                  ],
+                                ),
+                              )),
+                          const SizedBox(height: 24),
+                          const Text(
+                            'Only £4.99/month',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(primaryLightBlue),
                             ),
-                            const SizedBox(height: 24),
-                            ...[
-                              'Export expenses with excel spreadsheets',
-                              'Share folders as PDFs',
-                              'Backup all your expenses'
-                            ].map((feature) => Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.check,
-                                          color: Color(primaryLightBlue)),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        feature,
-                                        style: const TextStyle(
-                                            color: Colors.white, fontSize: 16),
-                                      )
-                                    ],
-                                  ),
-                                )),
-                            const SizedBox(height: 24),
-                            const Text(
-                              'Only £4.99/month',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Color(primaryLightBlue),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          OutlinedButton(
+                            onPressed: () {
+                              context.read<PurchasesCubit>().makeProPurchase();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(
+                                  color: Colors.white, width: 2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              textAlign: TextAlign.center,
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 28, horizontal: 80),
                             ),
-                            const SizedBox(height: 8),
-                            OutlinedButton(
+                            child: const Text('Upgrade now',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 20)),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Billed monthly. Cancel anytime.',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white70,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 260,),
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: TextButton(
                               onPressed: () {
-                                context.read<PurchasesCubit>().makeProPurchase();
+                                context
+                                    .read<PurchasesCubit>()
+                                    .restorePurchases();
                               },
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(
-                                    color: Colors.white, width: 2),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 28, horizontal: 80),
-                              ),
-                              child: const Text('Upgrade now',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 20)),
+                              child: const Text('Restore Purchases',
+                                  style: TextStyle(color: Colors.white)),
                             ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Billed monthly. Cancel anytime.',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white70,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Transform.translate(
-                              offset: const Offset(0, 24.0),
-                              child: Align(
-                                alignment: Alignment.bottomCenter,
-                                child: TextButton(
-                                  onPressed: () {
-                                    context
-                                        .read<PurchasesCubit>()
-                                        .restorePurchases();
-                                  },
-                                  child: const Text('Restore Purchases',
-                                      style: TextStyle(color: Colors.white)),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    ),
+                  ],
+                ),
+              );
+            },
           );
         },
       ),
