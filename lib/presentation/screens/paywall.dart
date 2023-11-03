@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receiptcamp/logic/cubits/purchases/purchases_cubit.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
-
 class PaywallView extends StatelessWidget {
   const PaywallView({super.key});
 
@@ -53,36 +52,36 @@ class PaywallView extends StatelessWidget {
 
   void _paywallPurchasesListener(BuildContext context, PurchasesState state) {
     switch (state) {
-            case PurchasesPending():
-              _showPurchasePendingDialog(context);
-              break;
-            case PurchasesSuccess():
-              _closePendingDialogAndBottomSheet(context);
-              _showOkDialog(
-                  context, 'Purchase successful. Welcome to ReceiptCamp Pro!');
-              break;
-            case PurchasesFailed():
-              Navigator.pop(context); // hiding pending dialog
-              _showOkDialog(
-                  context, 'Uh oh, purchase failed. Please try again later.');
-              break;
-            case PurchasesRestoreSuccess():
-              _closePendingDialogAndBottomSheet(context);
-              _showOkDialog(
-                  context, 'Purchases successfully restored. Welcome back.');
-              break;
-            case PurchasesRestoreFailed():
-              _closePendingDialogAndBottomSheet(context);
-              _showOkDialog(context,
-                  'Purchase restore failed. Please try again later');
-              break;
-            case UserIsAlreadyPro():
-              _showOkDialog(context, 'User is already pro');
-              break;
-            default:
-              _closePendingDialogAndBottomSheet(context);
-              _showOkDialog(context, 'Uh oh, unexpected error occured');
-          }
+      case PurchasesPending():
+        _showPurchasePendingDialog(context);
+        break;
+      case PurchasesSuccess():
+        _closePendingDialogAndBottomSheet(context);
+        _showOkDialog(
+            context, 'Purchase successful. Welcome to ReceiptCamp Pro!');
+        break;
+      case PurchasesFailed():
+        Navigator.pop(context); // hiding pending dialog
+        _showOkDialog(
+            context, 'Uh oh, purchase failed. Please try again later.');
+        break;
+      case PurchasesRestoreSuccess():
+        _closePendingDialogAndBottomSheet(context);
+        _showOkDialog(
+            context, 'Purchases successfully restored. Welcome back.');
+        break;
+      case PurchasesRestoreFailed():
+        _closePendingDialogAndBottomSheet(context);
+        _showOkDialog(
+            context, 'Purchase restore failed. Please try again later');
+        break;
+      case UserIsAlreadyPro():
+        _showOkDialog(context, 'User is already pro');
+        break;
+      default:
+        _closePendingDialogAndBottomSheet(context);
+        _showOkDialog(context, 'Uh oh, unexpected error occured');
+    }
   }
 
   @override
@@ -95,58 +94,129 @@ class PaywallView extends StatelessWidget {
         },
         builder: (context, state) {
           return GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              color: Colors.transparent,
-              child: DraggableScrollableSheet(
-                initialChildSize: 0.9,
-                minChildSize: 0.5,
-                maxChildSize: 1.0,
-                builder: (BuildContext context, ScrollController scrollController) {
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: const BoxDecoration(
-                      color:Color(primaryDeepBlue),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
+            onTap: () => Navigator.of(context).pop(),
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.6,
+              minChildSize: 0.5,
+              maxChildSize: 1.0,
+              builder: (BuildContext context, ScrollController scrollController) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(primaryDeepBlue),
+                        Color(primaryDarkBlue)
+                      ], // Gradient colors
                     ),
-                    child: ListView(
-                      controller: scrollController,
-                      children: [
-                        const Text(
-                          'Upgrade to Pro',
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white), textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 32),
-                        const Column(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: ListView(
+                    controller: scrollController,
+                    children: [
+                      const Text(
+                        'Upgrade to Pro',
+                        style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Column(
                           children: [
-                            Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text('Unlock premium features', style: TextStyle(fontSize: 24,color: Colors.white, fontWeight: FontWeight.bold)),
+                            const Text(
+                              'Unlock these premium features:',
+                              style: TextStyle(fontSize: 20, color: Colors.white),
+                              textAlign: TextAlign.center,
                             ),
-                            SizedBox(height: 30,)
+                            const SizedBox(height: 24),
+                            ...[
+                              'Export expenses with excel spreadsheets',
+                              'Share folders as PDFs',
+                              'Backup all your expenses'
+                            ].map((feature) => Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.check,
+                                          color: Color(primaryLightBlue)),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        feature,
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 16),
+                                      )
+                                    ],
+                                  ),
+                                )),
+                            const SizedBox(height: 24),
+                            const Text(
+                              'Only £4.99/month',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(primaryLightBlue),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            OutlinedButton(
+                              onPressed: () {
+                                context.read<PurchasesCubit>().makeProPurchase();
+                              },
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                    color: Colors.white, width: 2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 28, horizontal: 80),
+                              ),
+                              child: const Text('Upgrade now',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 20)),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Billed monthly. Cancel anytime.',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white70,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Transform.translate(
+                              offset: const Offset(0, 24.0),
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: TextButton(
+                                  onPressed: () {
+                                    context
+                                        .read<PurchasesCubit>()
+                                        .restorePurchases();
+                                  },
+                                  child: const Text('Restore Purchases',
+                                      style: TextStyle(color: Colors.white)),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                          ElevatedButton(
-                            onPressed: () {
-                              context.read<PurchasesCubit>().makeProPurchase();
-                            },
-                            child: const Text('Upgrade to Pro', style: TextStyle(color: Colors.white),),
-                          ),
-                        const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              context.read<PurchasesCubit>().restorePurchases();
-                            },
-                            child: const Text('Restore Purchases'),
-                          ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           );
         },
