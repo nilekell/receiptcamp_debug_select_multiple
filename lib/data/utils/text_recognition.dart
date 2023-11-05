@@ -144,34 +144,26 @@ class TextRecognitionService {
     final String currencySign = await getCurrencySymbol(textToAnalyse);
     RegExp discardRegExp = await getDiscardRegExp(textToAnalyse);
 
-    RegExp priceRegExp = RegExp(
-      r'((\$|€|¥|£|₹)\s?(\d+\.\d{2})?)|(\d+\.\d{2})',
-      caseSensitive: false,
-    );
-
-    List<String> potentialPrices = [];
-
+    // Get the lines of text from the recognized text
+    List<String> lines = [];
     for (TextBlock block in recognizedText.blocks) {
       for (TextLine line in block.lines) {
-        if (discardRegExp.hasMatch(line.text)) continue;
-        for (TextElement element in line.elements) {
-          String scannedText = element.text;
-          if (priceRegExp.hasMatch(scannedText) == false) continue;
-          if (potentialPrices.contains(scannedText)) continue;
-
-          potentialPrices.add(scannedText);
+        if (discardRegExp.hasMatch(line.text)) {
+          print('discarded: ${line.text}');
+        } else {
+          lines.add(line.text);
         }
       }
     }
 
-    Set<String> currencySymbols = {'\$', '€', '¥', '£', '₹'};
-    double finalValue = 0.00;
-    String currencySign = '£'; // Default currency symbol
+    // Variables for financial info extraction
+    num scanTotal = 0;
+    num finalTotal = 0;
 
-    for (final potentialPrice in potentialPrices) {
-      String cleanedPrice = potentialPrice.trim();
+    // Regex patterns
+    RegExp moneyExp = RegExp(r"(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)");
+    RegExp totalExp = RegExp(r"\b(total|total|gesamt|total|totale|total|totaal)\b", caseSensitive: false);
 
-      bool foundCurrencySymbol = false;
 
       for (String symbol in currencySymbols) {
         if (cleanedPrice.contains(symbol)) {
