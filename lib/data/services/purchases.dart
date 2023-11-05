@@ -113,7 +113,7 @@ class PurchasesService {
       CustomerInfo purchaserInfo =
           await Purchases.purchasePackage(_subscriptionPackage!);
       EntitlementInfo? entitlement = purchaserInfo
-          .entitlements.active[_receiptCampProEntitlementId];
+          .entitlements.all[_receiptCampProEntitlementId];
       if (entitlement!.isActive) {
         _userIsPro = true;
         return true;
@@ -129,10 +129,12 @@ class PurchasesService {
 
   Future<void> restorePurchases() async {
     try {
-      CustomerInfo restoredInfo = await Purchases.restorePurchases();
-      print(restoredInfo.activeSubscriptions);
+      CustomerInfo restoredCustomerInfo = await Purchases.restorePurchases();
+      _customerInfo = restoredCustomerInfo;
+      print('restored activeSubscriptions: ${restoredCustomerInfo.activeSubscriptions}');
+      print('restored entitlements: ${restoredCustomerInfo.entitlements}');
       // checking restored customerInfo to see if entitlement is now active
-      if (restoredInfo.entitlements.active[_receiptCampProEntitlementId]!.isActive) {
+      if (restoredCustomerInfo.entitlements.all[_receiptCampProEntitlementId]!.isActive || restoredCustomerInfo.activeSubscriptions.isNotEmpty) {
         _userIsPro = true;
       } else {
         _userIsPro = false;
