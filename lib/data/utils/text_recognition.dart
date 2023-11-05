@@ -196,31 +196,23 @@ class TextRecognitionService {
         break;
       case 'fr': // French
         discardRegExpPattern =
-            r'sous-total|économies|économie|promotions|promotion|service|opt serv|points|point|bon|taxe|rabais|tva|pourboire|frais de service|coupon|adhésion|dépôt|frais|livraison|expédition|promo|remboursement|ajustement|carte cadeau|supplément|extra|mise à niveau|supplément|emballage|manutention|frais de commodité|fidélité|récompenses|kilométrage|gagner|gagne|chance';
+            r'sous-total|économies|économie|promotions|promotion|service|opt serv|points|point|bon|taxe|rabais|tva|pourboire|frais de service|coupon|adhésion|dépôt|frais|livraison|expédition|promo|remboursement|ajustement|carte cadeau|supplément|extra|mise à niveau|supplément|emballage|manutention|frais de commodité|fidélité|récompenses|kilométrage|gagner|gagne|chance|société|limitée|ltd|groupe|sas|inc|société anonyme|corp|siège social|domicilié|rue|st|avenue|ave|boulevard|blvd|route|rd|voie|ln|numéro de société|rcs|capital social|imo|commerce';
         break;
       case 'de': // German
         discardRegExpPattern =
-            r'Teilsumme|Ersparnisse|Ersparnis|Aktionen|Aktion|Bedienung|Opt Dienst|Punkte|Punkt|Gutschein|Steuer|Rabatt|MwSt|Trinkgeld|Servicegebühr|Gutschein|Mitgliedschaft|Anzahlung|Gebühr|Lieferung|Versand|Promo|Rückerstattung|Anpassung|Geschenkkarte|Zusatz|Extras|Upgrade|Aufschlag|Verpackung|Handhabung|Komfortgebühr|Treue|Prämien|Kilometer|gewinnen|verdienen|Chance';
+            r'Teilsumme|Ersparnisse|Ersparnis|Aktionen|Aktion|Bedienung|Opt Dienst|Punkte|Punkt|Gutschein|Steuer|Rabatt|MwSt|Trinkgeld|Servicegebühr|Gutschein|Mitgliedschaft|Anzahlung|Gebühr|Lieferung|Versand|Promo|Rückerstattung|Anpassung|Geschenkkarte|Zusatz|Extras|Upgrade|Aufschlag|Verpackung|Handhabung|Komfortgebühr|Treue|Prämien|Kilometer|gewinnen|verdienen|Chance|Unternehmen|begrenzt|Ltd|Gruppe|SAS|Inc|Gesellschaft mit beschränkter Haftung|corp|eingetragener Firmensitz|domiciled|Straße|st|Avenue|ave|Boulevard|blvd|Weg|rd|Gasse|ln|Firmennummer|rcs|eingetragenes Kapital|imo|Handelsregister';
         break;
       case 'es': // Spanish
         discardRegExpPattern =
-            r'subtotal|ahorros|ahorro|promociones|promoción|servicio|serv opc|puntos|punto|vale|impuesto|descuento|iva|propina|cargo de servicio|cupón|membresía|depósito|tarifa|entrega|envío|promo|reembolso|ajuste|tarjeta regalo|complemento|extras|mejora|recargo|embalaje|manipulación|cargo por comodidad|lealtad|recompensas|kilometraje|ganar|ganancia|oportunidad';
+            r'subtotal|ahorros|ahorro|promociones|promoción|servicio|serv opc|puntos|punto|vale|impuesto|descuento|iva|propina|cargo de servicio|cupón|membresía|depósito|tarifa|entrega|envío|promo|reembolso|ajuste|tarjeta regalo|complemento|extras|mejora|recargo|embalaje|manipulación|cargo por comodidad|lealtad|recompensas|kilometraje|ganar|ganancia|oportunidad|compañía|limitada|ltd|grupo|sas|inc|corporación|corp|oficina registrada|domiciliado|calle|st|avenida|ave|bulevar|blvd|camino|rd|carril|ln|número de compañía|rcs|capital registrado|imo|comercio';
         break;
       case 'pt': // Portuguese
         discardRegExpPattern =
-            r'subtotal|economias|economia|promoções|promoção|serviço|serv opc|pontos|ponto|vale|imposto|desconto|iva|gorjeta|taxa de serviço|cupom|associação|depósito|tarifa|entrega|remessa|promo|reembolso|ajuste|cartão presente|adicional|extras|melhoria|sobretaxa|embalagem|manuseio|taxa de conveniência|lealdade|recompensas|quilometragem|ganhar|ganho|chance';
+            r'subtotal|economias|economia|promoções|promoção|serviço|serv opt|pontos|ponto|voucher|imposto|desconto|iva|gorjeta|taxa de serviço|cupom|membro|depósito|taxa|entrega|expedição|promo|reembolso|ajuste|cartão presente|adicional|extras|atualização|sobretaxa|embalagem|manuseio|taxa de conveniência|lealdade|recompensas|milhagem|ganhar|ganho|chance|companhia|limitada|ltd|grupo|sas|inc|corporação|corp|escritório registrado|domiciliado|rua|st|avenida|ave|boulevard|blvd|estrada|rd|lane|ln|número da companhia|rcs|capital registrado|imo|comércio';
         break;
       case 'it': // Italian
         discardRegExpPattern =
-            r'subtotale|risparmi|risparmio|promozioni|promozione|servizio|serv opt|punti|punto|buono|tassa|sconto|IVA|mancia|spesa di servizio|coupon|adesione|deposito|tariffa|consegna|spedizione|promo|rimborso|aggiustamento|buono regalo|extra|extras|aggiornamento|sovrattassa|imballaggio|maneggiamento|tassa di comodità|lealtà|ricompense|chilometraggio|vincere|guadagnare|opportunità';
-        break;
-      case 'ro': // Romanian
-        discardRegExpPattern =
-            r'subtotal|economii|economie|promoții|promoție|serviciu|serv opț|puncte|punct|tichet|taxă|reducere|TVA|bacșiș|taxă de serviciu|cupon|membru|depozit|tarif|livrare|transport|promo|rambursare|ajustare|card cadou|suplimentar|extra|actualizare|suprataxă|ambalaj|manipulare|taxa de comoditate|loialitate|recompense|kilometraj|câștiga|câștig|șansă';
-        break;
-      case 'nl': // Dutch
-        discardRegExpPattern =
-            r"subtotaal|besparingen|besparing|promoties|promotie|service|opt serv|punten|punt|voucher|belasting|korting|btw|fooien|servicekosten|coupon|lidmaatschap|aanbetaling|vergoeding|bezorging|verzending|promo|terugbetaling|aanpassing|cadeaubon|toevoeging|extra's|upgrade|toeslag|verpakking|afhandeling|gemaksvergoeding|loyaliteit|beloningen|kilometerstand|winnen|verdienen|kans";
+            r'subtotale|risparmi|risparmio|promozioni|promozione|servizio|opt serv|punti|punto|voucher|tassa|sconto|iva|mancia|carico di servizio|coupon|membri|deposito|tariffa|consegna|spedizione|promo|rimborso|aggiustamento|carta regalo|addon|extra|upgrade|sovrapprezzo|imballaggio|gestione|tassa di comodità|lealtà|premi|chilometraggio|vincere|guadagnare|opportunità|azienda|limitata|ltd|gruppo|sas|inc|società|corp|ufficio registrato|domiciliato|strada|st|viale|ave|boulevard|blvd|via|rd|lane|ln|numero azienda|rcs|capitale registrato|imo|commercio';
         break;
       default: // Default to English
         break;
