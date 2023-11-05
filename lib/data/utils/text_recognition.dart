@@ -189,7 +189,7 @@ class TextRecognitionService {
 
   // getting words to discard in receipt when scanning for price
   // only for latin languages
-  Future<RegExp> getDiscardRegExp(String textToAnalyze) async {
+  static Future<RegExp> getDiscardRegExp(String textToAnalyze) async {
     final languageIdentifier = LanguageIdentifier(confidenceThreshold: 0.5);
     final String detectedLanguage =
         await languageIdentifier.identifyLanguage(textToAnalyze);
