@@ -145,18 +145,36 @@ class TextRecognitionService {
     RegExp discardRegExp = await getDiscardRegExp(textToAnalyse);
     RegExp moneyExp = RegExp(r"(\d{1,3}(?:,\d{3})*\.\d{2})");
     RegExp urlRegExp = RegExp('^(?!mailto:)(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?\$');
+    RegExp discardSentencePattern = RegExp(r'(?:\b[A-Za-z]+\b[\s\r\n]*){4,}', caseSensitive: false);
+    RegExp emailPattern = RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', caseSensitive: false);
+    RegExp phoneNumberPattern = RegExp(r"(?:\+\d{1,3}[\s-]?)?(?:\(\d{1,3}\)[\s-]?)?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,4}(?!\.\d)");
+    RegExp datePattern = RegExp(
+      r"(\d{2}|\d{4})[-\/\s:](0[1-9]|1[0-2])[-\/\s:](0[1-9]|[12][0-9]|3[01])|" // YYYY-MM-DD or variations
+      r"(0[1-9]|1[0-2])[-\/\s:](0[1-9]|[12][0-9]|3[01])[-\/\s:](\d{2}|\d{4})|" // MM-DD-YYYY or variations
+      r"(0[1-9]|[12][0-9]|3[01])[-\/\s:](0[1-9]|1[0-2])[-\/\s:](\d{2}|\d{4})", // DD-MM-YYYY or variations
+      caseSensitive: false,
+    );
+    RegExp timePattern = RegExp(r"(2[0-3]|[01]?[0-9]):([0-5]?[0-9]):([0-5]?[0-9])", caseSensitive: false);
+
+
 
     // Get the lines of text from the recognized text
     List<String> lines = [];
     for (TextBlock block in recognizedText.blocks) {
       for (TextLine line in block.lines) {
-        if (discardRegExp.hasMatch(line.text)) continue;
-        if (urlRegExp.hasMatch(line.text)) continue;
+        if (discardSentencePattern.hasMatch(line.text) ||
+            discardRegExp.hasMatch(line.text) ||
+            urlRegExp.hasMatch(line.text) ||
+            emailPattern.hasMatch(line.text) ||
+            phoneNumberPattern.hasMatch(line.text) ||
+            datePattern.hasMatch(line.text) ||
+            timePattern.hasMatch(line.text)) {
+          continue;
+        }
+
         lines.add(line.text);
       }
     }
-
-    print(lines);
 
     // Variables for financial info extraction
     num scanTotal = 0;
