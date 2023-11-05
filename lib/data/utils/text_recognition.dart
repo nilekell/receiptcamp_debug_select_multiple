@@ -144,18 +144,19 @@ class TextRecognitionService {
     final String currencySign = await getCurrencySymbol(textToAnalyse);
     RegExp discardRegExp = await getDiscardRegExp(textToAnalyse);
     RegExp moneyExp = RegExp(r"(\d{1,3}(?:,\d{3})*\.\d{2})");
-    RegExp totalExp = RegExp(r"\b(total|gesamt|totale|totaal)\b", caseSensitive: false);
+    RegExp urlRegExp = RegExp('^(?!mailto:)(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?\$');
 
     // Get the lines of text from the recognized text
     List<String> lines = [];
     for (TextBlock block in recognizedText.blocks) {
       for (TextLine line in block.lines) {
         if (discardRegExp.hasMatch(line.text)) continue;
+        if (urlRegExp.hasMatch(line.text)) continue;
         lines.add(line.text);
-        print(line.text);
-        if (totalExp.hasMatch(line.text)) print('total regexp match: ${line.text}');
       }
     }
+
+    print(lines);
 
     // Variables for financial info extraction
     num scanTotal = 0;
