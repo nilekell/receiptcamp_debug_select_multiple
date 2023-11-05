@@ -30,4 +30,4 @@ final class PurchasesRestoreFailed extends PurchasesState {}
 
 final class UserIsAlreadyPro extends PurchasesState {}
 
-
+final class UserCannotMakePayments extends PurchasesState {}

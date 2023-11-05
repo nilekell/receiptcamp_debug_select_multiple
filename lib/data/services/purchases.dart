@@ -94,6 +94,20 @@ class PurchasesService {
     }
   }
 
+  // works on android only
+  Future<bool> canMakePayments() async {
+    try {
+      if ((await Purchases.canMakePayments())) {
+        return true;
+      } else {
+        return false;
+      }
+    } on Exception catch (e) {
+      print(e.toString());
+      return false;
+    }
+  }
+
   Future<bool> makeProSubscriptionPurchase() async {
     try {
       CustomerInfo purchaserInfo =

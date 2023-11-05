@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:receiptcamp/data/services/purchases.dart';
@@ -21,6 +22,12 @@ class PurchasesCubit extends Cubit<PurchasesState> {
   makeProPurchase() async {
     emit(PurchasesPending());
     try {
+      // works on android only
+      if (Platform.isAndroid && !(await _purchasesService.canMakePayments())) {
+        emit(UserCannotMakePayments());
+        return;
+      }
+
       if (_purchasesService.userIsPro) {
         emit(UserIsAlreadyPro());
         return;

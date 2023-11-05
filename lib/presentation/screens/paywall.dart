@@ -73,11 +73,13 @@ class PaywallView extends StatelessWidget {
       case PurchasesRestoreFailed():
         _closePendingDialogAndBottomSheet(context);
         _showOkDialog(
-            context, 'Purchase restore failed. Please try again later');
+            context, 'Purchase restore failed. Please try again later.');
         break;
       case UserIsAlreadyPro():
-        _showOkDialog(context, 'User is already pro');
+        _showOkDialog(context, 'User is already pro.');
         break;
+      case UserCannotMakePayments():
+        _showOkDialog(context, 'Purchase failed. Please check your payment settings.');
       default:
         _closePendingDialogAndBottomSheet(context);
         _showOkDialog(context, 'Uh oh, unexpected error occured');
