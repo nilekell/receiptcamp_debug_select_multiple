@@ -1,4 +1,4 @@
-// ignore_for_file: unused_field
+// ignore_for_file: unused_field, unused_element
 
 import 'dart:io';
 import 'package:flutter/services.dart';
@@ -53,8 +53,8 @@ class PurchasesService {
       await _fetchAvailableOfferings();
       await checkCustomerPurchaseStatus();
 
-      _outputPurchaseServiceInfo();
-      _outputSubscriptionPackageDetails();
+      // _outputPurchaseServiceInfo();
+      // _outputSubscriptionPackageDetails();
       _outputCustomerInfo();
 
       print('_userIsPro = $_userIsPro');
