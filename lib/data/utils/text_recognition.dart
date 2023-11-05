@@ -144,7 +144,7 @@ class TextRecognitionService {
     final String currencySign = await getCurrencySymbol(textToAnalyse);
     RegExp discardRegExp = await getDiscardRegExp(textToAnalyse);
     RegExp moneyExp = RegExp(r"(\d{1,3}(?:,\d{3})*\.\d{2})");
-    RegExp totalExp = RegExp(r"\b(total|total|gesamt|total|totale|total|totaal)\b", caseSensitive: false);
+    RegExp totalExp = RegExp(r"\b(total|gesamt|totale|totaal)\b", caseSensitive: false);
 
     // Get the lines of text from the recognized text
     List<String> lines = [];
@@ -152,6 +152,7 @@ class TextRecognitionService {
       for (TextLine line in block.lines) {
         if (discardRegExp.hasMatch(line.text)) continue;
         lines.add(line.text);
+        print(line.text);
         if (totalExp.hasMatch(line.text)) print('total regexp match: ${line.text}');
       }
     }
@@ -187,12 +188,11 @@ class TextRecognitionService {
     final String detectedLanguage =
         await languageIdentifier.identifyLanguage(textToAnalyze);
 
-    String discardRegExpPattern;
+    String discardRegExpPattern =
+        r'subtotal|savings|saving|promotions|promotion|service|opt serv|points|point|voucher|tax|discount|vat|tip|service charge|coupon|membership|deposit|fee|delivery|shipping|promo|refund|adjustment|gift card|add-on|extras|upgrade|surcharge|packaging|handling|convenience fee|loyalty|rewards|mileage|win|earn|chance|company|limited|ltd|group|sas|inc|corporation|corp|registered office|domiciled|street|st|avenue|ave|boulevard|blvd|road|rd|lane|ln|company number|rcs|registered capital|imo|commercial trade';
 
     switch (detectedLanguage) {
       case 'en': // English
-        discardRegExpPattern =
-            r'subtotal|savings|saving|promotions|promotion|service|opt serv|points|point|voucher|tax|discount|vat|tip|service charge|coupon|membership|deposit|fee|delivery|shipping|promo|refund|adjustment|gift card|add-on|extras|upgrade|surcharge|packaging|handling|convenience fee|loyalty|rewards|mileage|win|earn|chance';
         break;
       case 'fr': // French
         discardRegExpPattern =
@@ -223,8 +223,6 @@ class TextRecognitionService {
             r"subtotaal|besparingen|besparing|promoties|promotie|service|opt serv|punten|punt|voucher|belasting|korting|btw|fooien|servicekosten|coupon|lidmaatschap|aanbetaling|vergoeding|bezorging|verzending|promo|terugbetaling|aanpassing|cadeaubon|toevoeging|extra's|upgrade|toeslag|verpakking|afhandeling|gemaksvergoeding|loyaliteit|beloningen|kilometerstand|winnen|verdienen|kans";
         break;
       default: // Default to English
-        discardRegExpPattern =
-            r'subtotal|savings|saving|promotions|promotion|service|opt serv|points|point|voucher|tax|discount|vat|tip|service charge|coupon|membership|deposit|fee|delivery|shipping|promo|refund|adjustment|gift card|add-on|extras|upgrade|surcharge|packaging|handling|convenience fee|loyalty|rewards|mileage|win|earn|chance';
         break;
     }
 
