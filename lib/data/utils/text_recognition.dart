@@ -141,55 +141,61 @@ class TextRecognitionService {
         await textRecognizer.processImage(inputImage);
 
     final textToAnalyse = recognizedText.text;
+    final String currencySign = await getCurrencySymbol(textToAnalyse);
     RegExp discardRegExp = await getDiscardRegExp(textToAnalyse);
-
-    RegExp priceRegExp = RegExp(
-      r'((\$|€|¥|£|₹)\s?(\d+\.\d{2})?)|(\d+\.\d{2})',
+    RegExp moneyExp = RegExp(r"(\d{1,3}(?:,\d{3})*\.\d{2})");
+    RegExp urlRegExp = RegExp('^(?!mailto:)(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?\$');
+    RegExp discardSentencePattern = RegExp(r'(?:\b[A-Za-z]+\b[\s\r\n]*){4,}', caseSensitive: false);
+    RegExp emailPattern = RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', caseSensitive: false);
+    RegExp phoneNumberPattern = RegExp(r"(?:\+\d{1,3}[\s-]?)?(?:\(\d{1,3}\)[\s-]?)?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,4}(?!\.\d)");
+    RegExp datePattern = RegExp(
+      r"(\d{2}|\d{4})[-\/\s:](0[1-9]|1[0-2])[-\/\s:](0[1-9]|[12][0-9]|3[01])|" // YYYY-MM-DD or variations
+      r"(0[1-9]|1[0-2])[-\/\s:](0[1-9]|[12][0-9]|3[01])[-\/\s:](\d{2}|\d{4})|" // MM-DD-YYYY or variations
+      r"(0[1-9]|[12][0-9]|3[01])[-\/\s:](0[1-9]|1[0-2])[-\/\s:](\d{2}|\d{4})", // DD-MM-YYYY or variations
       caseSensitive: false,
     );
+    RegExp timePattern = RegExp(r"(2[0-3]|[01]?[0-9]):([0-5]?[0-9]):([0-5]?[0-9])", caseSensitive: false);
 
-    List<String> potentialPrices = [];
 
+
+    // Get the lines of text from the recognized text
+    List<String> lines = [];
     for (TextBlock block in recognizedText.blocks) {
       for (TextLine line in block.lines) {
-        if (discardRegExp.hasMatch(line.text)) continue;
-        for (TextElement element in line.elements) {
-          String scannedText = element.text;
-          if (priceRegExp.hasMatch(scannedText) == false) continue;
-          if (potentialPrices.contains(scannedText)) continue;
-
-          potentialPrices.add(scannedText);
+        if (discardSentencePattern.hasMatch(line.text) ||
+            discardRegExp.hasMatch(line.text) ||
+            urlRegExp.hasMatch(line.text) ||
+            emailPattern.hasMatch(line.text) ||
+            phoneNumberPattern.hasMatch(line.text) ||
+            datePattern.hasMatch(line.text) ||
+            timePattern.hasMatch(line.text)) {
+          continue;
         }
+
+        lines.add(line.text);
       }
     }
 
-    Set<String> currencySymbols = {'\$', '€', '¥', '£', '₹'};
-    double finalValue = 0.00;
-    String currencySign = '£'; // Default currency symbol
+    // Variables for financial info extraction
+    num scanTotal = 0;
+    num finalTotal = 0;
 
-    for (final potentialPrice in potentialPrices) {
-      String cleanedPrice = potentialPrice.trim();
 
-      bool foundCurrencySymbol = false;
-
-      for (String symbol in currencySymbols) {
-        if (cleanedPrice.contains(symbol)) {
-          currencySign = symbol;
-          cleanedPrice = cleanedPrice.replaceAll(symbol, '');
-          foundCurrencySymbol = true;
-          break;
-        }
-      }
-
-      double? value = double.tryParse(cleanedPrice);
-      if (value == null || value < finalValue) continue;
-      finalValue = value;
-
-      if (!foundCurrencySymbol) {
-        currencySign = '£'; // Default currency symbol if none found
+    //1. GET TOTAL (largest number)
+    for (int i = 0; i < lines.length; i++) {
+      if (moneyExp.hasMatch(lines[i])) {
+        String matchedString = moneyExp.stringMatch(lines[i]).toString();
+        String sanitizedString = matchedString.replaceAll(',', '');
+        double lineCost = double.parse(sanitizedString);
+        scanTotal = lineCost;
       }
     }
 
+    // Determine finalTotal
+    finalTotal = scanTotal;
+
+    // Convert finalTotal to double and format the final price string
+    double finalValue = finalTotal.toDouble();
     String finalPrice = '$currencySign${finalValue.toStringAsFixed(2)}';
     return finalPrice;
   }
@@ -201,44 +207,33 @@ class TextRecognitionService {
     final String detectedLanguage =
         await languageIdentifier.identifyLanguage(textToAnalyze);
 
-    String discardRegExpPattern;
+    String discardRegExpPattern =
+        r'subtotal|savings|saving|promotions|promotion|service|opt serv|points|point|voucher|tax|discount|vat|tip|service charge|coupon|membership|deposit|fee|delivery|shipping|promo|refund|adjustment|gift card|add-on|extras|upgrade|surcharge|packaging|handling|convenience fee|loyalty|rewards|mileage|win|earn|chance|company|limited|ltd|group|sas|inc|corporation|corp|registered office|domiciled|street|st|avenue|ave|boulevard|blvd|road|rd|lane|ln|company number|rcs|registered capital|imo|commercial trade';
 
     switch (detectedLanguage) {
       case 'en': // English
-        discardRegExpPattern =
-            r'subtotal|savings|saving|promotions|promotion|service|opt serv|points|point|voucher|tax|discount|vat|tip|service charge|coupon|membership|deposit|fee|delivery|shipping|promo|refund|adjustment|gift card|add-on|extras|upgrade|surcharge|packaging|handling|convenience fee|loyalty|rewards|mileage|win|earn|chance';
         break;
       case 'fr': // French
         discardRegExpPattern =
-            r'sous-total|économies|économie|promotions|promotion|service|opt serv|points|point|bon|taxe|rabais|tva|pourboire|frais de service|coupon|adhésion|dépôt|frais|livraison|expédition|promo|remboursement|ajustement|carte cadeau|supplément|extra|mise à niveau|supplément|emballage|manutention|frais de commodité|fidélité|récompenses|kilométrage|gagner|gagne|chance';
+            r'sous-total|économies|économie|promotions|promotion|service|opt serv|points|point|bon|taxe|rabais|tva|pourboire|frais de service|coupon|adhésion|dépôt|frais|livraison|expédition|promo|remboursement|ajustement|carte cadeau|supplément|extra|mise à niveau|supplément|emballage|manutention|frais de commodité|fidélité|récompenses|kilométrage|gagner|gagne|chance|société|limitée|ltd|groupe|sas|inc|société anonyme|corp|siège social|domicilié|rue|st|avenue|ave|boulevard|blvd|route|rd|voie|ln|numéro de société|rcs|capital social|imo|commerce';
         break;
       case 'de': // German
         discardRegExpPattern =
-            r'Teilsumme|Ersparnisse|Ersparnis|Aktionen|Aktion|Bedienung|Opt Dienst|Punkte|Punkt|Gutschein|Steuer|Rabatt|MwSt|Trinkgeld|Servicegebühr|Gutschein|Mitgliedschaft|Anzahlung|Gebühr|Lieferung|Versand|Promo|Rückerstattung|Anpassung|Geschenkkarte|Zusatz|Extras|Upgrade|Aufschlag|Verpackung|Handhabung|Komfortgebühr|Treue|Prämien|Kilometer|gewinnen|verdienen|Chance';
+            r'Teilsumme|Ersparnisse|Ersparnis|Aktionen|Aktion|Bedienung|Opt Dienst|Punkte|Punkt|Gutschein|Steuer|Rabatt|MwSt|Trinkgeld|Servicegebühr|Gutschein|Mitgliedschaft|Anzahlung|Gebühr|Lieferung|Versand|Promo|Rückerstattung|Anpassung|Geschenkkarte|Zusatz|Extras|Upgrade|Aufschlag|Verpackung|Handhabung|Komfortgebühr|Treue|Prämien|Kilometer|gewinnen|verdienen|Chance|Unternehmen|begrenzt|Ltd|Gruppe|SAS|Inc|Gesellschaft mit beschränkter Haftung|corp|eingetragener Firmensitz|domiciled|Straße|st|Avenue|ave|Boulevard|blvd|Weg|rd|Gasse|ln|Firmennummer|rcs|eingetragenes Kapital|imo|Handelsregister';
         break;
       case 'es': // Spanish
         discardRegExpPattern =
-            r'subtotal|ahorros|ahorro|promociones|promoción|servicio|serv opc|puntos|punto|vale|impuesto|descuento|iva|propina|cargo de servicio|cupón|membresía|depósito|tarifa|entrega|envío|promo|reembolso|ajuste|tarjeta regalo|complemento|extras|mejora|recargo|embalaje|manipulación|cargo por comodidad|lealtad|recompensas|kilometraje|ganar|ganancia|oportunidad';
+            r'subtotal|ahorros|ahorro|promociones|promoción|servicio|serv opc|puntos|punto|vale|impuesto|descuento|iva|propina|cargo de servicio|cupón|membresía|depósito|tarifa|entrega|envío|promo|reembolso|ajuste|tarjeta regalo|complemento|extras|mejora|recargo|embalaje|manipulación|cargo por comodidad|lealtad|recompensas|kilometraje|ganar|ganancia|oportunidad|compañía|limitada|ltd|grupo|sas|inc|corporación|corp|oficina registrada|domiciliado|calle|st|avenida|ave|bulevar|blvd|camino|rd|carril|ln|número de compañía|rcs|capital registrado|imo|comercio';
         break;
       case 'pt': // Portuguese
         discardRegExpPattern =
-            r'subtotal|economias|economia|promoções|promoção|serviço|serv opc|pontos|ponto|vale|imposto|desconto|iva|gorjeta|taxa de serviço|cupom|associação|depósito|tarifa|entrega|remessa|promo|reembolso|ajuste|cartão presente|adicional|extras|melhoria|sobretaxa|embalagem|manuseio|taxa de conveniência|lealdade|recompensas|quilometragem|ganhar|ganho|chance';
+            r'subtotal|economias|economia|promoções|promoção|serviço|serv opt|pontos|ponto|voucher|imposto|desconto|iva|gorjeta|taxa de serviço|cupom|membro|depósito|taxa|entrega|expedição|promo|reembolso|ajuste|cartão presente|adicional|extras|atualização|sobretaxa|embalagem|manuseio|taxa de conveniência|lealdade|recompensas|milhagem|ganhar|ganho|chance|companhia|limitada|ltd|grupo|sas|inc|corporação|corp|escritório registrado|domiciliado|rua|st|avenida|ave|boulevard|blvd|estrada|rd|lane|ln|número da companhia|rcs|capital registrado|imo|comércio';
         break;
       case 'it': // Italian
         discardRegExpPattern =
-            r'subtotale|risparmi|risparmio|promozioni|promozione|servizio|serv opt|punti|punto|buono|tassa|sconto|IVA|mancia|spesa di servizio|coupon|adesione|deposito|tariffa|consegna|spedizione|promo|rimborso|aggiustamento|buono regalo|extra|extras|aggiornamento|sovrattassa|imballaggio|maneggiamento|tassa di comodità|lealtà|ricompense|chilometraggio|vincere|guadagnare|opportunità';
-        break;
-      case 'ro': // Romanian
-        discardRegExpPattern =
-            r'subtotal|economii|economie|promoții|promoție|serviciu|serv opț|puncte|punct|tichet|taxă|reducere|TVA|bacșiș|taxă de serviciu|cupon|membru|depozit|tarif|livrare|transport|promo|rambursare|ajustare|card cadou|suplimentar|extra|actualizare|suprataxă|ambalaj|manipulare|taxa de comoditate|loialitate|recompense|kilometraj|câștiga|câștig|șansă';
-        break;
-      case 'nl': // Dutch
-        discardRegExpPattern =
-            r"subtotaal|besparingen|besparing|promoties|promotie|service|opt serv|punten|punt|voucher|belasting|korting|btw|fooien|servicekosten|coupon|lidmaatschap|aanbetaling|vergoeding|bezorging|verzending|promo|terugbetaling|aanpassing|cadeaubon|toevoeging|extra's|upgrade|toeslag|verpakking|afhandeling|gemaksvergoeding|loyaliteit|beloningen|kilometerstand|winnen|verdienen|kans";
+            r'subtotale|risparmi|risparmio|promozioni|promozione|servizio|opt serv|punti|punto|voucher|tassa|sconto|iva|mancia|carico di servizio|coupon|membri|deposito|tariffa|consegna|spedizione|promo|rimborso|aggiustamento|carta regalo|addon|extra|upgrade|sovrapprezzo|imballaggio|gestione|tassa di comodità|lealtà|premi|chilometraggio|vincere|guadagnare|opportunità|azienda|limitata|ltd|gruppo|sas|inc|società|corp|ufficio registrato|domiciliato|strada|st|viale|ave|boulevard|blvd|via|rd|lane|ln|numero azienda|rcs|capitale registrato|imo|commercio';
         break;
       default: // Default to English
-        discardRegExpPattern =
-            r'subtotal|savings|saving|promotions|promotion|service|opt serv|points|point|voucher|tax|discount|vat|tip|service charge|coupon|membership|deposit|fee|delivery|shipping|promo|refund|adjustment|gift card|add-on|extras|upgrade|surcharge|packaging|handling|convenience fee|loyalty|rewards|mileage|win|earn|chance';
         break;
     }
 
@@ -250,5 +245,21 @@ class TextRecognitionService {
     languageIdentifier.close();
 
     return discardRegExp;
+  }
+
+  static Future<String> getCurrencySymbol(String textToAnalyse) async {
+    Set<String> currencySymbols = {'\$', '€', '¥', '£', '₹'};
+    String currencySign = '£'; // Default currency symbol
+    int maxCount = 0;
+
+    for (String symbol in currencySymbols) {
+      int currentCount = symbol.allMatches(textToAnalyse).length;
+      if (currentCount > maxCount) {
+        maxCount = currentCount;
+        currencySign = symbol;
+      }
+    }
+
+    return currencySign;
   }
 }
