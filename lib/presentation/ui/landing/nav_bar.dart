@@ -49,8 +49,8 @@ Widget bottomNavigationBar(int state, BuildContext context) {
     ],
     currentIndex: state,
     onTap: (value) {
-      print(value);
-      print(state);
+      // print(value);
+      // print(state);
       if (value == 1 && state == 1) {
         context.read<FileExplorerCubit>().fetchFolderInformation(rootFolderId);
       }
