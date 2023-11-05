@@ -143,16 +143,16 @@ class TextRecognitionService {
     final textToAnalyse = recognizedText.text;
     final String currencySign = await getCurrencySymbol(textToAnalyse);
     RegExp discardRegExp = await getDiscardRegExp(textToAnalyse);
+    RegExp moneyExp = RegExp(r"(\d{1,3}(?:,\d{3})*\.\d{2})");
+    RegExp totalExp = RegExp(r"\b(total|total|gesamt|total|totale|total|totaal)\b", caseSensitive: false);
 
     // Get the lines of text from the recognized text
     List<String> lines = [];
     for (TextBlock block in recognizedText.blocks) {
       for (TextLine line in block.lines) {
-        if (discardRegExp.hasMatch(line.text)) {
-          print('discarded: ${line.text}');
-        } else {
-          lines.add(line.text);
-        }
+        if (discardRegExp.hasMatch(line.text)) continue;
+        lines.add(line.text);
+        if (totalExp.hasMatch(line.text)) print('total regexp match: ${line.text}');
       }
     }
 
@@ -160,29 +160,22 @@ class TextRecognitionService {
     num scanTotal = 0;
     num finalTotal = 0;
 
-    // Regex patterns
-    RegExp moneyExp = RegExp(r"(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)");
-    RegExp totalExp = RegExp(r"\b(total|total|gesamt|total|totale|total|totaal)\b", caseSensitive: false);
 
-
-      for (String symbol in currencySymbols) {
-        if (cleanedPrice.contains(symbol)) {
-          currencySign = symbol;
-          cleanedPrice = cleanedPrice.replaceAll(symbol, '');
-          foundCurrencySymbol = true;
-          break;
-        }
-      }
-
-      double? value = double.tryParse(cleanedPrice);
-      if (value == null || value < finalValue) continue;
-      finalValue = value;
-
-      if (!foundCurrencySymbol) {
-        currencySign = '£'; // Default currency symbol if none found
+    //1. GET TOTAL (largest number)
+    for (int i = 0; i < lines.length; i++) {
+      if (moneyExp.hasMatch(lines[i])) {
+        String matchedString = moneyExp.stringMatch(lines[i]).toString();
+        String sanitizedString = matchedString.replaceAll(',', '');
+        double lineCost = double.parse(sanitizedString);
+        scanTotal = lineCost;
       }
     }
 
+    // Determine finalTotal
+    finalTotal = scanTotal;
+
+    // Convert finalTotal to double and format the final price string
+    double finalValue = finalTotal.toDouble();
     String finalPrice = '$currencySign${finalValue.toStringAsFixed(2)}';
     return finalPrice;
   }
