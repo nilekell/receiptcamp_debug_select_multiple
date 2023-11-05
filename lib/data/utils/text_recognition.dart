@@ -256,11 +256,13 @@ class TextRecognitionService {
   static Future<String> getCurrencySymbol(String textToAnalyse) async {
     Set<String> currencySymbols = {'\$', '€', '¥', '£', '₹'};
     String currencySign = '£'; // Default currency symbol
+    int maxCount = 0;
 
     for (String symbol in currencySymbols) {
-      if (textToAnalyse.contains(symbol)) {
+      int currentCount = symbol.allMatches(textToAnalyse).length;
+      if (currentCount > maxCount) {
+        maxCount = currentCount;
         currencySign = symbol;
-        break;
       }
     }
 
