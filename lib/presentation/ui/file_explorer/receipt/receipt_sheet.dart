@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
@@ -6,6 +8,7 @@ import 'package:receiptcamp/presentation/ui/file_explorer/receipt/delete_receipt
 import 'package:receiptcamp/presentation/ui/file_explorer/receipt/move_receipt_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/receipt/rename_receipt_dialog.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
+import 'package:flutter/cupertino.dart';
 
 void showReceiptOptions(
     BuildContext context, FolderViewCubit folderViewCubit, Receipt receipt) {
@@ -78,6 +81,67 @@ void showReceiptOptions(
               // opening rename receipt dialog
               showRenameReceiptDialog(
                   bottomSheetContext, folderViewCubit, receipt);
+            },
+          ),
+          ListTile(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: iconPadding),
+              child: Transform.translate(
+                offset: const Offset(5, 0),
+                child: Transform.scale(
+                  scale: 1.1,
+                  child: Image.asset(
+                    'assets/calendar.png', // Ensure there's a calendar icon at this path
+                    color: secondaryColour,
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
+            title: Transform.translate(
+              offset: const Offset(6, 0),
+              child: const Text(
+                'Change Date',
+                style: textStyle,
+              ),
+            ),
+            onTap: () async {
+              Navigator.of(bottomSheetContext).pop();
+              DateTime currentDateTime = DateTime.fromMillisecondsSinceEpoch(
+                  receipt.dateCreated * 1000);
+              DateTime? newDate;
+              if (Platform.isAndroid) {
+                newDate = await showDatePicker(
+                  context: context,
+                  initialDate: currentDateTime,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime.now(),
+                );
+              } else if (Platform.isIOS) {
+                await showCupertinoModalPopup(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Container(
+                        height: MediaQuery.of(context).size.height * 0.4,
+                        color: Colors.white,
+                        child: CupertinoDatePicker(
+                          minimumDate: DateTime(2000),
+                          maximumDate: DateTime.now(),
+                          mode: CupertinoDatePickerMode.date,
+                          initialDateTime: currentDateTime,
+                          onDateTimeChanged: (DateTime newDateTime) {
+                            newDate = newDateTime;
+                          },
+                        ),
+                      );
+                    });
+              }
+              if (newDate != null) {
+                // Convert the new DateTime back to Unix timestamp
+                int newTimestamp = newDate!.millisecondsSinceEpoch ~/ 1000;
+                // Update the receipt with the new date timestamp
+                folderViewCubit.updateReceiptDate(receipt, newTimestamp);
+              }
             },
           ),
           ListTile(
