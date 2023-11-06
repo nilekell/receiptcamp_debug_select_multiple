@@ -151,10 +151,19 @@ class TextRecognitionService {
     RegExp datePattern = RegExp(
       r"(\d{2}|\d{4})[-\/\s:](0[1-9]|1[0-2])[-\/\s:](0[1-9]|[12][0-9]|3[01])|" // YYYY-MM-DD or variations
       r"(0[1-9]|1[0-2])[-\/\s:](0[1-9]|[12][0-9]|3[01])[-\/\s:](\d{2}|\d{4})|" // MM-DD-YYYY or variations
-      r"(0[1-9]|[12][0-9]|3[01])[-\/\s:](0[1-9]|1[0-2])[-\/\s:](\d{2}|\d{4})", // DD-MM-YYYY or variations
-      caseSensitive: false,
+      r"(0[1-9]|[12][0-9]|3[01])[-\/\s:](0[1-9]|1[0-2])[-\/\s:](\d{2}|\d{4})|" // DD-MM-YYYY or variations
+      r"(0[1-9]|1[0-2])\.(0[1-9]|[12][0-9]|3[01])\.\d{2}|" // MM.DD.YY
+      r"(0?[1-9]|1[0-2])\.(0?[1-9]|[12][0-9]|3[01])\.\d{2}|" // M.D.YY
+      r"(0[1-9]|1[0-2])\.(0?[1-9]|[12][0-9]|3[01])\.\d{2}|" // MM.D.YY
+      r"(0?[1-9]|1[0-2])\.(0[1-9]|[12][0-9]|3[01])\.\d{2}|" // M.DD.YY
+      r"(0[1-9]|1[0-2])\.(0[1-9]|[12][0-9]|3[01])\.\d{4}|" // MM.DD.YYYY
+      r"(0?[1-9]|1[0-2])\.(0?[1-9]|[12][0-9]|3[01])\.\d{4}|" // M.D.YYYY
+      r"(0[1-9]|1[0-2])\.(0?[1-9]|[12][0-9]|3[01])\.\d{4}|" // MM.D.YYYY
+      r"(0?[1-9]|1[0-2])\.(0[1-9]|[12][0-9]|3[01])\.\d{4}", // M.DD.YYYY
+    caseSensitive: false,
     );
-    RegExp timePattern = RegExp(r"(2[0-3]|[01]?[0-9]):([0-5]?[0-9]):([0-5]?[0-9])", caseSensitive: false);
+    RegExp percentagePattern = RegExp(r"(?:\d*\.?\d{1,2}%|%\d*\.?\d{1,2})"); // Examples: "1.9%", ".99%", "100%", "%1.5", "%50"
+    RegExp timePattern = RegExp(r"(2[0-3]|[01]?[0-9]):([0-5]?[0-9]):([0-5]?[0-9])", caseSensitive: false); // Examples: "23:59:59", "3:5:01", "14:09:09", "00:00:00"
 
 
 
@@ -168,7 +177,8 @@ class TextRecognitionService {
             emailPattern.hasMatch(line.text) ||
             phoneNumberPattern.hasMatch(line.text) ||
             datePattern.hasMatch(line.text) ||
-            timePattern.hasMatch(line.text)) {
+            timePattern.hasMatch(line.text) || 
+            percentagePattern.hasMatch(line.text)) {
           continue;
         }
 
@@ -187,7 +197,12 @@ class TextRecognitionService {
         String matchedString = moneyExp.stringMatch(lines[i]).toString();
         String sanitizedString = matchedString.replaceAll(',', '');
         double lineCost = double.parse(sanitizedString);
-        scanTotal = lineCost;
+        print(matchedString);
+        print(sanitizedString);
+        print(lineCost);
+        if (lineCost > scanTotal) {
+          scanTotal = lineCost;
+        }
       }
     }
 
