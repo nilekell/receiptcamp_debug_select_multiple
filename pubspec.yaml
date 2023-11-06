@@ -119,6 +119,7 @@ flutter:
     - assets/excel.png
     - assets/scan.png
     - assets/camera.png
+    - assets/calendar.png
     
     - assets/circle_gradient.png
     - assets/bottom_gradient.png
