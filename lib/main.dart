@@ -3,6 +3,7 @@ import 'package:advanced_in_app_review/advanced_in_app_review.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/services/directory_path_provider.dart';
 import 'package:receiptcamp/data/services/preferences.dart';
@@ -19,13 +20,15 @@ import 'package:receiptcamp/logic/cubits/sharing_intent/sharing_intent_cubit.dar
 import 'package:receiptcamp/presentation/screens/landing_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'presentation/ui/ui_constants.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 // import 'package:flutter/scheduler.dart' show timeDilation;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  appVersion = appVersion + packageInfo.version;
   try {
     // Initializing DirectoryPathProvider.instance in `main()` ensures that the documents directory path is
     // fetched as soon as the application starts, making the path
