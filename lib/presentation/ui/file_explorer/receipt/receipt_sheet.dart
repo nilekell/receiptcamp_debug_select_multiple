@@ -25,7 +25,7 @@ void showReceiptOptions(
     ),
     context: context,
     builder: (bottomSheetContext) => DraggableScrollableSheet(
-      initialChildSize: 0.5, // initial bottom sheet height
+      initialChildSize: 0.55, // initial bottom sheet height
       minChildSize: 0.25, // minimum possible bottom sheet height
       maxChildSize:
           0.8, // defines how high you can drag the the bottom sheet in relation to the screen height
@@ -87,7 +87,7 @@ void showReceiptOptions(
             leading: Padding(
               padding: const EdgeInsets.only(left: iconPadding),
               child: Transform.translate(
-                offset: const Offset(5, 0),
+                offset: const Offset(4, 0),
                 child: Transform.scale(
                   scale: 1.1,
                   child: Image.asset(
@@ -109,13 +109,34 @@ void showReceiptOptions(
               Navigator.of(bottomSheetContext).pop();
               DateTime currentDateTime = DateTime.fromMillisecondsSinceEpoch(
                   receipt.dateCreated * 1000);
+              DateTime minDate = DateTime(2000);
+              DateTime maxDate = DateTime.now();
               DateTime? newDate;
               if (Platform.isAndroid) {
                 newDate = await showDatePicker(
                   context: context,
                   initialDate: currentDateTime,
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime.now(),
+                  firstDate: minDate,
+                  lastDate: maxDate,
+                  builder: (context, child) {
+                    return Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: const ColorScheme.light(
+                          primary:
+                              Color(primaryDarkBlue), // header background color
+                          onPrimary: Colors.white, // header text color
+                          onSurface: Colors.black, // body text color
+                        ),
+                        textButtonTheme: TextButtonThemeData(
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(
+                                primaryDarkBlue), // button text color
+                          ),
+                        ),
+                      ),
+                      child: child!,
+                    );
+                  },
                 );
               } else if (Platform.isIOS) {
                 await showCupertinoModalPopup(
@@ -125,8 +146,8 @@ void showReceiptOptions(
                         height: MediaQuery.of(context).size.height * 0.4,
                         color: Colors.white,
                         child: CupertinoDatePicker(
-                          minimumDate: DateTime(2000),
-                          maximumDate: DateTime.now(),
+                          minimumDate: minDate,
+                          maximumDate: maxDate,
                           mode: CupertinoDatePickerMode.date,
                           initialDateTime: currentDateTime,
                           onDateTimeChanged: (DateTime newDateTime) {
