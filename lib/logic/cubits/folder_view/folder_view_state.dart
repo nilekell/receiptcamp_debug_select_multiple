@@ -74,6 +74,20 @@ final class FolderViewMoveFailure extends FolderViewActionState {
   List<Object> get props => [oldName, newName];
 }
 
+final class FolderViewUpdateDateSuccess extends FolderViewActionState {
+  const FolderViewUpdateDateSuccess({required super.folderId});
+
+  @override
+  List<Object> get props => [folderId];
+}
+
+final class FolderViewUpdateDateFailure extends FolderViewActionState {
+  const FolderViewUpdateDateFailure({required super.folderId});
+
+  @override
+  List<Object> get props => [folderId];
+}
+
 // Deleting states
 
 final class FolderViewDeleteSuccess extends FolderViewActionState {
