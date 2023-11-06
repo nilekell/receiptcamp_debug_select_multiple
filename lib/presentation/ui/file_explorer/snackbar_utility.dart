@@ -63,13 +63,19 @@ abstract class SnackBarUtility {
         message = state.numItemsDeleted > 1 ? 'Successfully deleted ${state.numItemsDeleted} items' :  'Successfully deleted ${state.numItemsDeleted} item';
         break;
       case FolderViewMultiDeleteFailure():
-        message = 'Uh oh, an unexpcted error occured while deleting those items';
+        message = 'Uh oh, an unexpected error occured while deleting those items';
         break;
       case FolderViewMultiMoveSuccess():
         message = state.numItemsMoved > 1 ? 'Successfully moved ${state.numItemsMoved} items' :  'Successfully moved ${state.numItemsMoved} item';
         break;
       case FolderViewMultiMoveFailure():
-        message = 'Uh oh, an unexpcted error occured while moving those items';
+        message = 'Uh oh, an unexpected error occured while moving those items';
+        break;
+      case FolderViewUpdateDateSuccess():
+        message = 'Updated date successfully';
+        break;
+      case FolderViewUpdateDateFailure():
+        message = 'Failed to update date';
         break;
       default:
         print('Unknown state in showSnackBar: ${state.runtimeType}');
