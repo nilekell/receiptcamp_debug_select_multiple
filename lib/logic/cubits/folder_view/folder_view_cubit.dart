@@ -618,4 +618,29 @@ class FolderViewCubit extends Cubit<FolderViewState> {
       fetchFilesInFolderSortedBy(folder.parentId, useCachedFiles: true);
     }
   }
+
+  updateReceiptDate(Receipt receipt, int newTimestamp) async {
+    try {
+      final updatedReceipt = Receipt(
+          id: receipt.id,
+          name: receipt.name,
+          fileName: receipt.fileName,
+          dateCreated: newTimestamp,
+          lastModified: newTimestamp,
+          storageSize: receipt.storageSize,
+          parentId: receipt.parentId);
+      await DatabaseRepository.instance.updateReceipt(updatedReceipt);
+
+      emit(FolderViewUpdateDateSuccess(folderId: receipt.parentId));
+      // notifying home bloc to reload when a receipt is renamed
+      homeBloc.add(HomeLoadReceiptsEvent());
+
+      fetchFilesInFolderSortedBy(receipt.parentId);
+    } on Exception catch (e) {
+      print(e.toString());
+      emit(FolderViewUpdateDateFailure(folderId: receipt.parentId));
+    }
+
+
+  }
 }
