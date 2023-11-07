@@ -6,6 +6,7 @@ import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/extensions/user_status_handler.dart';
 import 'package:receiptcamp/logic/cubits/settings/settings_cubit.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SlidingSettingsRoute extends PageRouteBuilder {
   SlidingSettingsRoute()
@@ -254,6 +255,58 @@ class _SettingsViewState extends State<SettingsView> {
                                 });
                             }
                           ),
+                        ),
+                        const Divider(
+                          color: Colors.white,
+                          thickness: 2,
+                          height: 1,
+                          indent: 25,
+                          endIndent: 25,
+                        ),
+                         Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ListTile(
+                              title: Text('View Privacy Policy',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  )),
+                              onTap: () async {
+                                Navigator.of(context).pop();
+                                final Uri url = Uri.parse(
+                                    'https://docs.google.com/document/d/e/2PACX-1vQyYNZXBXuqvICH9vWKWeIP0EAgYHLSRl4m5pku5p1ctkWUPdfq8WKnFsmK2X5emdAcpUv2pnpi3hQx/pub');
+                                if (!await launchUrl(url,
+                                    mode: LaunchMode.inAppWebView)) {
+                                  throw Exception('Could not launch $url');
+                                }
+                              }),
+                        ),
+                        const Divider(
+                          color: Colors.white,
+                          thickness: 2,
+                          height: 1,
+                          indent: 25,
+                          endIndent: 25,
+                        ),
+                         Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: ListTile(
+                              title: Text('View EULA',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  )),
+                              onTap: () async {
+                                Navigator.of(context).pop();
+                                final Uri url = Uri.parse(
+                                    'https://docs.google.com/document/d/e/2PACX-1vTIpT-bu1pdkEyWmbdYy1KOrmZkRbDJ1F7MKLnfBr5n9c2T5FF9xFsUOXR1zys56cMLf-VeBHkyKXnp/pub');
+                                if (!await launchUrl(url,
+                                    mode: LaunchMode.inAppWebView)) {
+                                  throw Exception('Could not launch $url');
+                                }
+                              }),
                         ),
                         const Divider(
                           color: Colors.white,
