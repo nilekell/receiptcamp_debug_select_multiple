@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_final_fields, unused_field
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receiptcamp/extensions/user_status_handler.dart';
 import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
 import 'package:receiptcamp/logic/cubits/sharing_intent/sharing_intent_cubit.dart';
 import 'package:receiptcamp/presentation/screens/file_explorer.dart';
@@ -51,9 +52,11 @@ class _LandingScreenState extends State<LandingScreen>
               Navigator.of(context).push(SlidingReceiveReceiptTransitionRoute(
                   receiptFiles: sharedFiles));
             case SharingIntentZipFileReceived():
-              final zipFile = state.zipFile;
+              context.handleUserStatus((BuildContext context) {
+                final zipFile = state.zipFile;
               Navigator.of(context).push(SlidingImportTransitionRoute(
                   zipFile: zipFile));
+              });
             default:
               return;
           }
