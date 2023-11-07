@@ -182,8 +182,11 @@ class _SettingsViewState extends State<SettingsView> {
                                       fontWeight: FontWeight.w500,
                                       color: Colors.white,)),
                             ),
-                            onTap: () =>
-                                context.read<SettingsCubit>().generateArchive(),
+                            onTap: () {
+                              context.handleUserStatus((context) {
+                                  context.read<SettingsCubit>().generateArchive();
+                                });
+                            }
                           ),
                         ),
                         const Divider(
