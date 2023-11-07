@@ -165,8 +165,8 @@ void showFolderOptions(
               ),
             ),
             onTap: () async {
-              await context.handleUserStatus((context) {
-                Navigator.of(bottomSheetContext).pop();
+              await context.handleUserStatus((BuildContext context) {
+                Navigator.of(context).pop();
               folderViewCubit.generateZipFile(folder, true);
               });
             },
@@ -193,8 +193,8 @@ void showFolderOptions(
               ),
             ),
             onTap: () async {
-              await context.handleUserStatus((context) {
-                Navigator.of(bottomSheetContext).pop();
+              await context.handleUserStatus((BuildContext context) {
+                Navigator.of(context).pop();
                 Navigator.of(context).push(
                     SlidingReceiptConfirmationTransitionRoute(folder: folder));
               });

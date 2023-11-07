@@ -183,7 +183,7 @@ class _SettingsViewState extends State<SettingsView> {
                                       color: Colors.white,)),
                             ),
                             onTap: () {
-                              context.handleUserStatus((context) {
+                              context.handleUserStatus((BuildContext context) {
                                   context.read<SettingsCubit>().generateArchive();
                                 });
                             }
@@ -206,7 +206,7 @@ class _SettingsViewState extends State<SettingsView> {
                                     color: Colors.white,
                                   )),
                               onTap: () {
-                                context.handleUserStatus((context) {
+                                context.handleUserStatus((BuildContext context) {
                                   showAdaptiveDialog(
                                       context: context,
                                       builder: (context) {
@@ -240,7 +240,7 @@ class _SettingsViewState extends State<SettingsView> {
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white,)),
                             onTap: () {
-                              context.handleUserStatus((context) {
+                              context.handleUserStatus((BuildContext context) {
                                   showAdaptiveDialog(
                                       context: context,
                                       builder: (context) {
