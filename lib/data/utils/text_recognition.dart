@@ -197,9 +197,9 @@ class TextRecognitionService {
         String matchedString = moneyExp.stringMatch(lines[i]).toString();
         String sanitizedString = matchedString.replaceAll(',', '');
         double lineCost = double.parse(sanitizedString);
-        print(matchedString);
-        print(sanitizedString);
-        print(lineCost);
+        // print(matchedString);
+        // print(sanitizedString);
+        // print(lineCost);
         if (lineCost > scanTotal) {
           scanTotal = lineCost;
         }
