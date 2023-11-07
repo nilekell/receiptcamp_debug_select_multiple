@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
+import 'package:receiptcamp/presentation/screens/settings_screen.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 import 'package:in_app_review/in_app_review.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -14,6 +16,7 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      elevation: 0.0,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(topRight: Radius.circular(40.0)),
       ),
@@ -49,7 +52,7 @@ class AppDrawer extends StatelessWidget {
             leading: Icon(Icons.feedback_outlined,
             size: tileIconSize, color: tileIconColour),
             title: Text(
-              'Feedback',
+              'Leave a review',
               style: tileTextStyle,
             ),
             onTap: () async {
@@ -57,6 +60,32 @@ class AppDrawer extends StatelessWidget {
               if (await inAppReview.isAvailable()) {
                 inAppReview.openStoreListing(appStoreId: appStoreId);
               }
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.open_in_new, size: tileIconSize, color: tileIconColour),
+            title: Text(
+              'Feedback',
+              style: tileTextStyle,
+            ),
+            onTap: () async {
+              Navigator.of(context).pop();
+              final Uri url = Uri.parse('https://www.receiptcamp.com/#feedback');
+              if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
+                throw Exception('Could not launch $url');
+              }
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.settings, size: tileIconSize, color: tileIconColour),
+            title: Text(
+              'Settings',
+              style: tileTextStyle,
+            ),
+            onTap: () async {
+              Navigator.of(context).pop();
+              Navigator.of(context)
+            .push(SlidingSettingsRoute());
             },
           ),
           // commenting out for future usage, currently unnecessary

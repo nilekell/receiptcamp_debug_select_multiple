@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receiptcamp/data/data_constants.dart';
+import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
+import 'package:receiptcamp/logic/cubits/file_explorer/file_explorer_cubit.dart';
 import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 
@@ -45,6 +48,16 @@ Widget bottomNavigationBar(int state, BuildContext context) {
               ))),
     ],
     currentIndex: state,
-    onTap: (value) => context.read<LandingCubit>().updateIndex(value),
+    onTap: (value) {
+      // print(value);
+      // print(state);
+      if (value == 1 && state == 1) {
+        context.read<FileExplorerCubit>().fetchFolderInformation(rootFolderId);
+      }
+      if (value == 0 && state == 0) {
+        context.read<HomeBloc>().add(HomeLoadReceiptsEvent());
+      }
+      context.read<LandingCubit>().updateIndex(value);
+    },
   );
 }

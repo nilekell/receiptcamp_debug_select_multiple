@@ -1,5 +1,6 @@
 import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
+import 'package:receiptcamp/data/utils/text_recognition.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
@@ -86,6 +87,164 @@ class DatabaseService {
 
   // Add Folder operations
 
+  // Method to get all Folder objects in a specific folder sorted by a specific column
+  Future<List<Folder>> getFoldersInFolderSortedBy(
+      String folderId, String column, String order) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT * FROM folders WHERE parentId = ? ORDER BY $column $order',
+        [folderId]);
+    return List.generate(maps.length, (i) {
+      return Folder(
+        id: maps[i]['id'],
+        name: maps[i]['name'],
+        lastModified: maps[i]['lastModified'],
+        parentId: maps[i]['parentId'],
+      );
+    });
+  }
+
+  // Method to get all Receipt objects in a specific folder sorted by a specific column
+  Future<List<Receipt>> getReceiptsInFolderSortedBy(
+      String folderId, String column, String order) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT * FROM receipts WHERE parentId = ? ORDER BY $column $order',
+        [folderId]);
+    return List.generate(maps.length, (i) {
+      return Receipt(
+          id: maps[i]['id'],
+          name: maps[i]['name'],
+          fileName: maps[i]['fileName'],
+          dateCreated: maps[i]['dateCreated'],
+          lastModified: maps[i]['lastModified'],
+          storageSize: maps[i]['storageSize'],
+          parentId: maps[i]['parentId']);
+    });
+  }
+
+  Future<List<ReceiptWithSize>> getReceiptsBySize(
+      String folderId, String order) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT * FROM receipts WHERE parentId = ? ORDER BY storageSize $order',
+      [folderId],
+    );
+
+    // Create a list to hold the ReceiptWithSize objects
+    final List<ReceiptWithSize> receiptsWithSize = [];
+
+    // Iterate through the maps, creating a Receipt and then a ReceiptWithSize for each one
+    for (var map in maps) {
+      final Receipt receipt = Receipt.fromMap(map);
+      final ReceiptWithSize receiptWithSize = ReceiptWithSize(
+        withSize: true,
+        receipt: receipt,
+      );
+      receiptsWithSize.add(receiptWithSize);
+    }
+
+    return receiptsWithSize;
+  }
+
+  Future<List<ReceiptWithPrice>> getReceiptsByPrice(
+      String folderId, String order) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+      'SELECT * FROM receipts WHERE parentId = ?',
+      [folderId],
+    );
+
+    final List<ReceiptWithPrice> receiptsWithPrice = [];
+
+    for (var map in maps) {
+      final Receipt receipt = Receipt.fromMap(map);
+      final String priceString =
+          await TextRecognitionService.extractPriceFromImage(receipt.localPath);
+      final double priceDouble =
+          double.tryParse(priceString.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
+      final ReceiptWithPrice receiptWithPrice = ReceiptWithPrice(
+          priceString: priceString, priceDouble: priceDouble, receipt: receipt);
+      receiptsWithPrice.add(receiptWithPrice);
+    }
+
+    // Sort the list based on price
+    receiptsWithPrice.sort((a, b) {
+      if (order == 'ASC') {
+        return a.priceDouble.compareTo(b.priceDouble);
+      } else if (order == 'DESC') {
+        return b.priceDouble.compareTo(a.priceDouble);
+      } else {
+        return 0; // Do not sort if the order parameter is invalid
+      }
+    });
+
+    return receiptsWithPrice;
+  }
+
+  Future<List<FolderWithPrice>> getFoldersByPrice(
+      String folderId, String order) async {
+    final db = await database;
+    const String column = 'name';
+
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        'SELECT * FROM folders WHERE parentId = ? ORDER BY $column $order',
+        [folderId]);
+
+    return List.generate(maps.length, (i) {
+      return FolderWithPrice(folder: Folder.fromMap(maps[i]), price: '--');
+    });
+  }
+
+  Future<List<FolderWithSize>> getFoldersByTotalReceiptSize(
+      String parentId, String order) async {
+    final db = await database;
+    final List<FolderWithSize> foldersWithSizes = [];
+
+    Future<int> getFolderSize(String folderId) async {
+      int folderSize = 0;
+      final List<Map<String, dynamic>> receiptMaps = await db
+          .rawQuery('SELECT * FROM receipts WHERE parentId = ?', [folderId]);
+      for (var map in receiptMaps) {
+        folderSize += (map['storageSize'] as num).toInt();
+      }
+
+      final List<Map<String, dynamic>> subFolderMaps = await db
+          .rawQuery('SELECT * FROM folders WHERE parentId = ?', [folderId]);
+      for (var map in subFolderMaps) {
+        folderSize += await getFolderSize(map['id']);
+      }
+
+      return folderSize;
+    }
+
+    final List<Map<String, dynamic>> folderMaps = await db
+        .rawQuery('SELECT * FROM folders WHERE parentId = ?', [parentId]);
+    for (var map in folderMaps) {
+      final folder = Folder(
+        id: map['id'],
+        name: map['name'],
+        lastModified: map['lastModified'],
+        parentId: map['parentId'],
+      );
+      final storageSize = await getFolderSize(folder.id);
+      foldersWithSizes
+          .add(FolderWithSize(storageSize: storageSize, folder: folder));
+    }
+
+    foldersWithSizes.sort((a, b) {
+      if (order.toUpperCase() == 'ASC') {
+        return a.storageSize.compareTo(b.storageSize);
+      } else {
+        return b.storageSize.compareTo(a.storageSize);
+      }
+    });
+
+    return foldersWithSizes;
+  }
+
+
   // Method to get folder contents (this includes receipts and folders)
   Future<List<Object>> getFolderContents(String folderId) async {
     final db = await database;
@@ -127,6 +286,61 @@ class DatabaseService {
     return [...foldersList, ...receiptsList]; // combining two lists and return
   }
 
+  Future<List<Receipt>> getAllReceiptsInFolder(String folderId) async {
+    final List<Receipt> allReceipts = [];
+
+    Future<void> fetchReceipts(String currentFolderId) async {
+      final db = await database;
+
+      // Fetch all folders in the current folder
+      final List<Map<String, dynamic>> folders = await db.rawQuery('''
+      SELECT *
+      FROM folders
+      WHERE parentId = ?
+    ''', [currentFolderId]);
+
+      final foldersList = List<Folder>.generate(folders.length, (i) {
+        return Folder(
+          id: folders[i]['id'],
+          name: folders[i]['name'],
+          lastModified: folders[i]['lastModified'],
+          parentId: folders[i]['parentId'],
+        );
+      });
+
+      // Fetch all receipts in the current folder
+      final List<Map<String, dynamic>> receipts = await db.rawQuery('''
+      SELECT *
+      FROM receipts
+      WHERE parentId = ?
+    ''', [currentFolderId]);
+
+      final receiptsList = List<Receipt>.generate(receipts.length, (i) {
+        return Receipt(
+          id: receipts[i]['id'],
+          name: receipts[i]['name'],
+          fileName: receipts[i]['fileName'],
+          dateCreated: receipts[i]['dateCreated'],
+          lastModified: receipts[i]['lastModified'],
+          storageSize: receipts[i]['storageSize'],
+          parentId: receipts[i]['parentId'],
+        );
+      });
+
+      allReceipts.addAll(receiptsList); // Add the receipts to the global list
+
+      // If there are folders, then we do a recursive call
+      for (final folder in foldersList) {
+        await fetchReceipts(folder.id);
+      }
+    }
+
+    await fetchReceipts(folderId);
+
+    return allReceipts;
+  }
+
+
   // Method to rename folder
   Future<void> renameFolder(String folderId, String newName) async {
     final db = await database;
@@ -162,10 +376,7 @@ class DatabaseService {
   // Method to insert a Folder object into the database.
   Future<void> insertFolder(Folder folder) async {
     final db = await database;
-    if (folder.name == rootFolderName) {
-      throw Exception('folder cannot have same name as default folder');
-      // function ends after throw statement
-    }
+    // folders can have the same name
     await db.insert('folders', folder.toMap());
   }
 
@@ -211,6 +422,50 @@ class DatabaseService {
 
     // returning list of folders
     return List.generate(maps.length, (i) {
+      return Folder(
+        id: maps[i]['id'],
+        name: maps[i]['name'],
+        lastModified: maps[i]['lastModified'],
+        parentId: maps[i]['parentId'],
+      );
+    });
+  }
+
+   Future<List<Folder>> getMultiFoldersThatCanBeMovedTo(List<Object> filesToBeMoved) async {
+    final db = await database;
+    List<String> exceptionFolderIds = [];
+
+    print('filesToBeMoved.length: ${filesToBeMoved.length}');
+    for (final item in filesToBeMoved) {
+      if (item is Receipt) {
+        exceptionFolderIds.add(item.parentId);
+        print('exceptionFolderIds: added Receipt ${item.name}, ${item.id}');
+      } else if (item is Folder) {
+        exceptionFolderIds.add(item.parentId);
+        print('exceptionFolderIds: added Folder ${item.name}, ${item.id}');
+        final subFolderIds = await getRecursiveSubFolderIds(item.id);
+        exceptionFolderIds.add(item.id);
+        exceptionFolderIds.addAll(subFolderIds);
+      }
+    }
+
+    // removing duplicates
+    exceptionFolderIds = exceptionFolderIds.toSet().toList();
+    print('exceptionFolderIds: $exceptionFolderIds');
+
+    // Create a string of placeholders for sqlite query
+    String placeholders = exceptionFolderIds.map((_) => '?').join(',');
+
+    // querying for all folders except for those in [exceptionFolderIds]
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT *
+      FROM folders
+      WHERE id NOT IN ($placeholders)
+    ''', exceptionFolderIds);
+
+    // returning list of folders
+    return List.generate(maps.length, (i) {
+      print(maps[i]['name']);
       return Folder(
         id: maps[i]['id'],
         name: maps[i]['name'],
@@ -277,13 +532,7 @@ class DatabaseService {
       }
 
       for (var receipt in receipts) {
-        final receiptPath = Receipt.fromMap(receipt).localPath;
-        // deleting receipt image in local storage
-        await FileService.deleteFileFromPath(receiptPath);
-
-        // deleting receipt record in db
-        await db
-            .rawDelete('DELETE FROM receipts WHERE id = ?', [receipt['id']]);
+        deleteReceipt(Receipt.fromMap(receipt).id);
       }
     }
 
@@ -336,33 +585,37 @@ class DatabaseService {
     }
   }
 
-  /* Unused method, but kept for potential future use
-  note: this method has no unit test but would be required if used in future)
   Future<bool> folderIsEmpty(String folderId) async {
     final db = await database;
-    final countReceiptsResult = await db.rawQuery('''
-    SELECT COUNT (*)
-    FROM receipts
-    WHERE parentId = ?
-    ''', [folderId]);
 
-    final countFolderResult = await db.rawQuery('''
-    SELECT COUNT (*)
-    FROM folders
-    WHERE parentId = ?
-    ''', [folderId]);
+    int totalSubReceipts = 0;
 
-    // Using Sqflite.firstIntValue to extract the count of receipts and folders from the query results.
-    int numReceipts = Sqflite.firstIntValue(countReceiptsResult) ?? 0;
-    print('numReceipts: $numReceipts');
-    int numFolders = Sqflite.firstIntValue(countFolderResult) ?? 0;
-    print('numFolders: $numFolders');
+    // getting list of ids for all sub folders within selected folder
+    final List<String> subFolderIds = await getRecursiveSubFolderIds(folderId);
 
-    final int total = numReceipts + numFolders;
+    // getting number of receipts within selected folder (not-recursive)
+    getReceiptCountInFolder(String folderId) async {
+      final countReceiptsResult = await db.rawQuery('''
+     SELECT COUNT (*)
+     FROM receipts
+     WHERE parentId = ?
+     ''', [folderId]);
 
-    return total < 1;
+      //adding number of receipts found directly in a folder to [totalSubReceipts]
+      int numReceipts = Sqflite.firstIntValue(countReceiptsResult) ?? 0;
+      totalSubReceipts = totalSubReceipts + numReceipts;
+    }
+
+    // getting number of receipts in selected subfolder
+    await getReceiptCountInFolder(folderId);
+
+    for (final id in subFolderIds) {
+      // getting number of receipts in each subfolder
+      await getReceiptCountInFolder(id);
+      }
+
+    return totalSubReceipts < 1;
   }
-  */
 
   Future<void> deleteAllFoldersExceptRoot() async {
   final Database db = await database;
@@ -373,6 +626,8 @@ class DatabaseService {
   // delete all receipts and tags because they reference folders that no longer exist
   await db.delete('receipts');
   await db.delete('tags');
+
+  FileService.deleteAllReceiptImages();
 }
 
   // Add Receipt operations

@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:image/image.dart' as img;
@@ -12,6 +11,7 @@ import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as p hide equals;
 import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/services/database.dart';
+import 'package:receiptcamp/data/services/directory_path_provider.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/data/utils/receipt_helper.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
@@ -108,7 +108,7 @@ class MockFileServiceShareFolderAsZip extends Mock {
     }
 
     String tempZipFileFullPath =
-        await FileService.tempZipFilePathGenerator(folder);
+        await FileService.tempFilePathGenerator('${folder.name}.zip');
     final zipFile =
         await File(tempZipFileFullPath).writeAsBytes(encodedArchive);
 
@@ -137,7 +137,7 @@ class MockReceiptToPdf extends Mock {
             return pw.Image(pdfImage);
           })));
 
-      final tempDir = (await getTemporaryDirectory()).path;
+      final tempDir = DirectoryPathProvider.instance.tempDirPath;
       final pdfFile = File('$tempDir/${basename(imagePath).split('.').first}.pdf');
 
       return pdfFile.writeAsBytes(await pdf.save());
@@ -298,7 +298,7 @@ void main() {
       }
     });
 
-    test('tempZipFilePathGenerator returns a valid temporary zip file path',
+    test('tempFilePathGenerator returns a valid temporary zip file path',
         () async {
       final folder = Folder(
           id: 'testId',
@@ -307,7 +307,7 @@ void main() {
           parentId: rootFolderId);
 
       final tempZipFilePath =
-          await FileService.tempZipFilePathGenerator(folder);
+          await FileService.tempFilePathGenerator('${folder.name}.zip');
 
       expect(tempZipFilePath, isNotNull);
       expect(tempZipFilePath, isA<String>());

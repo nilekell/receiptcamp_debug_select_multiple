@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
@@ -90,7 +91,7 @@ class _MoveFolderDialogState extends State<MoveFolderDialog> {
             items: folders.map<DropdownMenuItem<Folder>>((Folder folder) {
               return DropdownMenuItem<Folder>(
                   value: folder,
-                  child: Text(folder.name,
+                  child: Text(folder.id == rootFolderId ? 'Expenses' : folder.name,
                       style: const TextStyle(color: Colors.white)));
             }).toList(), // converting the Iterable returned from .map() back to a list
             // onChanged is called when the user selects a new option from the dropdown menu

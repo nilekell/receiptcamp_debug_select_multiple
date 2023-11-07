@@ -29,8 +29,8 @@ void main() {
 
   group('TextRecognitionService', () {
    test('loadCommonReceiptWords completes without errors', () async {
-  await TextRecognitionService.loadCommonReceiptWords();
-  expect(TextRecognitionService.loadCommonReceiptWords(), completes);
+  await TextRecognitionService.loadCommonReceiptWords('en');
+  expect(TextRecognitionService.loadCommonReceiptWords('en'), completes);
 });
 
 test('extractKeywords extracts keywords from scanned text', () async {

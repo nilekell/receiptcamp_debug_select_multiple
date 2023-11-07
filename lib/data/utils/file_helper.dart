@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -5,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:archive/archive_io.dart';
 import 'package:pdf/pdf.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
+import 'package:receiptcamp/data/services/directory_path_provider.dart';
+import 'package:receiptcamp/data/utils/text_recognition.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
@@ -120,11 +121,8 @@ class FileService {
 
   static Future<String> getLocalImagePath(ImageFileType imageFileType) async {
     try {
-      Directory imageDirectory = await getApplicationDocumentsDirectory();
-      String imageDirectoryPath = imageDirectory.path;
       final fileName = generateFileName(imageFileType);
-      final localImagePath = '$imageDirectoryPath/$fileName';
-
+      final localImagePath = '${DirectoryPathProvider.instance.appDocDirPath}/$fileName';
       return localImagePath;
     } on Exception catch (e) {
       print('Error in getLocalImagePath: $e');
@@ -161,19 +159,6 @@ class FileService {
       return fileName;
     } on Exception catch (e) {
       print('Error in getFileNameFromFile: $e');
-      return '';
-    }
-  }
-
-  // convert bytes to string that represents file sizes
-  static Future<String> bytesToSizeString(int bytes) async {
-    try {
-      if (bytes <= 0) return "0 B";
-      const suffixes = ["B", "KB", "MB", "GB"];
-      var i = (log(bytes) / log(1024)).floor();
-      return '${(bytes / pow(1024, i)).toStringAsFixed(2)} ${suffixes[i]}';
-    } on Exception catch (e) {
-      print('Error in bytesToSizeString: $e');
       return '';
     }
   }
@@ -223,8 +208,8 @@ class FileService {
             return pw.Image(pdfImage);
           })));
 
-      final tempDir = (await getTemporaryDirectory()).path;
-      final pdfFile = File('$tempDir/${receipt.name}.pdf');
+      final String fixedReceiptName = Utility.concatenateWithUnderscore(receipt.name);    
+      final pdfFile = File('${DirectoryPathProvider.instance.tempDirPath}/$fixedReceiptName.pdf');
 
       return pdfFile.writeAsBytes(await pdf.save());
     } on Exception catch (e) {
@@ -247,109 +232,91 @@ class FileService {
     }
   }
 
-  // share folder outside of app
-  static Future<void> shareFolderAsZip(Folder folder, bool withPdfs) async {
-    // creates an archive instance to store the zip file contents
-    final archive = Archive();
-
-    // This function is designed to recursively add files and folders to a ZIP archive.
-    // The 'path' parameter serves to keep track of the directory structure as the function recursively processes nested folders
-    // It ensures files and folders within the ZIP archive maintain their relative paths, reflecting the original directory structure.
-    // the withPdfs paramater is used to determine whether the zip folder will contains all receipt images converted to pdf or not
-    Future<void> processFolder(Folder folder, bool withPdfs, [String? path]) async {
-      final contents =
-          await DatabaseRepository.instance.getFolderContents(folder.id);
-
-      // Allowing empty subfolders to be shown in the unzipped folder
-      // Check if the folder is empty and a path is provided (i.e., it's not the root folder)
-      if (contents.isEmpty && path != null) {
-        // Add a directory entry to the archive
-        final directoryPath = '$path/'; // Ensured it ends with a '/'
-        // Instead of passing an empty list as content, we pass a list with a single byte (which is ignored for directories)
-        final directoryEntry = ArchiveFile(directoryPath, 0, [0]);
-        archive.addFile(directoryEntry);
-      }
-
-      for (var item in contents) {
-        if (item is Receipt) {
-          // initialising en empty XFile
-          XFile file = XFile.fromData(Uint8List(0));
-          if (withPdfs == true) {
-            // converting receipt image file to pdf
-            final pdfImage = await receiptToPdf(item);
-            // constructing XFile from pdf
-            file = XFile(pdfImage.path);
-          } else {
-            // just constructing XFile from receipt image file
-            file = XFile(item.localPath);
-          }
-          // read receipt image file as bytes
-          final bytes = await File(file.path).readAsBytes();
-          // Determine the path for the archive. If a path is provided, prepend it to the file name.
-          // This is where the ternary operator is used: it checks if 'path' is not null, and if so,
-          // it uses the provided path and appends the file name. Otherwise, it just uses the file name.
-          final archivePath = path != null ? '$path/${file.name}' : file.name;
-          // Create an archive file instance with the determined path, file size, and file bytes.
-          final archiveFile = ArchiveFile(archivePath, bytes.length, bytes);
-          // Add the archive file to the main archive.
-          archive.addFile(archiveFile);
-
-          // original files are not deleted as their path references the file stored in application documents directory
-          // deleting pdf file from temporary app storage once it as added to zip file archive
-          if (withPdfs == true) {
-            await File(file.path).delete();
-          }
-          // for loop goes to next receipt or folder in current directory
-        } else if (item is Folder) {
-          // Determine the path for the sub-folder. If a path is provided, prepend it to the folder name.
-          // Again, the ternary operator is used here to decide the new path.
-          final newPath = path != null ? '$path/${item.name}' : item.name;
-
-          // Recursively call the 'processFolder' function to process the contents of the sub-folder.
-          // This is the recursive part of the function, allowing it to handle nested folders.
-          await processFolder(item, withPdfs, newPath);
-        }
-      }
-    }
-
-    // Start the process by calling the 'processFolder' function with the root folder.
-    await processFolder(folder, withPdfs);
-
-    // Check if there are any files to share
-    if (archive.isEmpty) {
-      throw Exception('Cannot share archive: No files to share in this folder');
-    }
-
-    // create an encoder instance
-    final zipEncoder = ZipEncoder();
-
-    // encode archive
-    final encodedArchive = zipEncoder.encode(archive);
-    if (encodedArchive == null) {
-      print('empty encoded archive');
-      return;
-    }
-
-    // create temporary path to store zip file
-    String tempZipFileFullPath = await tempZipFilePathGenerator(folder);
-
-    // create a .zip file from the encoded bytes
-    final zipFile =
-        await File(tempZipFileFullPath).writeAsBytes(encodedArchive);
-
-    // Share the zip file
+  static Future<void> shareFolderAsZip(Folder folder, File zipFile) async {
+    // Share the excel file
     await Share.shareXFiles([XFile(zipFile.path)], subject: folder.name,sharePositionOrigin: iPadSharePositionOrigin);
 
     // delete zip file from local temp directory
     await FileService.deleteFileFromPath(zipFile.path);
   }
 
-  static Future<String> tempZipFilePathGenerator(Folder folder) async {
-    final zipFileName = '${folder.name}.zip';
-    final tempZipFileDirectory = await getTemporaryDirectory();
-    final tempZipFilePath = tempZipFileDirectory.path;
-    final tempZipFileFullPath = '$tempZipFilePath/$zipFileName';
-    return tempZipFileFullPath;
+  static Future<void> shareFolderAsExcel(Folder folder, File excelFile) async {
+  
+    // Share the excel file
+    await Share.shareXFiles([XFile(excelFile.path)], subject: folder.name,sharePositionOrigin: iPadSharePositionOrigin);
+
+    // delete zip file from local temp directory
+    await FileService.deleteFileFromPath(excelFile.path);
+  }
+
+  static Future<List<ExcelReceipt>> gatherReceiptsFromFolder(Folder currentFolder) async {
+      List<ExcelReceipt> excelReceipts = [];
+
+      final files =
+          await DatabaseRepository.instance.getFolderContents(currentFolder.id);
+
+      for (final file in files) {
+        if (file is Receipt) {
+          final price = await TextRecognitionService.extractPriceFromImage(
+              file.localPath);
+          final excelReceipt = ExcelReceipt(
+              price: price, receipt: file);
+          excelReceipts.add(excelReceipt);
+        } else if (file is Folder) {
+          await gatherReceiptsFromFolder(file); // Recursive call
+        }
+      }
+
+      return excelReceipts;
+    }
+
+  static Future<void> shareZipFile(File zipFile) async {
+    await Share.shareXFiles([XFile(zipFile.path)], subject: basename(zipFile.path).split('.').first, sharePositionOrigin: iPadSharePositionOrigin);
+
+    // delete zip file from local temp directory
+    await FileService.deleteFileFromPath(zipFile.path);
+  }
+
+  static Future<List<File>> getAllReceiptImages() async {
+    List<File> receiptImages = [];
+
+    String dirPath = '${DirectoryPathProvider.instance.appDocDirPath}/';
+
+    Directory directory = Directory(dirPath);
+
+    List<FileSystemEntity> files = directory.listSync();
+
+    for (FileSystemEntity file in files) {
+      String fileName = basename(file.path);
+      if (fileName.startsWith('RCPT_')) {
+        receiptImages.add(File(file.path));
+      }
+    }
+
+    return receiptImages;
+  }
+
+  static Future<void> deleteAllReceiptImages() async {
+    String dirPath = '${DirectoryPathProvider.instance.appDocDirPath}/';
+
+    Directory directory = Directory(dirPath);
+
+    List<FileSystemEntity> files = directory.listSync();
+
+    for (FileSystemEntity file in files) {
+      String fileName = basename(file.path);
+      if (fileName.startsWith('RCPT_')) {
+        await file.delete();
+      } else {
+        continue;
+      }
+    }
+  }
+
+
+  static Future<String> tempFilePathGenerator(String fileName) async {
+    final tempFileFullPath = '${DirectoryPathProvider.instance.tempDirPath}/$fileName';
+    return tempFileFullPath;
   }
 
   // download image to camera roll

@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 4.1.3+1
+version: 4.8.7+14
 
 environment:
   sdk: '>=3.0.3 <4.0.0'
@@ -31,34 +31,49 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # state
   bloc: ^8.1.2
   flutter_bloc: ^8.1.2
   equatable: ^2.0.5
   stream_transform: ^2.0.0
+
+  # ui
   google_fonts: ^4.0.1
-  meta: ^1.8.0
-  easy_image_viewer: ^1.2.1
+  photo_view: ^0.14.0
+  dropdown_button2: ^2.3.9
+  roundcheckbox: ^2.0.5
   image_picker: ^1.0.4
   cunning_document_scanner: ^1.1.2
+
+  # utils
   path: ^1.8.2
   archive: ^3.3.7
   sqflite: ^2.2.6
   uuid: ^3.0.7
   image: ^4.1.3
+  package_info_plus: ^4.2.0
+  json_schema: ^5.1.3
   flutter_image_compress: ^2.0.3
   share_plus: ^7.1.0
+  receive_sharing_intent: ^1.4.5
   pdf: ^3.10.4
+  syncfusion_flutter_xlsio: ^23.1.40
   gallery_saver: ^2.3.2
   in_app_review: ^2.0.6
+  url_launcher: ^6.1.14
+  purchases_flutter: ^6.1.0
   advanced_in_app_review: ^1.1.3
+  permission_handler: ^10.0.0
+  shared_preferences: ^2.2.1
+  intl: ^0.18.1
+  path_provider: ^2.0.15
+  google_mlkit_text_recognition: ^0.10.0
+  google_mlkit_language_id: ^0.8.0
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  intl: ^0.18.1
-  path_provider: ^2.0.15
-  google_mlkit_text_recognition: ^0.10.0
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +86,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
   test: ^1.24.1
+  meta: ^1.8.0
   sqflite_common_ffi: ^2.3.0+2
   mockito: ^5.4.2
 # For information on the generic Dart part of this file, see the
@@ -79,10 +95,17 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-    - assets/common_receipt_words.txt
+    - assets/common_receipt_words_english.txt
+    - assets/common_receipt_words_spanish.txt
+    - assets/common_receipt_words_french.txt
+    - assets/common_receipt_words_portugese.txt
+    - assets/common_receipt_words_german.txt
+    - assets/common_receipt_words_italian.txt
+    - assets/common_receipt_words_dutch.txt
+    - assets/common_receipt_words_romanian.txt
 
-    - assets/logo.png
-
+    - assets/x2_retina_receipt_icon.png
+    
     - assets/folder.png
     - assets/folder_plus.png
     - assets/folder_move.png
@@ -94,8 +117,10 @@ flutter:
     - assets/download.png
     - assets/share.png
     - assets/export_as_pdf.png
+    - assets/excel.png
     - assets/scan.png
     - assets/camera.png
+    - assets/calendar.png
     
     - assets/circle_gradient.png
     - assets/bottom_gradient.png

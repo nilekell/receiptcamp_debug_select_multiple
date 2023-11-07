@@ -20,9 +20,35 @@ class DatabaseRepository {
 
   // Folder methods
 
+  Future<List<Folder>> getFoldersInFolderSortedBy(String folderId, String column, String order) async {
+    return await _databaseService.getFoldersInFolderSortedBy(folderId, column, order);
+  }
+
+  Future<List<Receipt>> getReceiptsInFolderSortedBy(String folderId, String column, String order) async {
+    return await _databaseService.getReceiptsInFolderSortedBy(folderId, column, order);
+  }
+
+  Future<List<ReceiptWithSize>> getReceiptsBySize(String folderId, String order) async {
+    return await _databaseService.getReceiptsBySize(folderId, order);
+  }
+
+  Future<List<FolderWithSize>> getFoldersByTotalReceiptSize(String folderId, String order) async {
+    return await _databaseService.getFoldersByTotalReceiptSize(folderId, order);
+  }
+
   Future<List<Object>> getFolderContents(String folderId) async {
     return await _databaseService.getFolderContents(folderId);
   }
+
+  Future<List<Receipt>> getAllReceiptsInFolder(String folderId) async {
+    return await _databaseService.getAllReceiptsInFolder(folderId);
+  }
+
+  Future<bool> folderIsEmpty(String folderId) async {
+    return await _databaseService.folderIsEmpty(folderId);
+  }
+
+
 
   // Method to get list of folders except for a specified folder
   Future<List<Folder>> getFoldersThatCanBeMovedTo(String fileToBeMovedId, String fileToBeMovedParentId) async {
@@ -48,12 +74,6 @@ class DatabaseRepository {
   Future<Folder> getFolderById(String folderId) async {
     return await _databaseService.getFolderById(folderId);
   }
-
-  /* Unused method, but kept for potential future use
-  Future<bool> folderIsEmpty(String folderId) async {
-    return await _databaseService.folderIsEmpty(folderId);
-  }
-  */
 
   Future<void> deleteFolder(String folderId) async {
     return await _databaseService.deleteFolder(folderId);
@@ -95,6 +115,14 @@ class DatabaseRepository {
 
   Future<List<Receipt>> getReceiptByName(String name) async {
     return await _databaseService.getReceiptByName(name);
+  }
+
+  Future<List<ReceiptWithPrice>> getReceiptsByPrice(String folderId, String order) async {
+    return await _databaseService.getReceiptsByPrice(folderId, order);
+  }
+
+  Future<List<FolderWithPrice>> getFoldersByPrice(String folderId, String order) async {
+    return await _databaseService.getFoldersByPrice(folderId, order);
   }
 
   Future<void> renameReceipt(String id, String newName) async {
@@ -141,5 +169,9 @@ class DatabaseRepository {
 
   Future<void> printAllReceipts() async {
     await _databaseService.printAllReceipts();
+  }
+
+  Future<List<Folder>> getMultiFoldersThatCanBeMovedTo(List<Object> filesToBeMoved) async {
+    return await _databaseService.getMultiFoldersThatCanBeMovedTo(filesToBeMoved);
   }
 }

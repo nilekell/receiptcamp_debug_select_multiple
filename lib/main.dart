@@ -3,32 +3,50 @@ import 'package:advanced_in_app_review/advanced_in_app_review.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
-import 'package:receiptcamp/data/services/document_path_provider.dart';
+import 'package:receiptcamp/data/services/directory_path_provider.dart';
+import 'package:receiptcamp/data/services/preferences.dart';
+import 'package:receiptcamp/data/services/purchases.dart';
+import 'package:receiptcamp/data/services/sharing_intent.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
 import 'package:receiptcamp/bloc_observer.dart';
 import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
+import 'package:receiptcamp/logic/cubits/file_explorer/file_explorer_cubit.dart';
+import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/logic/cubits/landing/landing_cubit.dart';
+import 'package:receiptcamp/logic/cubits/settings/settings_cubit.dart';
+import 'package:receiptcamp/logic/cubits/sharing_intent/sharing_intent_cubit.dart';
 import 'package:receiptcamp/presentation/screens/landing_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'presentation/ui/ui_constants.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 // import 'package:flutter/scheduler.dart' show timeDilation;
 
 void main() async {
-  Bloc.observer = AppBlocObserver();
   WidgetsFlutterBinding.ensureInitialized();
-  // Initializing DocumentDirectoryProvider.instance in `main()` ensures that the documents directory path is
-  // fetched and set as soon as the application starts, making the path
-  // immediately available to any part of the application that requires it.
-  await DocumentDirectoryProvider.instance.initialize();
-  await DatabaseRepository.instance.init();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
-  // timeDilation = 8;
-  runApp(MultiBlocProvider(
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  appVersion = appVersion + packageInfo.version;
+  try {
+    // Initializing DirectoryPathProvider.instance in `main()` ensures that the documents directory path is
+    // fetched as soon as the application starts, making the path
+    // immediately available to any part of the application that requires it.
+    await DirectoryPathProvider.instance.initialize();
+    await DatabaseRepository.instance.init();
+    await PreferencesService.instance.init();
+    Bloc.observer = AppBlocObserver();
+    await PurchasesService.instance.initPlatformState();
+  } on Exception catch (e) {
+    print(e.toString());
+  }
+
+  final appMultiBlocProvider = MultiBlocProvider(
     providers: [
+      BlocProvider(
+        create: (context) => SettingsCubit()..init(),
+      ),
       BlocProvider<LandingCubit>(
           create: (BuildContext context) => LandingCubit()),
       BlocProvider<HomeBloc>(
@@ -36,11 +54,33 @@ void main() async {
             HomeBloc(databaseRepository: DatabaseRepository.instance)
               ..add(HomeInitialEvent()),
       ),
-      BlocProvider(create: (BuildContext context) => SearchBloc(databaseRepository: DatabaseRepository.instance)
-              ..add(const SearchInitialEvent()))
+      BlocProvider<FileExplorerCubit>(
+        create: (context) => FileExplorerCubit()..initializeFileExplorerCubit(),
+      ),
+      BlocProvider(
+        create: (context) => FolderViewCubit(
+            homeBloc: context.read<HomeBloc>(),
+            prefs: PreferencesService.instance)
+          ..initFolderView(),
+      ),
+      BlocProvider<SharingIntentCubit>(
+        create: (context) => SharingIntentCubit(
+            mediaStream: SharingIntentService.instance.mediaStream,
+            initialMedia: SharingIntentService.instance.initialMedia,
+            homeBloc: context.read<HomeBloc>(),
+            fileExplorerCubit: context.read<FileExplorerCubit>(),
+            landingCubit: context.read<LandingCubit>())
+          ..init(),
+      ),
+      BlocProvider(
+          create: (BuildContext context) =>
+              SearchBloc(databaseRepository: DatabaseRepository.instance)
+                ..add(const SearchInitialEvent()))
     ],
-    child: const MyApp(),
-  ));
+    child: const MyApp());
+
+  runApp(appMultiBlocProvider);
+
 }
 
 class MyApp extends StatefulWidget {
@@ -92,6 +132,7 @@ class _MyAppState extends State<MyApp> {
     return RepositoryProvider.value(
       value: (context) => DatabaseRepository.instance,
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: appName,
         theme: ThemeData(
           textTheme: GoogleFonts.rubikTextTheme(),
