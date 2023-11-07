@@ -34,6 +34,7 @@ class PurchasesService {
 
   Future<void> initPlatformState() async {
     try {
+      // print('PurchasesService init');
       await Purchases.setLogLevel(LogLevel.debug);
 
       PurchasesConfiguration? configuration;
@@ -116,6 +117,7 @@ class PurchasesService {
           .entitlements.all[_receiptCampProEntitlementId];
       if (entitlement!.isActive) {
         _userIsPro = true;
+        await PurchasesService.instance.initPlatformState();
         return true;
       } else {
         _userIsPro = false;
@@ -134,11 +136,20 @@ class PurchasesService {
       print('restored activeSubscriptions: ${restoredCustomerInfo.activeSubscriptions}');
       print('restored entitlements: ${restoredCustomerInfo.entitlements}');
       // checking restored customerInfo to see if entitlement is now active
+      // user was never a customer when activeSubscriptions.isEmpty == true
+      if (restoredCustomerInfo.activeSubscriptions.isEmpty) {
+        _userIsPro = false;
+        return;
+      }
+
       if (restoredCustomerInfo.entitlements.all[_receiptCampProEntitlementId]!.isActive || restoredCustomerInfo.activeSubscriptions.isNotEmpty) {
         _userIsPro = true;
       } else {
         _userIsPro = false;
       }
+
+      await PurchasesService.instance.initPlatformState();
+
     } on PlatformException catch (e) {
       print(e.toString());
     }
