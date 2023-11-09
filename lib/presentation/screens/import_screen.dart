@@ -109,7 +109,7 @@ class _ImportViewState extends State<ImportView>
     );
   }
 
-  Future<void> _showConfirmationDialog(BuildContext context, List<Object> items, List<File> imageFiles) async {
+  Future<void> _showConfirmationDialog(BuildContext context, List<Object> items, List<File> imageFiles, Map<String, File> receiptImageMap) async {
   return showDialog(
       barrierDismissible: false,
       context: context,
@@ -131,7 +131,7 @@ class _ImportViewState extends State<ImportView>
                   context
                           .read<SharingIntentCubit>()
                           .importItemsFromArchiveFile(items,
-                              imageFiles, widget.zipFile);
+                              imageFiles, widget.zipFile, receiptImageMap);
                 },
                 child: const Text("Continue", style: TextStyle(color: Colors.white),)),
           ],
@@ -243,7 +243,7 @@ class _ImportViewState extends State<ImportView>
                     icon: const Icon(Icons.save_alt),
                     onPressed: () { state is SharingIntentArchiveSuccess ?
                     _showConfirmationDialog(context, state.items,
-                              state.imageFiles,) : null;
+                              state.imageFiles, state.receiptImageMap) : null;
                     });
               },
             )
