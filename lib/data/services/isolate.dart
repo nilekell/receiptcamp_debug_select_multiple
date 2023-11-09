@@ -275,7 +275,7 @@ static void archiveEntryFunction(Map<String, dynamic> args) async {
     final SendPort sendPort = args['sendPort'];
 
     BackgroundIsolateBinaryMessenger.ensureInitialized(isolateParams.rootToken);
-    DirectoryPathProvider.instance.initialize();
+    await DirectoryPathProvider.instance.initialize();
 
     final File resultFile = await _createZipFileFromFolder(isolateParams.computeParams);
 

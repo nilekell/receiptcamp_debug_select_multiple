@@ -117,7 +117,6 @@ class PurchasesService {
           .entitlements.all[_receiptCampProEntitlementId];
       if (entitlement!.isActive) {
         _userIsPro = true;
-        await PurchasesService.instance.initPlatformState();
         return true;
       } else {
         _userIsPro = false;
@@ -147,8 +146,6 @@ class PurchasesService {
       } else {
         _userIsPro = false;
       }
-
-      await PurchasesService.instance.initPlatformState();
 
     } on PlatformException catch (e) {
       print(e.toString());
