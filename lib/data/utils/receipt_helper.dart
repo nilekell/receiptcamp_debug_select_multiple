@@ -62,7 +62,7 @@ class ReceiptService {
   List<Tag> tags = [];
 
   try {
-    final receiptKeyWords = await TextRecognitionService().extractKeywordsFromPath(imagePath);
+    final receiptKeyWords = await TextRecognitionService.extractKeywordsFromPath(imagePath);
     print(receiptKeyWords);
     tags = generateTags(receiptKeyWords, receiptId);
   } on Exception catch (e) {
