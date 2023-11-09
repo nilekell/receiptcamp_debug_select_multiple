@@ -190,6 +190,10 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
       final List<Folder> extractedFolders = [];
       final List<Receipt> extractedReceipts = [];
       final List<File> extractedImages = [];
+
+      // a map to associate receipt objects with images in the zip file
+      Map<String, File> receiptImageMap = {};
+
       // iterate over archive to extract folders and zip files
       for (final file in archive) {
         // Check if this is a folder JSON
@@ -202,6 +206,9 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
           final String receiptJson = utf8.decode(file.content);
           final Receipt receipt = Receipt.fromJson(receiptJson);
           extractedReceipts.add(receipt);
+
+          // Using the map to find the correct image for the receipt
+          receiptImageMap[receipt.fileName] = File('$extractedZipFilePath/Images/${receipt.fileName}');
         } // Check if this is an image file in the zip
         else if (file.name.contains('Images/')) {
           final File imageFile = File('$extractedZipFilePath${file.name}');
@@ -216,7 +223,7 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
           List.from([...extractedFolders, ...extractedReceipts]);
       // emit list of items and images
       emit(SharingIntentArchiveSuccess(
-          items: items, imageFiles: extractedImages));
+          items: items, imageFiles: extractedImages, receiptImageMap: receiptImageMap));
       print('Emitting SharingIntentArchiveSuccess');
     } catch (e) {
       print(e.toString());
@@ -225,24 +232,26 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
   }
 
   importItemsFromArchiveFile(List<Object> extractedItems,
-      List<File> extractedImages, File zipFile) async {
+      List<File> extractedImages, File zipFile, Map<String, File> receiptImageMap) async {
     emit(SharingIntentSavingArchive(
-        imageFiles: extractedImages, items: extractedItems));
+        imageFiles: extractedImages, items: extractedItems, receiptImageMap: receiptImageMap));
     try {
 
       await DatabaseRepository.instance.deleteAllFoldersExceptRoot();
 
-      for (final item in extractedItems) {
+      for (int i = 0; i < extractedItems.length; i++) {
+        Object item = extractedItems[i];
         if (item is Folder) {
           await DatabaseRepository.instance.insertFolder(item);
         } else if (item is Receipt) {
           await DatabaseRepository.instance.insertReceipt(item);
+          File image = receiptImageMap[item.fileName]!;
+          File copiedImage = await image.copy(
+              '${DirectoryPathProvider.instance.appDocDirPath}/${basename(image.path)}');
+          List<Tag> tags = await ReceiptService.extractKeywordsAndGenerateTags(
+              copiedImage.path, item.id);
+          await DatabaseRepository.instance.insertTags(tags);
         }
-      }
-
-      for (final image in extractedImages) {
-        await image.copy(
-            '${DirectoryPathProvider.instance.appDocDirPath}/${basename(image.path)}');
       }
 
       // deleting temp zip file and folder
@@ -250,9 +259,11 @@ class SharingIntentCubit extends Cubit<SharingIntentState> {
 
       // resetting file explorer
       fileExplorerCubit.initializeFileExplorerCubit();
+      // reloading home screen
+      homeBloc.add(HomeLoadReceiptsEvent());
 
       // closing screen
-      emit(SharingIntentArchiveClose(imageFiles: extractedImages, items: extractedItems));
+      emit(SharingIntentArchiveClose(imageFiles: extractedImages, items: extractedItems, receiptImageMap: receiptImageMap));
     } on Exception catch (e) {
       print(e.toString());
       emit(SharingIntentInvalidArchive());

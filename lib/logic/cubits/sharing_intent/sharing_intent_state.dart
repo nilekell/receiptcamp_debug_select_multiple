@@ -46,22 +46,23 @@ final class SharingIntentSuccess extends SharingIntentState {
 final class SharingIntentArchiveSuccess extends SharingIntentState {
   final List<Object> items;
   final List<File> imageFiles;
+  final Map<String, File> receiptImageMap;
 
-  const SharingIntentArchiveSuccess({required this.items, required this.imageFiles});
+  const SharingIntentArchiveSuccess({required this.items, required this.imageFiles, required this.receiptImageMap});
 
   @override
-  List<Object> get props => [items, imageFiles];
+  List<Object> get props => [items, imageFiles, receiptImageMap];
 }
 
 final class SharingIntentSavingArchive extends SharingIntentArchiveSuccess {
-  const SharingIntentSavingArchive({required super.imageFiles, required super.items});
+  const SharingIntentSavingArchive({required super.imageFiles, required super.items, required super.receiptImageMap});
 
   @override
   List<Object> get props => [items, imageFiles];
 }
 
 final class SharingIntentArchiveClose extends SharingIntentArchiveSuccess{
-  const SharingIntentArchiveClose({required super.imageFiles, required super.items});
+  const SharingIntentArchiveClose({required super.imageFiles, required super.items, required super.receiptImageMap});
 
   @override
   List<Object> get props => [items, imageFiles];
