@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:image/image.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
+import 'package:path/path.dart' hide Style;
+import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/services/directory_path_provider.dart';
 import 'package:receiptcamp/data/utils/file_helper.dart';
@@ -31,7 +34,7 @@ abstract class IsolateService {
     final SendPort sendPort = args['sendPort'];
 
     BackgroundIsolateBinaryMessenger.ensureInitialized(isolateParams.rootToken);
-    DirectoryPathProvider.instance.initialize();
+    await DirectoryPathProvider.instance.initialize();
 
     final File resultFile =
         await _createExcelSheetfromReceipts(isolateParams.computeParams);
@@ -133,12 +136,146 @@ abstract class IsolateService {
   return excelFile;
 }
 
+static void archiveEntryFunction(Map<String, dynamic> args) async {
+    final IsolateParams isolateParams = args['isolateParams'];
+    final SendPort sendPort = args['sendPort'];
+
+    BackgroundIsolateBinaryMessenger.ensureInitialized(isolateParams.rootToken);
+    await DirectoryPathProvider.instance.initialize();
+
+    final File archiveZipFile =
+        await _createArchiveFile(isolateParams.computeParams);
+
+    sendPort.send(archiveZipFile);
+  }
+
+  static Future<File> _createArchiveFile(
+      Map<String, dynamic> computeParams) async {
+    // Deserialize the compute parameters
+    List<Map<String, dynamic>> serializedReceipts =
+        computeParams['serializedReceipts'];
+    List<Map<String, dynamic>> serializedFolders =
+        computeParams['serializedFolders'];
+
+    List<Receipt> allReceipts = serializedReceipts
+        .map((receiptMap) => Receipt.fromMap(receiptMap))
+        .toList();
+    List<Folder> allFolders = serializedFolders
+        .map((folderMap) => Folder.fromMap(folderMap))
+        .toList();
+    List<File> allImages = await FileService.getAllReceiptImages();
+
+    // print('allReceipts.length: ${allReceipts.length}');
+    // print('allFolders.length: ${allFolders.length}');
+    // print('allImages.length: ${allImages.length}');
+
+    final Archive archive = Archive();
+
+    // adding all receipt image files to zip file
+    for (final file in allImages) {
+      final bytes = await file.readAsBytes();
+      archive.addFile(
+          ArchiveFile('Images/${basename(file.path)}', bytes.length, bytes));
+      // print('added Images/${basename(file.path)} to archive');
+    }
+
+    final String newRootFolderId = Utility.generateUid();
+
+    // adding all receipt json object files to zip file
+    for (final receipt in allReceipts) {
+      if (receipt.parentId == rootFolderId) {
+        Receipt adjustedReceipt = Receipt(
+            id: receipt.id,
+            name: receipt.name,
+            fileName: receipt.fileName,
+            dateCreated: receipt.dateCreated,
+            lastModified: receipt.lastModified,
+            storageSize: receipt.storageSize,
+            parentId: newRootFolderId);
+        String receiptJson = adjustedReceipt.toJson();
+        final bytes = utf8.encode(receiptJson); // Convert JSON string to bytes
+        archive.addFile(ArchiveFile(
+            'Objects/Receipts/${adjustedReceipt.fileName.split('.').first}.json',
+            bytes.length,
+            bytes));
+        // print('added Objects/Receipts/${adjustedReceipt.fileName.split('.').first}.json to archive');
+      } else {
+        String receiptJson = receipt.toJson();
+        final bytes = utf8.encode(receiptJson); // Convert JSON string to bytes
+        archive.addFile(ArchiveFile(
+            'Objects/Receipts/${receipt.fileName.split('.').first}.json',
+            bytes.length,
+            bytes));
+        // print('added Objects/Receipts/${receipt.fileName.split('.').first}.json to archive');
+      }
+    }
+
+    // adding all folder json object files to zip file
+    for (final folder in allFolders) {
+      if (folder.id == rootFolderId) {
+        // changing name and id of root folder
+        final Folder rootFolder = Folder(
+            id: newRootFolderId,
+            name: 'Imported_Expenses',
+            lastModified: folder.lastModified,
+            parentId: rootFolderId);
+        String folderJson = rootFolder.toJson();
+        final bytes = utf8.encode(folderJson);
+        archive.addFile(ArchiveFile(
+            'Objects/Folders/${rootFolder.name}.json', bytes.length, bytes));
+        // print('added Objects/Folders/${rootFolder.name}.json to archive');
+      } else if (folder.parentId == rootFolderId) {
+        // changing parent id of folders whose parent id is rootFolderId, as the folder
+        Folder adjustedFolder = Folder(
+            id: folder.id,
+            name: folder.name,
+            lastModified: folder.lastModified,
+            parentId: newRootFolderId);
+        String folderJson = adjustedFolder.toJson();
+        String fixedFolderName =
+            Utility.concatenateWithUnderscore(adjustedFolder.name);
+        final bytes = utf8.encode(folderJson); // Convert JSON string to bytes
+        archive.addFile(ArchiveFile(
+            'Objects/Folders/$fixedFolderName.json', bytes.length, bytes));
+        // print('added Objects/Folders/$fixedFolderName.json to archive');
+      } else {
+        String folderJson = folder.toJson();
+        String fixedFolderName = Utility.concatenateWithUnderscore(folder.name);
+        final bytes = utf8.encode(folderJson); // Convert JSON string to bytes
+        archive.addFile(ArchiveFile(
+            'Objects/Folders/$fixedFolderName.json', bytes.length, bytes));
+        // print('added Objects/Folders/$fixedFolderName.json to archive');
+      }
+    }
+
+    // Check if there are any files to share
+    if (archive.isEmpty) {
+      throw Exception('Cannot share archive: No files to share');
+    }
+
+    // Create an encoder instance
+    final zipEncoder = ZipEncoder();
+
+    // Encode the archive
+    final encodedArchive = zipEncoder.encode(archive);
+
+    // Create a temporary path to store the zip file
+    final String tempArchivePath = await FileService.tempFilePathGenerator(
+        'receiptcamp_archive_${Utility.generateUid().substring(0, 5)}.zip');
+
+    // Create a .zip file from the encoded bytes
+    final File archiveFile =
+        await File(tempArchivePath).writeAsBytes(encodedArchive!);
+
+    return archiveFile;
+  }
+
   static void zipFileEntryFunction(Map<String, dynamic> args) async {
     final IsolateParams isolateParams = args['isolateParams'];
     final SendPort sendPort = args['sendPort'];
 
     BackgroundIsolateBinaryMessenger.ensureInitialized(isolateParams.rootToken);
-    DirectoryPathProvider.instance.initialize();
+    await DirectoryPathProvider.instance.initialize();
 
     final File resultFile = await _createZipFileFromFolder(isolateParams.computeParams);
 
