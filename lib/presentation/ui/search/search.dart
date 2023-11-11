@@ -85,13 +85,7 @@ class CustomSearchDelegate extends SearchDelegate {
           case SearchStateEmpty():
             return Center(child: noResultsText);
           case SearchStateSuccess():
-            return Scrollbar(
-                child: ListView.builder(
-                    itemCount: state.items.length,
-                    itemBuilder: (context, index) {
-                      final receipt = state.items[index];
-                      return ReceiptSearchTile(receipt: receipt);
-                    }));
+            return SearchListView(state: state,);
           case SearchStateError():
             return Center(child: errorText);
           default:
@@ -119,13 +113,7 @@ class CustomSearchDelegate extends SearchDelegate {
           case SearchStateEmpty():
             return Center(child: noResultsText);
           case SearchStateSuccess():
-            return Scrollbar(
-                child: ListView.builder(
-                    itemCount: state.items.length,
-                    itemBuilder: (context, index) {
-                      final receipt = state.items[index];
-                      return ReceiptSearchTile(receipt: receipt);
-                    }));
+            return SearchListView(state: state,);
           case SearchStateError():
             return Center(child: errorText);
           default:
@@ -133,6 +121,28 @@ class CustomSearchDelegate extends SearchDelegate {
         }
       },
     );
+  }
+}
+
+class SearchListView extends StatelessWidget {
+  const SearchListView({
+    super.key,
+    required this.state
+  });
+
+  final SearchStateSuccess state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16.0),
+          physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: state.items.length,
+            itemBuilder: (context, index) {
+              final receipt = state.items[index];
+              return ReceiptSearchTile(receipt: receipt);
+            }));
   }
 }
 
