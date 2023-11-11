@@ -528,6 +528,9 @@ class ShimmerLoading extends StatelessWidget {
   ShimmerLoading({super.key});
 
   final Color placeholderColor = const Color(primaryGrey).withOpacity(0.2);
+  final BoxDecoration containerDecoration = BoxDecoration(
+      borderRadius: BorderRadius.circular(6.0),
+      color: const Color(primaryGrey).withOpacity(0.2));
 
   @override
   Widget build(BuildContext context) {
@@ -541,7 +544,10 @@ class ShimmerLoading extends StatelessWidget {
               // sort option shadow
               Padding(
                 padding: const EdgeInsets.only(top: 12.0, left: 24.0),
-                child: Container(width: 50, height: 20, color: placeholderColor),
+                child: Container(
+                    width: 50,
+                    height: 20,
+                    decoration: containerDecoration),
               ),
             ],
           ),
@@ -569,7 +575,7 @@ class ShimmerLoading extends StatelessWidget {
                         child: Container(
                           height: 20,
                           width: 150,
-                          color: placeholderColor,
+                         decoration: containerDecoration
                         ),
                       ),
                       const SizedBox(height: 15),
@@ -579,7 +585,7 @@ class ShimmerLoading extends StatelessWidget {
                         child: Container(
                           height: 16,
                           width: 100,
-                          color: placeholderColor,
+                          decoration: containerDecoration
                         ),
                       ),
                     ],
