@@ -90,11 +90,11 @@ class ShimmerLoading extends StatefulWidget {
 }
 
 class _ShimmerLoadingState extends State<ShimmerLoading> {
-  final Color _placeholderColor = const Color(primaryGrey).withOpacity(0.2);
+  static final Color _placeholderColor = const Color(primaryGrey).withOpacity(0.2);
 
-  final BoxDecoration _containerDecoration = BoxDecoration(
+  static final BoxDecoration _containerDecoration = BoxDecoration(
       borderRadius: BorderRadius.circular(6.0),
-      color: const Color(primaryGrey).withOpacity(0.2));
+      color: _placeholderColor);
 
   Listenable? _shimmerChanges;
 
