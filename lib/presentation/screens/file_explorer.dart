@@ -8,6 +8,7 @@ import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/screens/error_view.dart';
+import 'package:receiptcamp/presentation/screens/shimmer.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/folder_list_tile.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/order_sheet.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/receipt/receipt_list_tile.dart';
@@ -441,7 +442,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
       builder: (context, state) {
         switch (state) {
           case FolderViewInitial() || FolderViewLoading():
-            return ShimmerLoading();
+            return const Shimmer(child: ShimmerLoading());
           case FolderViewLoadedSuccess():
             print(
                 'RefreshableFolderView built with folder: ${state.folder.name}, ${state.orderedBy}, ${state.order}');
@@ -520,92 +521,6 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
             return Container();
         }
       },
-    );
-  }
-}
-
-class ShimmerLoading extends StatelessWidget {
-  ShimmerLoading({super.key});
-
-  final Color placeholderColor = const Color(primaryGrey).withOpacity(0.2);
-  final BoxDecoration containerDecoration = BoxDecoration(
-      borderRadius: BorderRadius.circular(6.0),
-      color: const Color(primaryGrey).withOpacity(0.2));
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomScrollView(
-      shrinkWrap: true,
-      physics: const AlwaysScrollableScrollPhysics(),
-      slivers: [
-        SliverToBoxAdapter(
-          child: Row(
-            children: [
-              // sort option shadow
-              Padding(
-                padding: const EdgeInsets.only(top: 12.0, left: 24.0),
-                child: Container(
-                    width: 50,
-                    height: 20,
-                    decoration: containerDecoration),
-              ),
-            ],
-          ),
-        ),
-        SliverList(delegate: SliverChildBuilderDelegate((context, index) {
-          return Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-            child: SizedBox(
-              height: 60,
-              child: Row(
-                children: [
-                  // icon shadow
-                  Container(
-                    height: 50,
-                    width: 50,
-                    color: placeholderColor,
-                  ),
-                  const SizedBox(width: 8),
-                  Column(
-                    children: [
-                      // title shadow
-                      Transform.translate(
-                        offset: const Offset(10, 10),
-                        child: Container(
-                          height: 20,
-                          width: 150,
-                         decoration: containerDecoration
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                      // subtitle shadow
-                      Transform.translate(
-                        offset: const Offset(-15, 2),
-                        child: Container(
-                          height: 16,
-                          width: 100,
-                          decoration: containerDecoration
-                        ),
-                      ),
-                    ],
-                  ),
-                  // options button shadow
-                  Padding(
-                    padding: const EdgeInsets.only(left: 104.0),
-                    child: Icon(
-                      Icons.more_vert,
-                      color: placeholderColor,
-                      size: 30,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-        childCount: 8))
-      ],
     );
   }
 }
