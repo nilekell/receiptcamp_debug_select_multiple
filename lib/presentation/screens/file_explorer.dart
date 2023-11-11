@@ -585,8 +585,8 @@ class ShimmerLoading extends StatelessWidget {
                     ],
                   ),
                   // options button shadow
-                  Transform.translate(
-                    offset: const Offset(112, 8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 104.0),
                     child: Icon(
                       Icons.more_vert,
                       color: placeholderColor,
