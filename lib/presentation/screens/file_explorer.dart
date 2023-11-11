@@ -441,12 +441,7 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
       builder: (context, state) {
         switch (state) {
           case FolderViewInitial() || FolderViewLoading():
-            return const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(child: CircularProgressIndicator()),
-              ],
-            );
+            return ShimmerLoading();
           case FolderViewLoadedSuccess():
             print(
                 'RefreshableFolderView built with folder: ${state.folder.name}, ${state.orderedBy}, ${state.order}');
@@ -525,6 +520,86 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
             return Container();
         }
       },
+    );
+  }
+}
+
+class ShimmerLoading extends StatelessWidget {
+  ShimmerLoading({super.key});
+
+  final Color placeholderColor = const Color(primaryGrey).withOpacity(0.2);
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      shrinkWrap: true,
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverToBoxAdapter(
+          child: Row(
+            children: [
+              // sort option shadow
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0, left: 24.0),
+                child: Container(width: 50, height: 20, color: placeholderColor),
+              ),
+            ],
+          ),
+        ),
+        SliverList(delegate: SliverChildBuilderDelegate((context, index) {
+          return Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+            child: SizedBox(
+              height: 60,
+              child: Row(
+                children: [
+                  // icon shadow
+                  Container(
+                    height: 50,
+                    width: 50,
+                    color: placeholderColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    children: [
+                      // title shadow
+                      Transform.translate(
+                        offset: const Offset(10, 10),
+                        child: Container(
+                          height: 20,
+                          width: 150,
+                          color: placeholderColor,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      // subtitle shadow
+                      Transform.translate(
+                        offset: const Offset(-15, 2),
+                        child: Container(
+                          height: 16,
+                          width: 100,
+                          color: placeholderColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // options button shadow
+                  Transform.translate(
+                    offset: const Offset(112, 8),
+                    child: Icon(
+                      Icons.more_vert,
+                      color: placeholderColor,
+                      size: 30,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        childCount: 8))
+      ],
     );
   }
 }
