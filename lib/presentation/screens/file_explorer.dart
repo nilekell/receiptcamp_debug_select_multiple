@@ -220,14 +220,12 @@ class BackButton extends StatelessWidget {
 }
 
 class SortOption extends StatelessWidget {
-  final Widget displayWidget;
   final String currentColumn;
   final String currentOrder;
   final String folderId;
   final FolderViewCubit cubit;
 
   const SortOption({
-    required this.displayWidget,
     required this.currentColumn,
     required this.currentOrder,
     required this.folderId,
@@ -237,19 +235,50 @@ class SortOption extends StatelessWidget {
 
   final sortOptionPadding = const EdgeInsets.only(top: 12.0, left: 30.0);
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _getSortDisplayWidget(String orderedBy, String order,
+      BuildContext context, FolderViewCubit cubit, String folderId) {
+    const sortTextStyle = TextStyle(
+        fontSize: 16, color: Color(primaryGrey), fontWeight: FontWeight.w600);
+
     return Material(
+      color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(4.0),
-        onTap: () {
-          showOrderOptions(context, cubit, currentOrder, currentColumn, folderId);
-        },
-        child: Padding(
-          padding: sortOptionPadding,
-          child: displayWidget,
+        onTap: () =>
+            showOrderOptions(context, cubit, order, orderedBy, folderId),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              () {
+                switch (orderedBy) {
+                  case 'name':
+                    return 'Name';
+                  case 'storageSize':
+                    return 'Storage used';
+                  case 'lastModified':
+                    return 'Last modified';
+                  case 'price':
+                    return 'Price';
+                  default:
+                    return 'Name';
+                }
+              }(),
+              style: sortTextStyle,
+            ),
+            OrderIcon(order),
+          ],
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: sortOptionPadding,
+      child: _getSortDisplayWidget(
+          currentColumn, currentOrder, context, cubit, folderId),
     );
   }
 }
@@ -264,35 +293,6 @@ class OrderIcon extends Icon {
                     : Icons.error,
             size: 18.0,
             color: const Color(primaryGrey));
-}
-
-Widget getSortDisplayWidget(String orderedBy, String order) {
-  const sortTextStyle = TextStyle(
-      fontSize: 16, color: Color(primaryGrey), fontWeight: FontWeight.w600);
-
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Text(
-        () {
-          switch (orderedBy) {
-            case 'name':
-              return 'Name';
-            case 'storageSize':
-              return 'Storage used';
-            case 'lastModified':
-              return 'Last modified';
-            case 'price':
-              return 'Price';
-            default:
-              return 'Name';
-          }
-        }(),
-        style: sortTextStyle,
-      ),
-      OrderIcon(order),
-    ],
-  );
 }
 
 class RefreshableFolderView extends StatefulWidget {
@@ -460,13 +460,15 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
                   state.files.isNotEmpty ||
                           state is FolderViewFileState
                       ? SliverToBoxAdapter(
-                          child: SortOption(
-                            displayWidget: getSortDisplayWidget(
-                                state.orderedBy, state.order),
-                            currentColumn: state.orderedBy,
-                            currentOrder: state.order,
-                            folderId: state.folder.id,
-                            cubit: context.read<FolderViewCubit>(),
+                          child: Row(
+                            children: [
+                              SortOption(
+                                currentColumn: state.orderedBy,
+                                currentOrder: state.order,
+                                folderId: state.folder.id,
+                                cubit: context.read<FolderViewCubit>(),
+                              ),
+                            ],
                           ),
                         )
                       : SliverToBoxAdapter(child: Container()),
