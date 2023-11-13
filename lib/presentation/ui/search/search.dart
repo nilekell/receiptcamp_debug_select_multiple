@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
 import 'package:receiptcamp/models/receipt.dart';
 import 'package:receiptcamp/presentation/screens/image_view.dart';
@@ -27,7 +29,7 @@ class CustomSearchDelegate extends SearchDelegate {
   @override
   ThemeData appBarTheme(BuildContext context) {
     return ThemeData(
-      appBarTheme: const AppBarTheme(backgroundColor: Color(primaryDarkBlue)),
+      appBarTheme: const AppBarTheme(backgroundColor: Color(primaryDarkBlue), elevation: 4.0),
       inputDecorationTheme: const InputDecorationTheme(
         hintStyle: TextStyle(color: Colors.white),
         border: InputBorder.none, // This gets rid of the underline
@@ -85,13 +87,7 @@ class CustomSearchDelegate extends SearchDelegate {
           case SearchStateEmpty():
             return Center(child: noResultsText);
           case SearchStateSuccess():
-            return Scrollbar(
-                child: ListView.builder(
-                    itemCount: state.items.length,
-                    itemBuilder: (context, index) {
-                      final receipt = state.items[index];
-                      return ReceiptSearchTile(receipt: receipt);
-                    }));
+            return SearchListView(state: state,);
           case SearchStateError():
             return Center(child: errorText);
           default:
@@ -119,13 +115,7 @@ class CustomSearchDelegate extends SearchDelegate {
           case SearchStateEmpty():
             return Center(child: noResultsText);
           case SearchStateSuccess():
-            return Scrollbar(
-                child: ListView.builder(
-                    itemCount: state.items.length,
-                    itemBuilder: (context, index) {
-                      final receipt = state.items[index];
-                      return ReceiptSearchTile(receipt: receipt);
-                    }));
+            return SearchListView(state: state,);
           case SearchStateError():
             return Center(child: errorText);
           default:
@@ -136,25 +126,69 @@ class CustomSearchDelegate extends SearchDelegate {
   }
 }
 
+class SearchListView extends StatelessWidget {
+  const SearchListView({
+    super.key,
+    required this.state
+  });
+
+  final SearchStateSuccess state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16.0),
+          physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: state.items.length,
+            itemBuilder: (context, index) {
+              final receipt = state.items[index];
+              return ReceiptSearchTile(receipt: receipt);
+            }));
+  }
+}
+
 class ReceiptSearchTile extends StatelessWidget {
   final Receipt receipt;
+  final String displayName;
+  final String displayDate;
 
-  const ReceiptSearchTile({super.key, required this.receipt});
+  ReceiptSearchTile({super.key, required this.receipt})
+      : displayName = receipt.name.length > 25
+            ? "${receipt.name.substring(0, 25)}..."
+            : receipt.name.split('.').first,
+        displayDate = Utility.formatDisplayDateFromDateTime(
+            Utility.formatDateTimeFromUnixTimestamp(receipt.lastModified));
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        leading: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-          child: Transform.scale(
-            scale: 1.4,
-            child: Image.asset('assets/receipt.png', colorBlendMode: BlendMode.srcIn, color: const Color(primaryGrey).withOpacity(0.5),),
+      leading: SizedBox(
+        height: 50,
+        width: 50,
+        child: ClipRRect(
+          // square image corners
+          borderRadius: const BorderRadius.all(Radius.zero),
+          child: Image.file(
+            File(receipt.localPath),
+            fit: BoxFit.cover,
           ),
         ),
-        onTap: () {
-          Navigator.of(context)
-              .push(SlidingImageTransitionRoute(receipt: receipt));
-        },
-        title: Text(receipt.name.split('.').first));
+      ),
+      onTap: () {
+        Navigator.of(context)
+            .push(SlidingImageTransitionRoute(receipt: receipt));
+      },
+      title: Text(
+        receipt.name.split('.').first,
+        style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Color(primaryGrey)),
+      ),
+      subtitle: Text('Modified $displayDate'),
+      subtitleTextStyle:
+          const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+    );
   }
 }
