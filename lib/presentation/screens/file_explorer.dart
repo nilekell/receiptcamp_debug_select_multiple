@@ -429,7 +429,10 @@ class _RefreshableFolderViewState extends State<RefreshableFolderView> {
           _showEmptySnackBar(context);
         }
         if (state is FolderViewFileLoaded) {
+          final folder = state.folder;
+          final zipFile = state.zipFile;
           Navigator.of(context).pop();
+          context.read<FolderViewCubit>().shareFolder(folder, zipFile);
           return;
         }
       },
