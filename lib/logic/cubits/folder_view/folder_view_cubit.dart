@@ -9,7 +9,6 @@ import 'package:receiptcamp/data/data_constants.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
 import 'package:receiptcamp/data/services/permissons.dart';
 import 'package:receiptcamp/data/services/preferences.dart';
-import 'package:receiptcamp/data/utils/file_helper.dart';
 import 'package:receiptcamp/data/utils/receipt_helper.dart';
 import 'package:receiptcamp/data/utils/utilities.dart';
 import 'package:receiptcamp/logic/blocs/home/home_bloc.dart';
