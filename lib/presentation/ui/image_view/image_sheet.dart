@@ -69,6 +69,7 @@ void showImageOptions(
             ),
             onTap: () {
               Navigator.of(bottomSheetContext).pop();
+              FileService.shareReceipt(receipt);
             },
           ),
           ListTile(
@@ -94,6 +95,7 @@ void showImageOptions(
             ),
             onTap: () {
               Navigator.of(bottomSheetContext).pop();
+              FileService.shareReceiptAsPdf(receipt);
             },
           ),
           ListTile(
