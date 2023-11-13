@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:receiptcamp/logic/blocs/search/search_bloc.dart';
-import 'package:receiptcamp/presentation/ui/search/search.dart';
-
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   HomeAppBar({super.key});
 
@@ -56,17 +52,6 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
-      actions: [
-        IconButton(
-          onPressed: () {
-            showSearch(
-                context: context,
-                delegate: CustomSearchDelegate(
-                    searchBloc: context.read<SearchBloc>()));
-          },
-          icon: const Icon(Icons.search),
-        )
-      ],
     );
   }
 }

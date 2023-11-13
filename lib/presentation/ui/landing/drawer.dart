@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:receiptcamp/data/repositories/database_repository.dart';
-import 'package:receiptcamp/presentation/screens/settings_screen.dart';
 import 'package:receiptcamp/presentation/ui/ui_constants.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -74,18 +73,6 @@ class AppDrawer extends StatelessWidget {
               if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
                 throw Exception('Could not launch $url');
               }
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.settings, size: tileIconSize, color: tileIconColour),
-            title: Text(
-              'Settings',
-              style: tileTextStyle,
-            ),
-            onTap: () async {
-              Navigator.of(context).pop();
-              Navigator.of(context)
-            .push(SlidingSettingsRoute());
             },
           ),
           // commenting out for future usage, currently unnecessary
