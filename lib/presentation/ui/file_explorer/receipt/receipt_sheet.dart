@@ -228,6 +228,52 @@ void showReceiptOptions(
           //     FileService.saveImageToCameraRoll(receipt);
           //   },
           // ),
+          ListTile(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: iconPadding),
+              child: Transform.scale(
+                  scale: iconScale,
+                  child: Image.asset(
+                    'assets/share.png',
+                    color: secondaryColour,
+                    colorBlendMode: BlendMode.srcIn,
+                  )),
+            ),
+            title: const Text(
+              'Share',
+              style: textStyle,
+            ),
+            onTap: () {
+              Navigator.of(bottomSheetContext).pop();
+              FileService.shareReceipt(receipt);
+            },
+          ),
+          ListTile(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: iconPadding),
+              child: Transform.translate(
+                offset: const Offset(-8, 0),
+                child: Transform.scale(
+                    scale: 0.75,
+                    child: Image.asset(
+                      'assets/export_as_pdf.png',
+                      color: secondaryColour,
+                      colorBlendMode: BlendMode.srcIn,
+                    )),
+              ),
+            ),
+            title: Transform.translate(
+              offset: const Offset(-15, 0),
+              child: const Text(
+                'Export as PDF',
+                style: textStyle,
+              ),
+            ),
+            onTap: () {
+              Navigator.of(bottomSheetContext).pop();
+              FileService.shareReceiptAsPdf(receipt);
+            },
+          ),
           const SizedBox(height: 50)
         ],
       ),

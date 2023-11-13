@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:receiptcamp/extensions/user_status_handler.dart';
 import 'package:receiptcamp/logic/cubits/folder_view/folder_view_cubit.dart';
 import 'package:receiptcamp/models/folder.dart';
+import 'package:receiptcamp/presentation/screens/receipt_confirmation.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/delete_folder_confirmation_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/move_folder_dialog.dart';
 import 'package:receiptcamp/presentation/ui/file_explorer/folder/rename_folder_dialog.dart';
@@ -119,6 +121,83 @@ void showFolderOptions(
               Navigator.of(bottomSheetContext).pop();
               // opening deleting folder dialog
               showDeleteFolderDialog(bottomSheetContext, folderViewCubit, folder);
+            },
+          ),
+          ListTile(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: iconPadding),
+              child: Transform.scale(
+                  scale: iconScale,
+                  child: Image.asset(
+                    'assets/share.png',
+                    color: secondaryColour,
+                    colorBlendMode: BlendMode.srcIn,
+                  )),
+            ),
+            title: const Text(
+              'Share',
+              style: textStyle,
+            ),
+            onTap: () {
+              Navigator.of(bottomSheetContext).pop();
+              folderViewCubit.generateZipFile(folder, false);
+            },
+          ),
+          ListTile(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: iconPadding),
+              child: Transform.translate(
+                offset: const Offset(-8, 0),
+                child: Transform.scale(
+                    scale: 0.75,
+                    child: Image.asset(
+                      'assets/export_as_pdf.png',
+                      color: secondaryColour,
+                      colorBlendMode: BlendMode.srcIn,
+                    )),
+              ),
+            ),
+            title: Transform.translate(
+              offset: const Offset(-15, 0),
+              child: const Text(
+                'Export as PDF',
+                style: textStyle,
+              ),
+            ),
+            onTap: () async {
+              await context.handleUserStatus((BuildContext context) {
+                Navigator.of(context).pop();
+              folderViewCubit.generateZipFile(folder, true);
+              });
+            },
+          ),
+          ListTile(
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Transform.translate(
+                offset: const Offset(-10, 0),
+                child: Transform.scale(
+                    scale: 0.70,
+                    child: Image.asset(
+                      'assets/excel.png',
+                      color: secondaryColour,
+                      colorBlendMode: BlendMode.srcIn,
+                    )),
+              ),
+            ),
+            title: Transform.translate(
+              offset: const Offset(-15, 0),
+              child: const Text(
+                'Export with Excel',
+                style: textStyle,
+              ),
+            ),
+            onTap: () async {
+              await context.handleUserStatus((BuildContext context) {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                    SlidingReceiptConfirmationTransitionRoute(folder: folder));
+              });
             },
           ),
         ],
